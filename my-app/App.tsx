@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { Button } from 'react-native-paper';
 import { registerRootComponent } from 'expo';
+import Camera from './screens/camera';
 
 function App() {
   return (
@@ -18,7 +19,8 @@ function App() {
 export default function Main() {
   return (
     <PaperProvider>
-      <App />
+      {/* <App /> */}
+      <Camera />
     </PaperProvider>
   );
 }

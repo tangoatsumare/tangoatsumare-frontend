@@ -15,7 +15,9 @@
     "react-dom": "18.0.0",
     "react-native": "0.69.5",
     "react-native-paper": "^5.0.0-rc.5",
-    "react-native-web": "~0.18.7"
+    "react-native-web": "~0.18.7",
+    "expo-media-library": "~14.2.0",
+    "expo-camera": "~12.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
