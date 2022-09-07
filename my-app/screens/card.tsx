@@ -4,16 +4,16 @@ import { ParamListBase } from '@react-navigation/native'
 
 import React from "react";
 import {View, TouchableOpacity, Text} from 'react-native'
-import {IStackScreenProps} from "../library/stackScreenProps";
 
-export const Home = () => {
+export const Card = () => {
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
+
 
     return (
         <View>
             <TouchableOpacity
-                onPress={()=>{
-                    navigation.navigate("Card")
+                onPress={() => {
+                    navigation.replace("Home")
                 }}>
                 <Text>to card</Text>
             </TouchableOpacity>
@@ -21,4 +21,3 @@ export const Home = () => {
         </View>
     )
 }
-
