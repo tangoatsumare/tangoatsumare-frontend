@@ -1,5 +1,4 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 // https://callstack.github.io/react-native-paper/1.0/getting-started.html
 import {NavigationContainer} from "@react-navigation/native";
 import { Provider as PaperProvider } from 'react-native-paper';
@@ -11,6 +10,8 @@ import "react-native-gesture-handler";
 import React from "react";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {Card} from "./screens/card";
+import {Profile} from "./screens/profile";
+import {Settings} from "./screens/settings";
 
 // function App() {
 //   return (
@@ -38,6 +39,9 @@ export default function App() {
                       name="Main" component={Main}/>
                   <Stack.Screen name="Home" component={Home}/>
                   <Stack.Screen name="Card" component={Card}/>
+                  <Stack.Screen name="Settings" component={Settings}/>
+                  <Stack.Screen name="Profile" component={Profile}/>
+
 
               </Stack.Navigator>
           </NavigationContainer>

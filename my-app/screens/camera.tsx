@@ -1,54 +1,22 @@
-import React from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
-// import { MaterialBottomTabNavigationProp } from '@react-navigation/material-bottom-tabs';
-import { Headline, Caption, useTheme, Button } from 'react-native-paper';
+import { useNavigation} from "@react-navigation/core";
+import { StackNavigationProp} from '@react-navigation/stack';
+import { ParamListBase } from '@react-navigation/native'
 
-// import overlay from './overlay';
-
-type Props = {
-    // navigation: MaterialBottomTabNavigationProp<{}>;
-};
+import React from "react";
+import {View, TouchableOpacity, Text} from 'react-native'
 
 export const Camera = () => {
-    const theme = useTheme();
-
-    // const backgroundColor = overlay(2, theme.colors.surface) as string;
+    const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
     return (
-        <ScrollView
-            // style={{ backgroundColor }}
-            // contentContainerStyle={[styles.scrollViewContent, { backgroundColor }]}
-        >
-            <Headline style={styles.centerText}>
-                Send a message, get a message
-            </Headline>
-            <Caption style={styles.centerText}>
-                Private Messages are private conversations between you and other people
-                on Twitter. Share Tweets, media, and more!
-            </Caption>
-            <Button
-                onPress={() => {}}
-                style={styles.button}
-                mode="contained"
-                labelStyle={{ color: 'white' }}
-            >
-                Write a message
-            </Button>
-        </ScrollView>
-    );
-};
+        <View>
+            <TouchableOpacity
+                onPress={()=>{
+                    navigation.navigate("Card")
+                }}>
+                <Text>to card</Text>
+            </TouchableOpacity>
 
-const styles = StyleSheet.create({
-    scrollViewContent: {
-        flex: 1,
-        paddingHorizontal: 30,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    centerText: {
-        textAlign: 'center',
-    },
-    button: {
-        marginTop: 20,
-    },
-});
+        </View>
+    )
+}

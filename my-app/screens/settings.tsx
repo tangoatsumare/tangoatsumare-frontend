@@ -5,7 +5,7 @@ import { ParamListBase } from '@react-navigation/native'
 import React from "react";
 import {View, TouchableOpacity, Text} from 'react-native'
 
-export const Home = () => {
+export const Settings = () => {
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
     return (
@@ -20,4 +20,3 @@ export const Home = () => {
         </View>
     )
 }
-

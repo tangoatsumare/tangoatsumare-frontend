@@ -5,7 +5,6 @@ import {
     DrawerContentScrollView,
 } from '@react-navigation/drawer';
 import {
-    useTheme,
     Avatar,
     Title,
     Caption,
@@ -16,8 +15,13 @@ import {
     Switch,
 } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import {useNavigation} from "@react-navigation/core";
+import {StackNavigationProp} from "@react-navigation/stack";
+import {ParamListBase} from "@react-navigation/native";
 
-export function DrawerContent(props) {
+export function DrawerContent(props: any) {
+    const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
+
     return (
         <DrawerContentScrollView {...props}>
             <View
@@ -60,14 +64,18 @@ export function DrawerContent(props) {
                             />
                         )}
                         label="Profile"
-                        onPress={() => {}}
+                        onPress={()=>{
+                            navigation.navigate("Profile")
+                        }}
                     />
                     <DrawerItem
                         icon={({ color, size }) => (
                             <MaterialCommunityIcons name="tune" color={color} size={size} />
                         )}
                         label="Settings"
-                        onPress={() => {}}
+                        onPress={()=>{
+                            navigation.navigate("Settings")
+                        }}
                     />
                     <DrawerItem
                         icon={({ color, size }) => (
@@ -78,7 +86,9 @@ export function DrawerContent(props) {
                             />
                         )}
                         label="Favorites"
-                        onPress={() => {}}
+                        onPress={()=>{
+                            navigation.navigate("Favorites")
+                        }}
                     />
                 </Drawer.Section>
                 <Drawer.Section title="Preferences">
