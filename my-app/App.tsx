@@ -12,38 +12,85 @@ import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {Card} from "./screens/card";
 import {Profile} from "./screens/profile";
 import {Settings} from "./screens/settings";
-
-// function App() {
-//   return (
-//       <View style={styles.container}>
-//         <Text>!!!!</Text>
-//         <Button icon="camera" mode="contained" onPress={() => console.log('Pressed')}>Hi</Button>
-//         <StatusBar style="auto" />
-//       </View>
-//   );
-// }
+import {Camera} from "./screens/camera";
+import {BottomTabs} from "./screens/bottomTabs";
+import {createMaterialBottomTabNavigator} from "@react-navigation/material-bottom-tabs";
 
 export default function App() {
 
     const Stack = createNativeStackNavigator();
+    const Tab = createMaterialBottomTabNavigator();
 
-    // const routes = () => Routes.map((route, i) =>
-    //     <Stack.Screen name={route.name} component={route.component} key={i}/>;
+    const HomeStack = () => {
+
+        return (
+            <Stack.Navigator  initialRouteName="Main">
+                <Stack.Screen options={{headerShown: false}} name="Main" component={Main} />
+                <Stack.Screen name="Home" component={Home} />
+                <Stack.Screen name="Card" component={Card}/>
+                <Stack.Screen name="Settings" component={Settings}/>
+                <Stack.Screen name="Profile" component={Profile}/>
+                <Stack.Screen name="Camera" component={Camera}/>
+            </Stack.Navigator>
+        )
+    }
+
+    const ProfileStack = () => {
+
+        return (
+            <Stack.Navigator initialRouteName="Profile">
+                <Stack.Screen name="Home" component={Home} />
+                <Stack.Screen name="Card" component={Card}/>
+                <Stack.Screen name="Settings" component={Settings}/>
+                <Stack.Screen name="Profile" component={Profile}/>
+                <Stack.Screen name="Camera" component={Camera}/>
+            </Stack.Navigator>
+        )
+    }
+
+    const CameraStack = () => {
+
+        return (
+            <Stack.Navigator initialRouteName="Camera">
+                <Stack.Screen name="Home" component={Home} />
+                <Stack.Screen name="Card" component={Card}/>
+                <Stack.Screen name="Settings" component={Settings}/>
+                <Stack.Screen name="Profile" component={Profile}/>
+                <Stack.Screen name="Camera" component={Camera}/>
+            </Stack.Navigator>
+        )
+    }
 
     return (
       <PaperProvider>
           <NavigationContainer independent={true}>
-              <Stack.Navigator initialRouteName={"Main"}>
-                  <Stack.Screen
-                      options={{headerShown: false, headerTitle: "Home"}}
-                      name="Main" component={Main}/>
-                  <Stack.Screen name="Home" component={Home}/>
-                  <Stack.Screen name="Card" component={Card}/>
-                  <Stack.Screen name="Settings" component={Settings}/>
-                  <Stack.Screen name="Profile" component={Profile}/>
-
-
-              </Stack.Navigator>
+              <Tab.Navigator
+                  initialRouteName="Home"
+                  shifting={true}
+                  sceneAnimationEnabled={false}
+              >
+                  <Tab.Screen
+                      name="Home"
+                      component={HomeStack}
+                      options={{
+                          tabBarIcon: 'home-account',
+                      }}
+                  />
+                  <Tab.Screen
+                      name="Profile"
+                      component={ProfileStack}
+                      options={{
+                          tabBarIcon: 'account-outline',
+                      }}
+                  />
+                  <Tab.Screen
+                      name="Camera"
+                      component={CameraStack}
+                      options={{
+                          tabBarIcon: 'camera',
+                      }}
+                  />
+              </Tab.Navigator>
           </NavigationContainer>
       </PaperProvider>
   );

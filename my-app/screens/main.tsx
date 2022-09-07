@@ -4,6 +4,7 @@ import {
 } from 'react-native-paper';
 
 import { RootNavigator } from './rootNavigator';
+import {BottomTabs} from "./bottomTabs";
 
 export const Main = () => {
   //handle themes and languages here

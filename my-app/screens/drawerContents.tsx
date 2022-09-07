@@ -39,20 +39,20 @@ export function DrawerContent(props: any) {
                     />
                     <Title style={styles.title}>Dean</Title>
                     <Caption style={styles.caption}>@DeaNihongo</Caption>
-                    <View style={styles.row}>
-                        <View style={styles.section}>
-                            <Paragraph style={[styles.paragraph, styles.caption]}>
-                                120
-                            </Paragraph>
-                            <Caption style={styles.caption}>Posts</Caption>
-                        </View>
-                        <View style={styles.section}>
-                            <Paragraph style={[styles.paragraph, styles.caption]}>
-                                1500
-                            </Paragraph>
-                            <Caption style={styles.caption}>Collection</Caption>
-                        </View>
-                    </View>
+                    {/*<View style={styles.row}>*/}
+                    {/*    <View style={styles.section}>*/}
+                    {/*        <Paragraph style={[styles.paragraph, styles.caption]}>*/}
+                    {/*            120*/}
+                    {/*        </Paragraph>*/}
+                    {/*        <Caption style={styles.caption}>Posts</Caption>*/}
+                    {/*    </View>*/}
+                    {/*    <View style={styles.section}>*/}
+                    {/*        <Paragraph style={[styles.paragraph, styles.caption]}>*/}
+                    {/*            1500*/}
+                    {/*        </Paragraph>*/}
+                    {/*        <Caption style={styles.caption}>Collection</Caption>*/}
+                    {/*    </View>*/}
+                    {/*</View>*/}
                 </View>
                 <Drawer.Section style={styles.drawerSection}>
                     <DrawerItem
@@ -91,16 +91,16 @@ export function DrawerContent(props: any) {
                         }}
                     />
                 </Drawer.Section>
-                <Drawer.Section title="Preferences">
-                    <TouchableRipple onPress={() => {}}>
-                        <View style={styles.preference}>
-                            <Text>Dark Theme</Text>
-                            <View pointerEvents="none">
-                                <Switch value={false} />
-                            </View>
-                        </View>
-                    </TouchableRipple>
-                </Drawer.Section>
+                {/*<Drawer.Section title="Preferences">*/}
+                {/*    <TouchableRipple onPress={() => {}}>*/}
+                {/*        <View style={styles.preference}>*/}
+                {/*            <Text>Dark Theme</Text>*/}
+                {/*            <View pointerEvents="none">*/}
+                {/*                <Switch value={false} />*/}
+                {/*            </View>*/}
+                {/*        </View>*/}
+                {/*    </TouchableRipple>*/}
+                {/*</Drawer.Section>*/}
             </View>
         </DrawerContentScrollView>
     );
