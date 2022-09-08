@@ -1,19 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Image, Platform } from 'react-native';
-import { Camera, CameraType } from 'expo-camera';
-// import * as MediaLibrary from 'expo-media-library';
-// import Button from '../src/components/Button';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, Image } from 'react-native';
 import { Button } from 'react-native-paper';
 import * as ImagePicker from 'expo-image-picker';
 
 export default function ImagePickerTest() {
 
     const [image, setImage] = useState<string>(""); // typescript?
-    // const [status, setStatus] = ImagePicker.useCameraPermissions();
-
-    // const permissionCheck = async () => {
-    //     await ImagePicker.getCameraPermissionsAsync();
-    // }
 
     const openCamera = async () => {
         const permissionCheck = await ImagePicker.requestCameraPermissionsAsync();
@@ -55,6 +47,7 @@ export default function ImagePickerTest() {
             <Button onPress={pickImage}>
                 <Text>Select An Image</Text>
             </Button>
+            <Text>copy me</Text>
         </View>
     );
 }
