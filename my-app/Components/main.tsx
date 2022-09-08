@@ -3,8 +3,7 @@ import {
     Provider as PaperProvider,
 } from 'react-native-paper';
 
-import { RootNavigator } from './rootNavigator';
-import {BottomTabs} from "./bottomTabs";
+import { RootNavigator } from '../Components/rootNavigator';
 
 export const Main = () => {
   //handle themes and languages here

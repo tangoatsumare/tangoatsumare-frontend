@@ -77,30 +77,35 @@ export function DrawerContent(props: any) {
                             navigation.navigate("Settings")
                         }}
                     />
-                    <DrawerItem
-                        icon={({ color, size }) => (
-                            <MaterialCommunityIcons
-                                name="bookmark-outline"
-                                color={color}
-                                size={size}
-                            />
-                        )}
-                        label="Favorites"
-                        onPress={()=>{
-                            navigation.navigate("Favorites")
-                        }}
-                    />
+                    {/*<DrawerItem*/}
+                    {/*    icon={({ color, size }) => (*/}
+                    {/*        <MaterialCommunityIcons*/}
+                    {/*            name="bookmark-outline"*/}
+                    {/*            color={color}*/}
+                    {/*            size={size}*/}
+                    {/*        />*/}
+                    {/*    )}*/}
+                    {/*    label="Favorites"*/}
+                    {/*    onPress={()=>{*/}
+                    {/*        navigation.navigate("Favorites")*/}
+                    {/*    }}*/}
+                    {/*/>*/}
                 </Drawer.Section>
-                {/*<Drawer.Section title="Preferences">*/}
-                {/*    <TouchableRipple onPress={() => {}}>*/}
-                {/*        <View style={styles.preference}>*/}
-                {/*            <Text>Dark Theme</Text>*/}
-                {/*            <View pointerEvents="none">*/}
-                {/*                <Switch value={false} />*/}
-                {/*            </View>*/}
-                {/*        </View>*/}
-                {/*    </TouchableRipple>*/}
-                {/*</Drawer.Section>*/}
+                <Drawer.Section>
+                    <DrawerItem style={styles.signOut}
+                    icon={({ color, size }) => (
+                        <MaterialCommunityIcons
+                            name="logout"
+                            color={color}
+                            size={size}
+                        />
+                    )}
+                    label="Sign Out"
+                    onPress={()=>{
+                        navigation.navigate("Home")
+                    }}
+                />
+                </Drawer.Section>
             </View>
         </DrawerContentScrollView>
     );
@@ -144,4 +149,7 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 16,
     },
+    signOut: {
+        marginTop: 270,
+    }
 });
