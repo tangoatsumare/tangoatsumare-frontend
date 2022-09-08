@@ -5,13 +5,16 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import { Button } from 'react-native-paper';
 import { registerRootComponent } from 'expo';
 
+import { OCR } from './screens/OCR';
+
 function App() {
   return (
-      <View style={styles.container}>
-        <Text>!!!!</Text>
-        <Button icon="camera" mode="contained" onPress={() => console.log('Pressed')}>Hi</Button>
-        <StatusBar style="auto" />
-      </View>
+      <OCR />
+      // <View style={styles.container}>
+      //   <Text>!!!!</Text>
+      //   <Button icon="camera" mode="contained" onPress={() => console.log('Pressed')}>Hi</Button>
+      //   <StatusBar style="auto" />
+      // </View>
   );
 }
 
