@@ -3,7 +3,7 @@ import { StackNavigationProp} from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 
 import React from "react";
-import {View, TouchableOpacity, Text} from 'react-native'
+import {View, Text} from 'react-native'
 import {Button} from "react-native-paper";
 
 export const Card = () => {

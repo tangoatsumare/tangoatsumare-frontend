@@ -3,7 +3,7 @@ import {
     MD3LightTheme as DefaultTheme, Provider as PaperProvider,
 } from 'react-native-paper';
 
-import { RootNavigator } from './rootNavigator';
+import {CamNavigator, HomeNavigator, SRSNavigator} from './rootNavigator';
 
 const theme = {
     ...DefaultTheme,
@@ -17,11 +17,27 @@ const theme = {
     },
 };
 
-export const Main = () => {
+export const HomeNav = () => {
   //handle themes and languages here
     return (
             <PaperProvider theme={theme}>
-                <RootNavigator />
+                <HomeNavigator />
             </PaperProvider>
+    );
+};
+export const SRSNav = () => {
+    //handle themes and languages here
+    return (
+        <PaperProvider theme={theme}>
+            <SRSNavigator />
+        </PaperProvider>
+    );
+};
+export const CamNav = () => {
+    //handle themes and languages here
+    return (
+        <PaperProvider theme={theme}>
+            <CamNavigator />
+        </PaperProvider>
     );
 };

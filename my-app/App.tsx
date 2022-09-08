@@ -1,4 +1,3 @@
-import { StyleSheet } from 'react-native';
 // https://callstack.github.io/react-native-paper/1.0/getting-started.html
 import {NavigationContainer} from "@react-navigation/native";
 import { MD3LightTheme as DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
@@ -7,6 +6,7 @@ import "react-native-gesture-handler";
 import React from "react";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import {TabNav} from "./Components/tabNav";
+import {StackNav} from "./Components/stackNavigator";
 
 export default function App() {
 
@@ -26,7 +26,7 @@ export default function App() {
         <SafeAreaProvider>
         <PaperProvider theme={theme}>
           <NavigationContainer independent={true}>
-              <TabNav />
+              <StackNav />
           </NavigationContainer>
       </PaperProvider>
         </SafeAreaProvider>
