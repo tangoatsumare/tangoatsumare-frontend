@@ -14,6 +14,7 @@ import {Profile} from "./screens/profile";
 import {Settings} from "./screens/settings";
 import {Camera} from "./screens/camera";
 import {BottomTabs} from "./screens/bottomTabs";
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import {createMaterialBottomTabNavigator} from "@react-navigation/material-bottom-tabs";
 
 export default function App() {
@@ -39,11 +40,8 @@ export default function App() {
 
         return (
             <Stack.Navigator initialRouteName="Profile">
-                <Stack.Screen name="Home" component={Home} />
-                <Stack.Screen name="Card" component={Card}/>
                 <Stack.Screen name="Settings" component={Settings}/>
                 <Stack.Screen name="Profile" component={Profile}/>
-                <Stack.Screen name="Camera" component={Camera}/>
             </Stack.Navigator>
         )
     }
@@ -62,7 +60,8 @@ export default function App() {
     }
 
     return (
-      <PaperProvider>
+        <SafeAreaProvider>
+        <PaperProvider>
           <NavigationContainer independent={true}>
               <Tab.Navigator
                   initialRouteName="Home"
@@ -93,7 +92,8 @@ export default function App() {
               </Tab.Navigator>
           </NavigationContainer>
       </PaperProvider>
-  );
+        </SafeAreaProvider>
+    );
 }
 
 // https://docs.expo.dev/versions/latest/sdk/register-root-component/

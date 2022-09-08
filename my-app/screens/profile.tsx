@@ -12,9 +12,9 @@ export const Profile = () => {
         <View>
             <TouchableOpacity
                 onPress={()=>{
-                    navigation.navigate("Card")
+                    navigation.navigate("Settings")
                 }}>
-                <Text>to card</Text>
+                <Text>To Settings</Text>
             </TouchableOpacity>
 
         </View>
