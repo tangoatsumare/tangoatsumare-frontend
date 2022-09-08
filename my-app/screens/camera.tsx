@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Button, Image, Platform } from 'react-native';
-// import { Camera, CameraType } from 'expo-camera';
+import { Camera, CameraType } from 'expo-camera';
 // import * as MediaLibrary from 'expo-media-library';
 // import Button from '../src/components/Button';
 // import { Button } from 'react-native-paper';
@@ -11,9 +11,27 @@ export default function ImagePickerTest() {
     const [image, setImage] = useState<string>(""); // typescript?
     const [status, setStatus] = ImagePicker.useCameraPermissions();
 
-    const permissionCheck = async () => {
-        ImagePicker.getCameraPermissionsAsync();
+    // const permissionCheck = async () => {
+    //     await ImagePicker.getCameraPermissionsAsync();
+    // }
+
+    const openCamera = async () => {
+        const permissionCheck = await ImagePicker.requestCameraPermissionsAsync();
+
+        if (permissionCheck.granted === false) {
+            alert("Camera access denied mutha fuckaaaaaa");
+            return;
+        }
+
+        const result = await ImagePicker.launchCameraAsync();
+        console.log("result: ", result);
+
+        if (!result.cancelled) {
+            setImage(result.uri);
+            console.log("result.uri: ", result.uri);
+        }
     }
+    
 
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -30,8 +48,9 @@ export default function ImagePickerTest() {
 
     return (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-            <Button title="Select image" onPress={pickImage} />
             {image && <Image source={{ uri: image }} style={{ width: 300, height: 300 }} />}
+            <Button title="Camera" onPress={openCamera} />
+            <Button title="Select image" onPress={pickImage} />
         </View>
     );
 }
