@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
 // https://callstack.github.io/react-native-paper/1.0/getting-started.html
 import {NavigationContainer} from "@react-navigation/native";
-import { Provider as PaperProvider } from 'react-native-paper';
+import { MD3LightTheme as DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import { registerRootComponent } from 'expo';
 import { Main } from "./Components/main";
 import {Routes} from "./library/routes";
@@ -20,6 +20,18 @@ import {Login} from "./screens/login";
 import {Register} from "./screens/register";
 
 export default function App() {
+
+    const theme = {
+        ...DefaultTheme,
+        roundness: 2,
+        version: 3,
+        colors: {
+            ...DefaultTheme.colors,
+            primary: '#be1e2d',
+            secondary: '#f1c40f',
+            tertiary: '#a1b2c3'
+        },
+    };
 
     const Stack = createNativeStackNavigator();
     const Tab = createMaterialBottomTabNavigator();
@@ -58,7 +70,7 @@ export default function App() {
 
     return (
         <SafeAreaProvider>
-        <PaperProvider>
+        <PaperProvider theme={theme}>
           <NavigationContainer independent={true}>
               <Tab.Navigator
                   initialRouteName="Home"
