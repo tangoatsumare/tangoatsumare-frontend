@@ -6,17 +6,17 @@ import React from "react";
 import {View, Text, StyleSheet} from 'react-native'
 import {Button} from "react-native-paper";
 
-export const Profile = () => {
+export const Camera = () => {
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
     return (
         <View style={styles.container}>
             <Button icon="eye" mode="contained" style={styles.button}
-                        onPress={()=>{
-                            navigation.navigate("Settings")
-                        }}>
-                    <Text>To Settings</Text>
-                </Button>
+                    onPress={()=>{
+                        navigation.navigate("Home")
+                    }}>
+                <Text>Return Home</Text>
+            </Button>
         </View>
     )
 }
