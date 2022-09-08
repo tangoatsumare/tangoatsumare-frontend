@@ -8,11 +8,7 @@ import {
     Avatar,
     Title,
     Caption,
-    Paragraph,
     Drawer,
-    Text,
-    TouchableRipple,
-    Switch,
 } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import {useNavigation} from "@react-navigation/core";
@@ -39,20 +35,7 @@ export function DrawerContent(props: any) {
                     />
                     <Title style={styles.title}>Dean</Title>
                     <Caption style={styles.caption}>@DeaNihongo</Caption>
-                    {/*<View style={styles.row}>*/}
-                    {/*    <View style={styles.section}>*/}
-                    {/*        <Paragraph style={[styles.paragraph, styles.caption]}>*/}
-                    {/*            120*/}
-                    {/*        </Paragraph>*/}
-                    {/*        <Caption style={styles.caption}>Posts</Caption>*/}
-                    {/*    </View>*/}
-                    {/*    <View style={styles.section}>*/}
-                    {/*        <Paragraph style={[styles.paragraph, styles.caption]}>*/}
-                    {/*            1500*/}
-                    {/*        </Paragraph>*/}
-                    {/*        <Caption style={styles.caption}>Collection</Caption>*/}
-                    {/*    </View>*/}
-                    {/*</View>*/}
+
                 </View>
                 <Drawer.Section style={styles.drawerSection}>
                     <DrawerItem
@@ -77,19 +60,6 @@ export function DrawerContent(props: any) {
                             navigation.navigate("Settings")
                         }}
                     />
-                    {/*<DrawerItem*/}
-                    {/*    icon={({ color, size }) => (*/}
-                    {/*        <MaterialCommunityIcons*/}
-                    {/*            name="bookmark-outline"*/}
-                    {/*            color={color}*/}
-                    {/*            size={size}*/}
-                    {/*        />*/}
-                    {/*    )}*/}
-                    {/*    label="Favorites"*/}
-                    {/*    onPress={()=>{*/}
-                    {/*        navigation.navigate("Favorites")*/}
-                    {/*    }}*/}
-                    {/*/>*/}
                 </Drawer.Section>
                 <Drawer.Section>
                     <DrawerItem style={styles.signOut}
@@ -102,7 +72,7 @@ export function DrawerContent(props: any) {
                     )}
                     label="Sign Out"
                     onPress={()=>{
-                        navigation.navigate("Home")
+                        navigation.navigate("Login")
                     }}
                 />
                 </Drawer.Section>

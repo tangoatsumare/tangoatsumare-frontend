@@ -3,19 +3,21 @@ import { StyleSheet } from 'react-native';
 import {NavigationContainer} from "@react-navigation/native";
 import { Provider as PaperProvider } from 'react-native-paper';
 import { registerRootComponent } from 'expo';
-import { Main } from "./screens/main";
+import { Main } from "./Components/main";
 import {Routes} from "./library/routes";
 import {Home} from "./screens/home";
 import "react-native-gesture-handler";
 import React from "react";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
-import {Card} from "./screens/card";
+import {Card} from "./Components/card";
 import {Profile} from "./screens/profile";
 import {Settings} from "./screens/settings";
 import {Camera} from "./screens/camera";
-import {BottomTabs} from "./screens/bottomTabs";
+import {SRS} from "./screens/srs";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import {createMaterialBottomTabNavigator} from "@react-navigation/material-bottom-tabs";
+import {Login} from "./screens/login";
+import {Register} from "./screens/register";
 
 export default function App() {
 
@@ -27,21 +29,19 @@ export default function App() {
         return (
             <Stack.Navigator  initialRouteName="Main">
                 <Stack.Screen options={{headerShown: false}} name="Main" component={Main} />
-                <Stack.Screen name="Home" component={Home} />
-                <Stack.Screen name="Card" component={Card}/>
                 <Stack.Screen name="Settings" component={Settings}/>
                 <Stack.Screen name="Profile" component={Profile}/>
-                <Stack.Screen name="Camera" component={Camera}/>
+                <Stack.Screen name="Login" component={Login}/>
+                <Stack.Screen name="Register" component={Register}/>
             </Stack.Navigator>
         )
     }
 
-    const ProfileStack = () => {
+    const SRSStack = () => {
 
         return (
-            <Stack.Navigator initialRouteName="Profile">
-                <Stack.Screen name="Settings" component={Settings}/>
-                <Stack.Screen name="Profile" component={Profile}/>
+            <Stack.Navigator initialRouteName="SRS">
+                <Stack.Screen name="SRS" component={SRS}/>
             </Stack.Navigator>
         )
     }
@@ -50,11 +50,8 @@ export default function App() {
 
         return (
             <Stack.Navigator initialRouteName="Camera">
-                <Stack.Screen name="Home" component={Home} />
-                <Stack.Screen name="Card" component={Card}/>
-                <Stack.Screen name="Settings" component={Settings}/>
-                <Stack.Screen name="Profile" component={Profile}/>
                 <Stack.Screen name="Camera" component={Camera}/>
+                <Stack.Screen name="Settings" component={Settings}/>
             </Stack.Navigator>
         )
     }
@@ -76,10 +73,10 @@ export default function App() {
                       }}
                   />
                   <Tab.Screen
-                      name="Profile"
-                      component={ProfileStack}
+                      name="SRS"
+                      component={SRSStack}
                       options={{
-                          tabBarIcon: 'account-outline',
+                          tabBarIcon: 'card-multiple-outline',
                       }}
                   />
                   <Tab.Screen

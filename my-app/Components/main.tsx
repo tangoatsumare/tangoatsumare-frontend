@@ -3,7 +3,7 @@ import {
     Provider as PaperProvider,
 } from 'react-native-paper';
 
-import { RootNavigator } from '../Components/rootNavigator';
+import { RootNavigator } from './rootNavigator';
 
 export const Main = () => {
   //handle themes and languages here

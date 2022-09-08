@@ -3,20 +3,32 @@ import { StackNavigationProp} from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 
 import React from "react";
-import {View, TouchableOpacity, Text} from 'react-native'
+import {View, Text, StyleSheet} from 'react-native'
+import {Button} from "react-native-paper";
 
 export const Profile = () => {
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
     return (
-        <View>
-            <TouchableOpacity
-                onPress={()=>{
-                    navigation.navigate("Settings")
-                }}>
-                <Text>To Settings</Text>
-            </TouchableOpacity>
-
+        <View style={styles.container}>
+            <Button icon="eye" mode="contained" style={styles.button}
+                        onPress={()=>{
+                            navigation.navigate("Settings")
+                        }}>
+                    <Text>To Settings</Text>
+                </Button>
         </View>
     )
 }
+
+const styles = StyleSheet.create({
+        button: {
+            alignItems: 'center',
+        },
+        container: {
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+        }
+    }
+);
