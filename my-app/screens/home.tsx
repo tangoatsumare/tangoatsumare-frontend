@@ -5,20 +5,20 @@
 import React, { useEffect, useState } from "react";
 import {View, Text, StyleSheet, FlatList, TouchableOpacity} from 'react-native'
 import { SegmentedButtons} from "react-native-paper";
-import { Collection } from "../Components/collection";
+// import { Collection } from "../Components/collection";
 import { Feed } from "../Components/feed";
 
 export const Home = () => {
     // const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
     const [value, setValue] = React.useState('collection');
-
-    const handleCollection: any = () => {
-    if (value === 'collection'){
-        return <Collection/>
-    } else {
-        return <Feed/>
-    }
-    }
+    //
+    // const handleCollection: any = () => {
+    // if (value === 'collection'){
+    //     return <Collection/>
+    // } else {
+    //     return <Feed/>
+    // }
+    // }
 
 
     return (
@@ -38,7 +38,6 @@ export const Home = () => {
                 ]}
                 style={styles.segment}
             />
-            {handleCollection}
         </View>
        
     )
