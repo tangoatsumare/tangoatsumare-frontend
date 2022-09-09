@@ -11,12 +11,9 @@ export const SRS = () => {
 
     return (
         <View style={styles.container}>
-            <Button icon="eye" mode="contained" style={styles.button}
-                    onPress={()=>{
-                        navigation.navigate("Home")
-                    }}>
-                <Text>Return Home</Text>
-            </Button>
+            
+                <Text>SRS Flashcard feature coming soon</Text>
+            
         </View>
     )
 }
