@@ -13,6 +13,7 @@ export const SingleCard = () => {
 
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
     const [flashcard, setFlashcard] = useState({})
+    const [engDef, setEngDef] = useState('')
 
     // const route = useRoute<RouteProp<Record<string, StackParamsList>, string>>();
     const route = useRoute<RouteProp<StackParamsList, 'Card'>>();
@@ -25,6 +26,7 @@ export const SingleCard = () => {
         .get(`https://tangoatsumare-api.herokuapp.com/api/flashcards/${route.params?.id}`)
         .then((response) => {
           setFlashcard(response.data[0])
+          setEngDef(response.data[0].english_definition[0])
         });
     }, []);
   
@@ -35,7 +37,7 @@ export const SingleCard = () => {
                     <Card.Cover source={{ uri: 'https://www.japan-guide.com/g20/740/2040_04.jpg' }} style={styles.photo} />
                     <Paragraph style={styles.text}>{card.reading}</Paragraph>
                     <Title style={styles.textVocab}>{card.target_word}</Title>
-                    <Paragraph style={styles.text}> Meaning: {card.english_definition}</Paragraph>
+                    <Paragraph style={styles.text}> Meaning: {engDef}</Paragraph>
                     <Paragraph style={styles.text}>Sentence: {card.context}</Paragraph>
                     </Card.Content>
                     
