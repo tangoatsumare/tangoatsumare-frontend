@@ -5,7 +5,7 @@ import {
     DrawerContentScrollView,
 } from '@react-navigation/drawer';
 import {
-    Avatar,
+    // Avatar,
     Title,
     Caption,
     Drawer,
@@ -26,13 +26,13 @@ export function DrawerContent(props: any) {
                 }
             >
                 <View style={styles.userInfoSection}>
-                    <Avatar.Image
+                    {/* <Avatar.Image
                         source={{
                             uri:
                                 'https://avatars.githubusercontent.com/u/68458897?v=4',
                         }}
                         size={50}
-                    />
+                    /> */}
                     <Title style={styles.title}>Dean</Title>
                     <Caption style={styles.caption}>@DeaNihongo</Caption>
 
