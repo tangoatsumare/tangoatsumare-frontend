@@ -51,7 +51,6 @@ const [flashcards, setFlashcards] = useState([])
              
                 </Card.Actions>
                </Card>
-               <br/>                
               </TouchableOpacity>
             );
           }
