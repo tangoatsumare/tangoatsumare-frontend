@@ -14,7 +14,9 @@ export const SingleCard = () => {
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
     const [flashcard, setFlashcard] = useState({})
 
-    const route = useRoute<RouteProp<Record<string, StackParamsList>, string>>();
+    // const route = useRoute<RouteProp<Record<string, StackParamsList>, string>>();
+    const route = useRoute<RouteProp<StackParamsList, 'Card'>>();
+
 
 
     useEffect(() => {
@@ -28,9 +30,9 @@ export const SingleCard = () => {
   
     const displayCard = (card: any) => {
         return (
-            <Card key={card.target_word}>
+            <Card key={card.target_word} style={styles.card}>
                     <Card.Content>
-                    <Card.Cover source={{ uri: 'https://www.japan-guide.com/g20/740/2040_04.jpg' }} />
+                    <Card.Cover source={{ uri: 'https://www.japan-guide.com/g20/740/2040_04.jpg' }} style={styles.photo} />
                     <Paragraph style={styles.text}>Reading: {card.reading}</Paragraph>
                     <Title style={styles.text}>Vocab: {card.target_word}</Title>
                     <Paragraph style={styles.text}> English: {card.english_definition}</Paragraph>
@@ -60,5 +62,17 @@ const styles = StyleSheet.create({
     },
     text: {
         textAlign: 'center',
-      }
+      },
+        card: {
+            minWidth: '100%',
+            minHeight: '100%',
+            borderRadius: 10,
+            margin: 10,
+            marginTop: 2, 
+          },
+          photo: {
+            maxHeight: '100%',
+            maxWidth: '100%',
+          }
+      
   })

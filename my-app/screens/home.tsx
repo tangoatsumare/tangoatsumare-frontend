@@ -49,6 +49,7 @@ const styles = StyleSheet.create({
             alignItems: 'center',
         },
         container: {
+            marginTop: 30,
             alignItems: 'center',
             justifyContent: 'center',
         },

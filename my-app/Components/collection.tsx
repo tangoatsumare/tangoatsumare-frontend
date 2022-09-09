@@ -41,7 +41,7 @@ const [flashcards, setFlashcards] = useState([])
                 handleShowFlashcard(item._id)
               }}
             >
-              <Card key={item.target_word}>
+              <Card key={item.target_word} style={styles.card}>
                     <Card.Content>
                     <Card.Cover source={{ uri: 'https://www.japan-guide.com/g20/740/2040_04.jpg' }} />
                     <Title style={styles.text}>Vocab: {item.target_word}</Title>
@@ -83,6 +83,11 @@ const styles = StyleSheet.create({
           },
           text: {
             textAlign: 'center',
+          },
+          card: {
+            borderRadius: 10,
+            margin: 10,
+            marginTop: 2, 
           }
     }
 );
