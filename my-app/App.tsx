@@ -1,39 +1,38 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
 // https://callstack.github.io/react-native-paper/1.0/getting-started.html
-import { Provider as PaperProvider } from 'react-native-paper';
-import { Button } from 'react-native-paper';
+import {NavigationContainer} from "@react-navigation/native";
+import { MD3LightTheme as DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import { registerRootComponent } from 'expo';
-
+import "react-native-gesture-handler";
+import React from "react";
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+// import {TabNav} from "./Components/tabNav";
+import {StackNav} from './Components/stackNavigator';
 import { OCR } from './screens/OCR';
 
-function App() {
-  return (
-      <OCR />
-      // <View style={styles.container}>
-      //   <Text>!!!!</Text>
-      //   <Button icon="camera" mode="contained" onPress={() => console.log('Pressed')}>Hi</Button>
-      //   <StatusBar style="auto" />
-      // </View>
-  );
-}
+export default function App() {
 
-export default function Main() {
-  return (
-    <PaperProvider>
-      <App />
-    </PaperProvider>
-  );
+    const theme = {
+        ...DefaultTheme,
+        roundness: 2,
+        version: 3,
+        colors: {
+            ...DefaultTheme.colors,
+            primary: '#be1e2d',
+            secondary: '#f1c40f',
+            tertiary: '#a1b2c3'
+        },
+    };
+
+    return (
+        <SafeAreaProvider>
+        <PaperProvider theme={theme}>
+          <NavigationContainer independent={true}>
+              <StackNav />
+          </NavigationContainer>
+      </PaperProvider>
+        </SafeAreaProvider>
+    );
 }
 
 // https://docs.expo.dev/versions/latest/sdk/register-root-component/
-registerRootComponent(Main);
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+registerRootComponent(App);

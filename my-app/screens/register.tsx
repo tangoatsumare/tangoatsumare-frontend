@@ -1,4 +1,4 @@
-import { useNavigation} from "@react-navigation/core";
+import { useNavigation } from "@react-navigation/core";
 import { StackNavigationProp} from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 
@@ -6,17 +6,17 @@ import React from "react";
 import {View, Text, StyleSheet} from 'react-native'
 import {Button} from "react-native-paper";
 
-export const Profile = () => {
+export const Register = () => {
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
     return (
         <View style={styles.container}>
             <Button icon="eye" mode="contained" style={styles.button}
-                        onPress={()=>{
-                            navigation.navigate("Settings")
-                        }}>
-                    <Text>To Settings</Text>
-                </Button>
+                    onPress={()=>{
+                        navigation.navigate("Home")
+                    }}>
+                <Text>To Home Screen</Text>
+            </Button>
         </View>
     )
 }
