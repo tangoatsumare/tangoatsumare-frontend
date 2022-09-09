@@ -33,9 +33,9 @@ export const SingleCard = () => {
             <Card key={card.target_word} style={styles.card}>
                     <Card.Content>
                     <Card.Cover source={{ uri: 'https://www.japan-guide.com/g20/740/2040_04.jpg' }} style={styles.photo} />
-                    <Paragraph style={styles.text}>Reading: {card.reading}</Paragraph>
-                    <Title style={styles.text}>Vocab: {card.target_word}</Title>
-                    <Paragraph style={styles.text}> English: {card.english_definition}</Paragraph>
+                    <Paragraph style={styles.text}>{card.reading}</Paragraph>
+                    <Title style={styles.textVocab}>{card.target_word}</Title>
+                    <Paragraph style={styles.text}> Meaning: {card.english_definition}</Paragraph>
                     <Paragraph style={styles.text}>Sentence: {card.context}</Paragraph>
                     </Card.Content>
                     
@@ -63,16 +63,21 @@ const styles = StyleSheet.create({
     text: {
         textAlign: 'center',
       },
+      textVocab: {
+        textAlign: 'center',
+        fontWeight: "bold"
+      },
         card: {
-            minWidth: '100%',
-            minHeight: '100%',
+            minWidth: '90%',
             borderRadius: 10,
             margin: 10,
             marginTop: 2, 
           },
           photo: {
-            maxHeight: '100%',
-            maxWidth: '100%',
+            minWidth: '80%',
+            minHeight: '50%',
+            maxHeight: '95%',
+            maxWidth: '95%',
           }
       
   })

@@ -44,7 +44,7 @@ const [flashcards, setFlashcards] = useState([])
               <Card key={item.target_word} style={styles.card}>
                     <Card.Content>
                     <Card.Cover source={{ uri: 'https://www.japan-guide.com/g20/740/2040_04.jpg' }} />
-                    <Title style={styles.text}>Vocab: {item.target_word}</Title>
+                    <Title style={styles.textVocab}>{item.target_word}</Title>
                     <Paragraph style={styles.text}>Sentence: {item.context}</Paragraph>
                     </Card.Content>
                     <Card.Actions>
@@ -78,16 +78,22 @@ const styles = StyleSheet.create({
 
         },
           separator: {
-            height: 1,
+            height: 0,
             backgroundColor: "grey"
           },
           text: {
             textAlign: 'center',
           },
+          textVocab: {
+            textAlign: 'center',
+            fontWeight: "bold"
+          },
           card: {
             borderRadius: 10,
             margin: 10,
             marginTop: 2, 
-          }
+
+          },
+         
     }
 );
