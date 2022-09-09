@@ -7,6 +7,7 @@ import React from "react";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 // import {TabNav} from "./Components/tabNav";
 import {StackNav} from './Components/stackNavigator';
+import { OCR } from './screens/OCR';
 
 export default function App() {
 
