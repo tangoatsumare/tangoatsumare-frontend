@@ -6,7 +6,7 @@ import "react-native-gesture-handler";
 import React from "react";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 // import {TabNav} from "./Components/tabNav";
-import {StackNav} from "./Components/stackNavigator";
+import {StackNav} from './Components/stackNavigator';
 
 export default function App() {
 
