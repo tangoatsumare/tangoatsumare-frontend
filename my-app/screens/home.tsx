@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
             justifyContent: 'center',
         },
         segment: {
-            
+            marginBottom: 5
         },
     }
 );
