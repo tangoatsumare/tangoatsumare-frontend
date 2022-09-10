@@ -8,10 +8,6 @@ import {Button, Divider, Avatar, Title, Card,} from "react-native-paper";
 import CountryFlag from "react-native-country-flag";
 import axios from 'axios';
 import { Item } from "react-native-paper/lib/typescript/components/List/List";
-// import {Collection} from '../Components/collection';
-
-// const [test, setTest] = useState();
-
 
 export const Profile = () => {
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
@@ -27,11 +23,6 @@ export const Profile = () => {
             setFlashcards(flashcards)
           });
     }, []);
-
-    const handleShowFlashcard = (flashcardName: any) => {
-        //navigate
-        console.log(flashcardName)
-    }
 
     const displayCard = () => {
         const topTwo = [flashcards[flashcards.length-1], flashcards[flashcards.length-2]];
@@ -54,12 +45,6 @@ export const Profile = () => {
                     );
                 }}
             />
-            // <Card style={styles.card}>
-            //     <Card.Content>
-            //         <Card.Cover source={{uri: 'https://avatars.githubusercontent.com/u/96172124?v=4'}} />
-            //         <Card.Title title="test card" />
-            //     </Card.Content>
-            // </Card>
         );
     }
     
@@ -89,18 +74,10 @@ export const Profile = () => {
                         />
                     </View>
                 </View>
-                    {/* <Divider style={styles.divider}/> */}
-
-                {/* <Divider style={styles.divider}/> */}
 
                 {/* My Cards */}
                 <Title style={styles.sectionTitle}>Recent Cards</Title>
-                {/* <View>
-                    {displayFlashcard(flashcards)}
-                </View> */}
                 <View>
-                    {/* {displayFlashcard(flashcards)} */}
-                    {/* <Text> card area </Text> */}
                     <View style={styles.cardBox}>
                         {displayCard()}
                     </View>
@@ -111,8 +88,6 @@ export const Profile = () => {
                             <Text>View All Cards</Text>
                         </Button>
                 </View>
-                {/* <Divider style={styles.divider}/> */}
-
                 {/* Favorites? */}
                 <Title style={styles.sectionTitle}>Recent Favorites</Title>
                 <View style={{marginBottom: 25}}>
@@ -126,21 +101,9 @@ export const Profile = () => {
                             <Text>View All Favorites</Text>
                         </Button>
                 </View>
-                {/* <Divider style={styles.divider}/> */}
             </View>
         </ScrollView>
     )
-
-    // return (
-    //     <View style={styles.container}>
-    //         <Button icon="eye" mode="contained" style={styles.button}
-    //                     onPress={()=>{
-    //                         navigation.navigate("Settings")
-    //                     }}>
-    //                 <Text>To Settings</Text>
-    //             </Button>
-    //     </View>
-    // )
 }
 
 const styles = StyleSheet.create({
