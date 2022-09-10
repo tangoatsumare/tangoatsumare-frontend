@@ -34,18 +34,19 @@ export const Profile = () => {
 
     const displayCard = () => {
         const topTwo = [flashcards[0], flashcards[1]];
+        console.log("toptwo check: ", topTwo[0]);
         return (
             <FlatList
             nestedScrollEnabled
             columnWrapperStyle={{justifyContent: 'space-evenly'}}
             numColumns={2}
                 data={topTwo}
-                renderItem={() => {
+                renderItem={({item}) => {
                     return (
                         <Card style={styles.card}>
                             <Card.Content>
                                 <Card.Cover source={{uri: 'https://avatars.githubusercontent.com/u/96172124?v=4'}} />
-                                <Card.Title title="test" />
+                                <Card.Title style={{backgroundColor: 'lightgray'}} title={item['target_word']} />
                             </Card.Content>
                         </Card>
                     );
@@ -70,9 +71,9 @@ export const Profile = () => {
                 <View style={styles.profileBox}>
                     {/* <Text> profile area </Text> */}
                     <View style={styles.profileInfo}>
-                        <Text>profile info box </Text>
-                        <Text>handle</Text>
-                        <Text>Currently learning: </Text>
+                        <Text style={styles.text}>Firstname Lastname <Text>flag</Text></Text>
+                        <Text style={styles.text}>@ User Handle</Text>
+                        <Text style={styles.text}>Currently learning: </Text>
                         <Text>Flag</Text>
                     </View>
 
@@ -103,7 +104,7 @@ export const Profile = () => {
                     </View>
                         <Button onPress={() => {
                             console.log("My Cards button pressed");
-                            // navigation.navigate("Cards");
+                            // navigation.navigate("Cards"); ??
                         }}>
                             <Text>View All Cards</Text>
                         </Button>
@@ -118,7 +119,7 @@ export const Profile = () => {
                     </View>
                     <Button onPress={() => {
                             console.log("Favorites button pressed");
-                            // navigation.navigate("Cards");
+                            // navigation.navigate("Favorites"); ??
                         }}>
                             <Text>View All Favorites</Text>
                         </Button>
@@ -145,7 +146,7 @@ const styles = StyleSheet.create({
             // flex: 1,
             alignContent: 'center',
             // justifyContent: 'center',
-            backgroundColor: 'pink',
+            // backgroundColor: '#f2eded',
         },
         profileBox: {
             flex: 0,
@@ -154,18 +155,23 @@ const styles = StyleSheet.create({
             alignItems: 'center',
             // alignContent: 'center',
             // borderColor: 'green',
-            backgroundColor: 'blue',
+            // backgroundColor: 'blue',
             height: 200,
         },
         profileInfo: {
             alignContent: 'center',
-            backgroundColor: 'green',
+            // backgroundColor: 'green',
+        },
+        text: {
+            fontSize: 16
         },
         avatarBox: {
             // borderColor: 'black',
             flex: 0,
             alignContent: 'center',
-            backgroundColor: 'yellow',
+            // backgroundColor: 'yellow',
+            borderWidth: 1,
+            borderRadius: 100,
             // margin: 0,
             // marginLeft: 20,
         },
@@ -173,19 +179,21 @@ const styles = StyleSheet.create({
             flexDirection: 'row',
             // flexWrap: 'wrap',
             justifyContent: 'space-evenly',
-            backgroundColor: 'red',
+            // backgroundColor: 'red',
             
         },
         card: {
             width: 180,
-            height: 250,
-            backgroundColor: 'gold',
+            height: 275,
+            backgroundColor: 'gray',
             marginTop: 10,
             marginBottom: 10,
+            
         },
         sectionTitle: {
             textAlign: 'center',
-            backgroundColor: 'magenta',
+            backgroundColor: '#f23535',
+            color: 'white'
         },
         button: {
             alignItems: 'center',
