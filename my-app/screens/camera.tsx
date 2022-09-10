@@ -60,16 +60,23 @@ export const Camera = () => {
                     <Text>Select An Image</Text>
                 </Button>
             </View>
-            <Button icon="eye" mode="contained" style={styles.button}
-                    onPress={()=>{
-                        navigation.navigate("OCR", {
-                            image_uri: image,
-                            image_base64: base64
-                        })
-                    }}>
-                <Text>Create Flashcard</Text>
+            <Button 
+                // icon="eye" 
+                mode="contained" 
+                style={styles.button}
+                onPress={()=>{
+                    navigation.navigate("OCR", {
+                        image_uri: image,
+                        image_base64: base64
+                    })
+                }}
+            >
+                <Text>continue creation</Text>
             </Button>
-            <Button icon="eye" mode="contained" style={styles.button}
+            <Button 
+                // icon="eye" 
+                mode="contained" 
+                style={styles.button}
                     onPress={()=>{
                         navigation.navigate("Home")
                     }}>

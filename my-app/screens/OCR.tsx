@@ -1,3 +1,4 @@
+// import { useNavigation} from "@react-navigation/core";
 import { Image, StyleSheet, Text, TextInput, View, ScrollView, TouchableOpacity } from 'react-native';
 import { Button } from 'react-native-paper';
 import imageSource from '../assets/ocr-test.jpeg';
@@ -78,12 +79,6 @@ export const OCR = ({ route, navigation }) => {
         }
     };
 
-    // useEffect(() => {
-    //     if (cloudStoragePath) {
-    //         console.log(cloudStoragePath);
-    //     }
-    // }, [cloudStoragePath]);
-
     const handleSelectionChange = (e) => {
         if (responseText) {
             const start = e.nativeEvent.selection.start;
@@ -110,10 +105,10 @@ export const OCR = ({ route, navigation }) => {
         }
     };
 
-    const submitFlashCard = async () => {
-        try {
-            if (selectedText && responseText && resultFromDictionaryLookup && cloudStoragePath) {
-                await uploadToFirebaseCloudStorage();
+    useEffect(() => {
+        (async () => {
+            if (cloudStoragePath) {
+                console.log(cloudStoragePath);
                 const flashcard = {
                     target_word: selectedText,
                     context: responseText,
@@ -132,11 +127,19 @@ export const OCR = ({ route, navigation }) => {
                 }).then(res => {
                     console.log('flashcard POSTed to the backend API');
                     // navigate user to his/her collection of cards
-                    navigation.navigate("Home")
+                    navigation.navigate("Home");
                 }).catch(err => {
                     console.log(err);
                 });
             }
+        })();
+    }, [cloudStoragePath]);
+
+    const submitFlashCard = async () => {
+        try {
+            if (selectedText && responseText && resultFromDictionaryLookup) {
+                await uploadToFirebaseCloudStorage();
+            } else console.log('hmmm....');
         } catch (err) {
             console.log(err);
         }

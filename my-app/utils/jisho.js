@@ -2,18 +2,18 @@
 // const JishoAPI = require('unofficial-jisho-api');
 // const jisho = new JishoAPI();
 import axios from 'axios'; // https://github.com/axios/axios
-import {
-    COTOHA_ACCESS_TOKEN_PUBLISH_URL,
-    COTOHA_API_BASE_URL,
-    COTOHA_DEV_CLIENT_ID,
-    COTOHA_DEV_SECRET
-} from '@env';
+// import {
+//     COTOHA_ACCESS_TOKEN_PUBLISH_URL,
+//     COTOHA_API_BASE_URL,
+//     COTOHA_DEV_CLIENT_ID,
+//     COTOHA_DEV_SECRET
+// } from '@env';
 
 const lookupJishoApi = async (word) => {
     const api = `https://jisho.org/api/v1/search/words?keyword=${word}`;
     const response = await axios.get(api);
     const definitions = response.data.data[0].senses[0].english_definitions;
-    return definitions;
+    return definitions ? definitions : 'definition not found';
 
     // implementation for COTOHA
     // let accessToken;
