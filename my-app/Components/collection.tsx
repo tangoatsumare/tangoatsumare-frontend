@@ -13,6 +13,7 @@ export const Collection = () => {
   const navigation = useNavigation<StackNavigationProp<StackParamsList>>();
 const [flashcards, setFlashcards] = useState([])
 
+
   useEffect(() => {
     axios
       .get("https://tangoatsumare-api.herokuapp.com/api/flashcards")
@@ -32,10 +33,12 @@ const [flashcards, setFlashcards] = useState([])
     const displayFlashcard = (flashcards: readonly any[] | null | undefined) => {
         return (
             <FlatList
+            inverted
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           data={flashcards}
           keyExtractor={(flashcard, index) => index.toString()}
           renderItem={({item}) => {
+
             return (
               <TouchableOpacity onPress={() => {
                 handleShowFlashcard(item._id)
@@ -43,7 +46,7 @@ const [flashcards, setFlashcards] = useState([])
             >
               <Card key={item.target_word} style={styles.card}>
                     <Card.Content>
-                    <Card.Cover source={{ uri: 'https://www.japan-guide.com/g20/740/2040_04.jpg' }} />
+                    <Card.Cover   source={{uri: item.image ? item.image : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}} />
                     <Title style={styles.textVocab}>{item.target_word}</Title>
                     <Paragraph style={styles.text}>Sentence: {item.context}</Paragraph>
                     </Card.Content>
