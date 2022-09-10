@@ -1,7 +1,9 @@
 import { GOOGLE_CLOUD_VISION_API_KEY } from '@env';
 
+
 const sendImageToCloudVisionApi = async (image) => {
     try {
+        console.log(GOOGLE_CLOUD_VISION_API_KEY);
         let body = JSON.stringify({
             requests: [
                 {

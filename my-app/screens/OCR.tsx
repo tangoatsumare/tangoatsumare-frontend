@@ -36,6 +36,7 @@ export const OCR = ({ route, navigation }) => {
     useEffect(() => {
         (async () => {
             try {
+                console.log(image_base64);
                 const result = await sendImageToCloudVisionApi(image_base64);
                 setResponseText(result);
             } catch (err) {
