@@ -1,20 +1,21 @@
-import { 
-    GOOGLE_FIREBASE_API_KEY,
-    GOOGLE_FIREBASE_AUTH_DOMAIN,
-    GOOGLE_FIREBASE_PROJECT_ID,
-    GOOGLE_FIREBASE_STORAGE_BUCKET,
-    GOOGLE_FIREBASE_MESSAGING_SENDER_ID,
-    GOOGLE_FIREBASE_APP_ID,
-} from '@env';
+// import { 
+//     GOOGLE_FIREBASE_API_KEY,
+//     GOOGLE_FIREBASE_AUTH_DOMAIN,
+//     GOOGLE_FIREBASE_PROJECT_ID,
+//     GOOGLE_FIREBASE_STORAGE_BUCKET,
+//     GOOGLE_FIREBASE_MESSAGING_SENDER_ID,
+//     GOOGLE_FIREBASE_APP_ID,
+// } from '@env';
+// https://www.npmjs.com/package/react-native-dotenv
 import { initializeApp } from 'firebase/app';
 
 const firebaseConfig = {
-    apiKey: GOOGLE_FIREBASE_API_KEY,
-    authDomain: GOOGLE_FIREBASE_AUTH_DOMAIN,
-    projectId: GOOGLE_FIREBASE_PROJECT_ID,
-    storageBucket: GOOGLE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: GOOGLE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: GOOGLE_FIREBASE_APP_ID,
+    apiKey: process.env.GOOGLE_FIREBASE_API_KEY,
+    authDomain: process.env.GOOGLE_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.GOOGLE_FIREBASE_PROJECT_ID,
+    storageBucket:  process.env.GOOGLE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.GOOGLE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.GOOGLE_FIREBASE_APP_ID,
 }
 
 export const app = initializeApp(firebaseConfig);

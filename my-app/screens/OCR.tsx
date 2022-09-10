@@ -36,7 +36,7 @@ export const OCR = ({ route, navigation }) => {
     useEffect(() => {
         (async () => {
             try {
-                console.log(image_base64);
+                // console.log(image_base64);
                 const result = await sendImageToCloudVisionApi(image_base64);
                 setResponseText(result);
             } catch (err) {
@@ -118,7 +118,7 @@ export const OCR = ({ route, navigation }) => {
                     image: cloudStoragePath,
                     parts_of_speech: ''
                 };
-                console.log(flashcard);
+                // console.log(flashcard);
     
                 // await axios.post(`https://tangoatsumare-api.herokuapp.com/api/flashcards`, { // put into .env
                 //     headers: {
@@ -142,6 +142,8 @@ export const OCR = ({ route, navigation }) => {
                     console.log('flashcard POSTed to the backend API');
                     // navigate user to his/her collection of cards
                     navigation.navigate("Home");
+                    // TODO: the home screen needs to refresh based on the updated flashcards in the server
+
                 }).catch(err => {
                     console.log(err);
                 });

@@ -1,9 +1,8 @@
-import { GOOGLE_CLOUD_VISION_API_KEY } from '@env';
-
+// import { GOOGLE_CLOUD_VISION_API_KEY } from '@env';
+import axios from 'axios';
 
 const sendImageToCloudVisionApi = async (image) => {
     try {
-        console.log(GOOGLE_CLOUD_VISION_API_KEY);
         let body = JSON.stringify({
             requests: [
                 {
@@ -22,7 +21,7 @@ const sendImageToCloudVisionApi = async (image) => {
 
         const response = await fetch(
             'https://vision.googleapis.com/v1/images:annotate?key=' +
-                GOOGLE_CLOUD_VISION_API_KEY,
+                process.env.GOOGLE_CLOUD_VISION_API_KEY,
             {
                 headers: {
                     Accept: 'application/json',
@@ -33,8 +32,6 @@ const sendImageToCloudVisionApi = async (image) => {
             }
         );
         const responseJson = await response.json();
-
-        // console.log(responseJson);
 
         if (responseJson) {
             if (responseJson.responses[0].textAnnotations[0].description) {
