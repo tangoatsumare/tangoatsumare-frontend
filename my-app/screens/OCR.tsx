@@ -99,7 +99,7 @@ export const OCR = ({ route, navigation }) => {
     const receiveDictionaryInfo = async () => {
         try {
             let result = await lookupJishoApi(selectedText);
-            setResultFromDictionaryLookup(result.toString());
+            setResultFromDictionaryLookup(result[0].toString());
         } catch (err) {
             console.log(err);
         }
@@ -114,16 +114,29 @@ export const OCR = ({ route, navigation }) => {
                     context: responseText,
                     reading: '',
                     english_definition: [resultFromDictionaryLookup],
-                    image: cloudStoragePath.toString(),
+                    image: cloudStoragePath,
                     parts_of_speech: ''
                 };
                 console.log(flashcard);
     
-                await axios.post(`https://tangoatsumare-api.herokuapp.com/api/flashcards`, { // put into .env
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    data: flashcard
+                // await axios.post(`https://tangoatsumare-api.herokuapp.com/api/flashcards`, { // put into .env
+                //     headers: {
+                //         'Content-Type': 'application/json',
+                //     },
+                //     data: flashcard
+                // }).then(res => {
+                //     console.log('flashcard POSTed to the backend API');
+                //     // navigate user to his/her collection of cards
+                //     navigation.navigate("Home");
+                // }).catch(err => {
+                //     console.log(err);
+                // });
+                await fetch(`https://tangoatsumare-api.herokuapp.com/api/flashcards`, { // put into .env
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(flashcard)
                 }).then(res => {
                     console.log('flashcard POSTed to the backend API');
                     // navigate user to his/her collection of cards
