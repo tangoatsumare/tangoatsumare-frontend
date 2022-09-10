@@ -29,7 +29,6 @@ export const SingleCard = () => {
         .then((response) => {
           setFlashcard(response.data[0])
           setEngDef(response.data[0].english_definition[0])
-          setImageUrl(response.data.image)
         });
     }, []);
   
@@ -37,7 +36,7 @@ export const SingleCard = () => {
         return (
             <Card key={card.target_word} style={styles.card}>
                     <Card.Content>
-                    <Card.Cover  source={{uri: imageUrl ? imageUrl :  'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}}style={styles.photo} />
+                    <Card.Cover   source={{uri: card.image ? card.image : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}}style={styles.photo} />
                     <Paragraph style={styles.text}>{card.reading}</Paragraph>
                     <Title style={styles.textVocab}>{card.target_word}</Title>
                     <Paragraph style={styles.text}> Meaning: {engDef}</Paragraph>

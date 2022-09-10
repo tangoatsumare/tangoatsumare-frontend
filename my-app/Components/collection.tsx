@@ -33,6 +33,7 @@ const [flashcards, setFlashcards] = useState([])
     const displayFlashcard = (flashcards: readonly any[] | null | undefined) => {
         return (
             <FlatList
+            inverted
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           data={flashcards}
           keyExtractor={(flashcard, index) => index.toString()}
