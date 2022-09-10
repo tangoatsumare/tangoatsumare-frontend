@@ -5,6 +5,7 @@ import { ParamListBase } from '@react-navigation/native'
 import React, { useState, useEffect } from "react";
 import {View, Text, StyleSheet, ScrollView, FlatList, TouchableOpacity} from 'react-native'
 import {Button, Divider, Avatar, Title, Card,} from "react-native-paper";
+import CountryFlag from "react-native-country-flag";
 import axios from 'axios';
 import { Item } from "react-native-paper/lib/typescript/components/List/List";
 // import {Collection} from '../Components/collection';
@@ -46,7 +47,7 @@ export const Profile = () => {
                         <Card style={styles.card}>
                             <Card.Content>
                                 {/* <Card.Cover source={{uri: 'https://avatars.githubusercontent.com/u/96172124?v=4'}} /> */}
-                                <Card.Cover source={{uri: item["image"] }} />
+                                <Card.Cover source={{uri: item["image"] ?  item["image"] : 'https://avatars.githubusercontent.com/u/96172124?v=4'}} />
                                 <Card.Title style={{backgroundColor: 'lightgray'}} title={item['target_word']} />
                             </Card.Content>
                         </Card>
@@ -72,10 +73,10 @@ export const Profile = () => {
                 <View style={styles.profileBox}>
                     {/* <Text> profile area </Text> */}
                     <View style={styles.profileInfo}>
-                        <Text style={styles.text}>Abraham Lincoln <Text>flag</Text></Text>
+                        <Text style={styles.text}>Abraham Lincoln <CountryFlag isoCode="us" size={22}/></Text>
                         <Text style={styles.text}>@BaberahamLincoln</Text>
                         <Text style={styles.text}>Currently learning: </Text>
-                        <Text>Flag</Text>
+                        <CountryFlag isoCode="jp" size={22} />
                     </View>
 
                     <View style={styles.avatarBox}>
