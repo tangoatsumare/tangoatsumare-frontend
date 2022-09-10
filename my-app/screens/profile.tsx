@@ -33,8 +33,8 @@ export const Profile = () => {
     }
 
     const displayCard = () => {
-        const topTwo = [flashcards[0], flashcards[1]];
-        console.log("toptwo check: ", topTwo[0]);
+        const topTwo = [flashcards[flashcards.length-1], flashcards[flashcards.length-2]];
+        
         return (
             <FlatList
             nestedScrollEnabled
@@ -45,7 +45,8 @@ export const Profile = () => {
                     return (
                         <Card style={styles.card}>
                             <Card.Content>
-                                <Card.Cover source={{uri: 'https://avatars.githubusercontent.com/u/96172124?v=4'}} />
+                                {/* <Card.Cover source={{uri: 'https://avatars.githubusercontent.com/u/96172124?v=4'}} /> */}
+                                <Card.Cover source={{uri: item["image"] }} />
                                 <Card.Title style={{backgroundColor: 'lightgray'}} title={item['target_word']} />
                             </Card.Content>
                         </Card>
@@ -71,8 +72,8 @@ export const Profile = () => {
                 <View style={styles.profileBox}>
                     {/* <Text> profile area </Text> */}
                     <View style={styles.profileInfo}>
-                        <Text style={styles.text}>Firstname Lastname <Text>flag</Text></Text>
-                        <Text style={styles.text}>@ User Handle</Text>
+                        <Text style={styles.text}>Abraham Lincoln <Text>flag</Text></Text>
+                        <Text style={styles.text}>@BaberahamLincoln</Text>
                         <Text style={styles.text}>Currently learning: </Text>
                         <Text>Flag</Text>
                     </View>
@@ -113,7 +114,7 @@ export const Profile = () => {
 
                 {/* Favorites? */}
                 <Title style={styles.sectionTitle}>Recent Favorites</Title>
-                <View>
+                <View style={{marginBottom: 25}}>
                     <View>
                         {displayCard()}
                     </View>
@@ -188,7 +189,7 @@ const styles = StyleSheet.create({
             backgroundColor: 'gray',
             marginTop: 10,
             marginBottom: 10,
-            
+            borderRadius: 10,
         },
         sectionTitle: {
             textAlign: 'center',
