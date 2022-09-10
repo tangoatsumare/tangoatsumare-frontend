@@ -1,4 +1,5 @@
-import { Image, StyleSheet, Text, TextInput, View, TouchableOpacity } from 'react-native';
+// import { useNavigation} from "@react-navigation/core";
+import { Image, StyleSheet, Text, TextInput, View, ScrollView, TouchableOpacity } from 'react-native';
 import { Button } from 'react-native-paper';
 import imageSource from '../assets/ocr-test.jpeg';
 import cat from '../assets/wakeupcat.jpeg';
@@ -7,87 +8,159 @@ import cat from '../assets/wakeupcat.jpeg';
 // import vision from '@google-cloud/vision';
 import { useState, useEffect } from 'react';
 import { sendImageToCloudVisionApi } from '../utils/flashcard';
+import { app } from '../firebase';
+import { 
+    getStorage,
+    ref, 
+    uploadBytesResumable, 
+    uploadString,
+    getDownloadURL
+} from 'firebase/storage';
+// https://www.npmjs.com/package/react-native-uuid
+import uuid from 'react-native-uuid';
 
-export const OCR = () => {
-    const publiclyAccessibleImage = 'https://amerikaya-arc.com/blog/wp-content/uploads/2021/03/4520693_s.jpg';
-    const [ image, setImage ] = useState(publiclyAccessibleImage);
-    const [ responseText, setResponseText ] = useState('hey yoooo');
+import {lookupJishoApi} from '../utils/jisho';
+import { async } from '@firebase/util';
+import axios from 'axios';
+
+export const OCR = ({ route, navigation }) => {
+    const storage = getStorage(app);
+    const { image_uri, image_base64 } = route.params;
+    const [ image, setImage ] = useState(image_uri);
+    const [ cloudStoragePath, setCloudStoragePath ] = useState('');
+    const [ responseText, setResponseText ] = useState('');
     const [ selectedText, setSelectedText ] = useState('');
+    const [ resultFromDictionaryLookup, setResultFromDictionaryLookup ] = useState('');
 
+    // send to cloud vision once components are mounted
     useEffect(() => {
         (async () => {
-            // try {
-            //     const data = {
-            //         target_word: 'Testing',
-            //         context: 'Testing',
-            //         reading: 'Testing',
-            //         english_definition: [],
-            //         image: 'Testing',
-            //         parts_of_speech: 'Testing',
-            //     };
-
-            //     const response = await fetch('https://tangoatsumare-api.herokuapp.com/api/flashcards', {
-            //         method: 'POST',
-            //         headers: {
-            //             "Content-Type": "application/json"
-            //         },
-            //         body: JSON.stringify(data)
-            //     });
-            //     const responseJson = await response.json();
-            //     console.log(responseJson);
-            // } catch (err) {
-            //     console.log(err);
-            // }
+            try {
+                const result = await sendImageToCloudVisionApi(image_base64);
+                setResponseText(result);
+            } catch (err) {
+                console.log(err);
+            }
         })();
     }, []);
     
-    const handleButtonClick = async () => {
+    async function uploadImageAsync(uri) {
+        // Why are we using XMLHttpRequest? See:
+        // https://github.com/expo/expo/issues/2402#issuecomment-443726662
+        const blob = await new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.onload = function () {
+            resolve(xhr.response);
+          };
+          xhr.onerror = function (e) {
+            console.log(e);
+            reject(new TypeError("Network request failed"));
+          };
+          xhr.responseType = "blob";
+          xhr.open("GET", uri, true);
+          xhr.send(null);
+        });
+      
+        const fileRef = ref(storage, `testing/${uuid.v4()}`); // uuid for the photo object's name
+        const result = await uploadBytesResumable(fileRef, blob);
+      
+        // We're done with the blob, close and release it
+        blob.close();
+      
+        return await getDownloadURL(fileRef);
+      }
+
+    const uploadToFirebaseCloudStorage = async () => {
         try {
-            const result = 
-            await sendImageToCloudVisionApi(image);
-            // console.log(result);
-            setResponseText(result);
+            const uploadURL = await uploadImageAsync(image);
+            setCloudStoragePath(uploadURL);
         } catch (err) {
             console.log(err);
         }
-        
     };
 
-    const onPressTitle = () => {
-        setSelectedText("[pressed]");
+    const handleSelectionChange = (e) => {
+        if (responseText) {
+            const start = e.nativeEvent.selection.start;
+            const end = e.nativeEvent.selection.end;
+            const selectedChunk = responseText.substring(start, end);
+            setSelectedText(selectedChunk);
+        }
     }
 
-    const doSomething = (e) => {
-        const start = e.nativeEvent.selection.start;
-        const end = e.nativeEvent.selection.end;
-        // console.log(start, end);
-        const selectedChunk = responseText.substring(start, end);
-        console.log(selectedChunk);
-        setSelectedText(selectedChunk);
-    }
+    useEffect(() => {
+        (async () => {
+            if (selectedText) {
+                await receiveDictionaryInfo(selectedText);
+            }
+        })();
+    }, [selectedText]);
 
-    const receiveDictionaryInfo = () => {
-        
-    }
+    const receiveDictionaryInfo = async () => {
+        try {
+            let result = await lookupJishoApi(selectedText);
+            setResultFromDictionaryLookup(result.toString());
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
+    useEffect(() => {
+        (async () => {
+            if (cloudStoragePath) {
+                console.log(cloudStoragePath);
+                const flashcard = {
+                    target_word: selectedText,
+                    context: responseText,
+                    reading: '',
+                    english_definition: [resultFromDictionaryLookup],
+                    image: cloudStoragePath.toString(),
+                    parts_of_speech: ''
+                };
+                console.log(flashcard);
+    
+                await axios.post(`https://tangoatsumare-api.herokuapp.com/api/flashcards`, { // put into .env
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    data: flashcard
+                }).then(res => {
+                    console.log('flashcard POSTed to the backend API');
+                    // navigate user to his/her collection of cards
+                    navigation.navigate("Home");
+                }).catch(err => {
+                    console.log(err);
+                });
+            }
+        })();
+    }, [cloudStoragePath]);
+
+    const submitFlashCard = async () => {
+        try {
+            if (selectedText && responseText && resultFromDictionaryLookup) {
+                await uploadToFirebaseCloudStorage();
+            } else console.log('hmmm....');
+        } catch (err) {
+            console.log(err);
+        }
+    };
 
     return (
-        <View style={styles.container}>
-            <Image source={{ uri: publiclyAccessibleImage }} style={styles.logo} />
-            <Button 
-                icon="eye" 
-                mode="contained"
-                onPress={handleButtonClick}
-                style={styles.button}
-            >
-                Send to Cloud Vision
-            </Button>
+        <ScrollView 
+        contentContainerStyle={{ alignItems: "center", justifyContent: "center"}}
+        style={styles.container}
+        >
+            <Image 
+                source={{ uri: image }} 
+                style={styles.logo} 
+            />
             <View 
                 style={styles.responseContainer}
             >
-                <Text>This is the response: </Text>
+                <Text>Select a word to learn</Text>
                 <TextInput
                     style={styles.responseText}
-                    onSelectionChange={doSomething}
+                    onSelectionChange={handleSelectionChange}
                     editable={false}
                     multiline={true}
                 >
@@ -95,19 +168,46 @@ export const OCR = () => {
                 </TextInput>
             </View>
             <View style={styles.userTextSelection}>
-                <Text>Here is for user text selection:</Text>
+                <Text>You've selected</Text>
                 <Text style={styles.responseText}>{selectedText}</Text>
             </View>
-            <View style={styles.testing}>
+            {/* <View style={styles.testing}> */}
+            {/* <Button
+                mode="contained"
+                onPress={receiveDictionaryInfo}
+                style={styles.button}
+            >
+                Look up the Dictionary
+            </Button> */}
+            <View style={styles.dictionaryLookup}></View>
+            <Text>Here is the dictionary lookup result:</Text>
+            <Text style={styles.lookupText}>{resultFromDictionaryLookup}</Text>
+            {/* <Button
+                mode="contained"
+                onPress={uploadToFirebaseCloudStorage}
+                style={styles.button}
+            >
+                Upload to Firebase Cloud Storage
+            </Button> */}
             <Button 
                 mode="contained"
                 style={styles.button}
-                onPress={receiveDictionaryInfo}
+                onPress={submitFlashCard}
             >
                 Send
             </Button>
-            </View>
-        </View>
+            {/* <View>
+                <Text>
+                    1. upload photo to cloud storage
+                </Text>
+                <Text>
+                    2. if 1 is successful, gather everything
+                </Text>
+                <Text>
+                    3. send HTTP POST request to backend API
+                </Text>
+            </View> */}
+        </ScrollView>
     );
 };
 
@@ -115,8 +215,8 @@ const styles = StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: '#fff',
-      alignItems: 'center',
-      justifyContent: 'center',
+    //   alignItems: 'center',
+    //   justifyContent: 'center',
     },
     logo: {
         width: 305,
@@ -129,18 +229,28 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    userTextSelection: {
-        padding: 20,
-        fontSize: 50,
-    },
     responseText: {
         fontSize: 50,
-        padding: 20
+        // padding: 20
+    },
+    userTextSelection: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        // padding: 20,
+        fontSize: 50,
     },
     testing: {
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    dictionaryLookup: {
+        padding: 20,
+        fontSize: 30,
+    },
+    lookupText: {
+        fontSize: 20,
+        padding: 20
     }
   });
   

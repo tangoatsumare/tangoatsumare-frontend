@@ -9,9 +9,10 @@ const sendImageToCloudVisionApi = async (image) => {
                         { type: 'DOCUMENT_TEXT_DETECTION', maxResults: 1}
                     ],
                     image: {
-                        source: {
-                            imageUri: image
-                        }
+                        // source: {
+                        //     imageUri: image
+                        // }
+                        content: image
                     }
                 }
             ]
@@ -31,9 +32,13 @@ const sendImageToCloudVisionApi = async (image) => {
         );
         const responseJson = await response.json();
 
-        if (responseJson.responses[0].textAnnotations[0].description) {
-            // setResponseText(responseJson.responses[0].textAnnotations[0].description);
-            return responseJson.responses[0].textAnnotations[0].description;
+        // console.log(responseJson);
+
+        if (responseJson) {
+            if (responseJson.responses[0].textAnnotations[0].description) {
+                // setResponseText(responseJson.responses[0].textAnnotations[0].description);
+                return responseJson.responses[0].textAnnotations[0].description;
+            }
         }
     } catch (err) {
         console.log(err);

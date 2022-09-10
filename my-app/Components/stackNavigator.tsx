@@ -6,6 +6,7 @@ import {Login} from "../screens/login";
 import {Register} from "../screens/register";
 import {SRS} from "../screens/srs";
 import {Camera} from "../screens/camera";
+import { OCR } from "../screens/OCR";
 import React from 'react';
 import {createMaterialBottomTabNavigator} from "@react-navigation/material-bottom-tabs";
 import { Collection } from "./collection";
@@ -61,6 +62,7 @@ export const StackNav = () => {
             <RootStack.Screen name="Register" component={Register}/>
             <RootStack.Screen name="SRS" component={SRS}/>
             <RootStack.Screen name="Camera" component={Camera}/>
+            <RootStack.Screen name="OCR" component={OCR}/>
             <RootStack.Screen name="Collection" component={Collection}/>
             <RootStack.Screen name="Card" component={SingleCard}/>
         </RootStack.Navigator>

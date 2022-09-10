@@ -11,6 +11,7 @@ export const Camera = () => {
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
     const [image, setImage] = useState<string>(""); // typescript?
+    const [base64, setBase64 ] = useState<string>("");
 
     const openCamera = async () => {
         const permissionCheck = await ImagePicker.requestCameraPermissionsAsync();
@@ -20,12 +21,15 @@ export const Camera = () => {
             return;
         }
 
-        const result = await ImagePicker.launchCameraAsync();
-        console.log("result: ", result);
+        const result = await ImagePicker.launchCameraAsync({
+            base64: true
+        });
+        // console.log("result: ", result);
 
         if (!result.cancelled) {
             setImage(result.uri);
-            console.log("result.uri: ", result.uri);
+            setBase64(result.base64);
+            // console.log("result.uri: ", result.uri);
         }
     }
     
@@ -35,11 +39,13 @@ export const Camera = () => {
             mediaTypes: ImagePicker.MediaTypeOptions.All,
             allowsEditing: true,
             aspect: [4, 3],
-            quality: 1
+            quality: 1,
+            base64: true
         });
-        console.log("result: ", result);
+        // console.log("result: ", result);
         if (!result.cancelled) {
             setImage(result.uri);
+            setBase64(result.base64);
         }
     }
 
@@ -54,7 +60,23 @@ export const Camera = () => {
                     <Text>Select An Image</Text>
                 </Button>
             </View>
-            <Button icon="eye" mode="contained" style={styles.button}
+            <Button 
+                // icon="eye" 
+                mode="contained" 
+                style={styles.button}
+                onPress={()=>{
+                    navigation.navigate("OCR", {
+                        image_uri: image,
+                        image_base64: base64
+                    })
+                }}
+            >
+                <Text>continue creation</Text>
+            </Button>
+            <Button 
+                // icon="eye" 
+                mode="contained" 
+                style={styles.button}
                     onPress={()=>{
                         navigation.navigate("Home")
                     }}>
@@ -67,6 +89,7 @@ export const Camera = () => {
 const styles = StyleSheet.create({
         button: {
             alignItems: 'center',
+            margin: 10
         },
         container: {
             flex: 1,
