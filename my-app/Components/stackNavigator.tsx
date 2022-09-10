@@ -9,6 +9,9 @@ import {Camera} from "../screens/camera";
 import { OCR } from "../screens/OCR";
 import React from 'react';
 import {createMaterialBottomTabNavigator} from "@react-navigation/material-bottom-tabs";
+import { Collection } from "./collection";
+import { SingleCard } from "./card";
+
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -60,6 +63,8 @@ export const StackNav = () => {
             <RootStack.Screen name="SRS" component={SRS}/>
             <RootStack.Screen name="Camera" component={Camera}/>
             <RootStack.Screen name="OCR" component={OCR}/>
+            <RootStack.Screen name="Collection" component={Collection}/>
+            <RootStack.Screen name="Card" component={SingleCard}/>
         </RootStack.Navigator>
     )
 }

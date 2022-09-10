@@ -6,14 +6,17 @@ import React from "react";
 import {View, Text, StyleSheet} from 'react-native'
 import {Button} from "react-native-paper";
 
-export const SRS = () => {
+export const Feed = () => {
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
     return (
         <View style={styles.container}>
-            
-                <Text>SRS Flashcard feature coming soon</Text>
-            
+            <Button icon="eye" mode="contained" style={styles.button}
+                        onPress={()=>{
+                            navigation.navigate("Settings")
+                        }}>
+                    <Text>Feed</Text>
+                </Button>
         </View>
     )
 }
