@@ -12,7 +12,7 @@ export const Camera = () => {
 
     const [image, setImage] = useState<string>(""); // typescript?
     const [base64, setBase64 ] = useState<string>("");
-
+ 
     const openCamera = async () => {
         const permissionCheck = await ImagePicker.requestCameraPermissionsAsync();
 
@@ -64,11 +64,15 @@ export const Camera = () => {
                 // icon="eye"
                 mode="contained-tonal" 
                 style={styles.button}
+                disabled={image ? false : true}
                 onPress={()=>{
-                    navigation.navigate("OCR", {
-                        image_uri: image,
-                        image_base64: base64
-                    })
+                    if (image) {
+                        navigation.navigate("OCR", {
+                            image_uri: image,
+                            image_base64: base64
+                        })
+                        setImage('');
+                    }
                 }}
             >
                 <Text>continue creation</Text>
