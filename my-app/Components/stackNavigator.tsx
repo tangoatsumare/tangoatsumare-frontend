@@ -11,6 +11,7 @@ import React from 'react';
 import {createMaterialBottomTabNavigator} from "@react-navigation/material-bottom-tabs";
 import { Collection } from "./collection";
 import { SingleCard } from "./card";
+import { Button } from "react-native-paper";
 
 
 const Tab = createMaterialBottomTabNavigator();

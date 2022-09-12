@@ -52,7 +52,7 @@ export const Camera = () => {
     return (
         <View style={styles.container}>
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                {image && <Image source={{ uri: image }} style={{ width: 300, height: 300 }} />}
+                {image && <Image source={{ uri: image }} style={{ width: 300, height: 300 }} resizeMode="contain"/>}
                 <Button icon="camera" onPress={openCamera}>
                     <Text>Open Camera</Text>
                 </Button>
@@ -61,8 +61,8 @@ export const Camera = () => {
                 </Button>
             </View>
             <Button 
-                // icon="eye" 
-                mode="contained" 
+                // icon="eye"
+                mode="contained-tonal" 
                 style={styles.button}
                 onPress={()=>{
                     navigation.navigate("OCR", {
@@ -75,7 +75,8 @@ export const Camera = () => {
             </Button>
             <Button 
                 // icon="eye" 
-                mode="contained" 
+                mode="outlined"
+                textColor="black"
                 style={styles.button}
                     onPress={()=>{
                         navigation.navigate("Home")

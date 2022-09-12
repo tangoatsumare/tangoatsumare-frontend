@@ -6,7 +6,7 @@ import cat from '../assets/wakeupcat.jpeg';
 // import SelectableText from 'react-native-selectable-text';
 // Imports the Google Cloud client library
 // import vision from '@google-cloud/vision';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { sendImageToCloudVisionApi } from '../utils/flashcard';
 import { app } from '../firebase';
 import { 
@@ -36,7 +36,6 @@ export const OCR = ({ route, navigation }) => {
     useEffect(() => {
         (async () => {
             try {
-                // console.log(image_base64);
                 const result = await sendImageToCloudVisionApi(image_base64);
                 setResponseText(result);
             } catch (err) {
@@ -90,11 +89,11 @@ export const OCR = ({ route, navigation }) => {
     }
 
     useEffect(() => {
-        (async () => {
-            if (selectedText) {
-                await receiveDictionaryInfo(selectedText);
-            }
-        })();
+        async function fetchData () {
+            await receiveDictionaryInfo(selectedText);
+        };
+        if (selectedText !== '') fetchData(); 
+        else setResultFromDictionaryLookup('');
     }, [selectedText]);
 
     const receiveDictionaryInfo = async () => {
@@ -118,20 +117,7 @@ export const OCR = ({ route, navigation }) => {
                     image: cloudStoragePath,
                     parts_of_speech: ''
                 };
-                // console.log(flashcard);
-    
-                // await axios.post(`https://tangoatsumare-api.herokuapp.com/api/flashcards`, { // put into .env
-                //     headers: {
-                //         'Content-Type': 'application/json',
-                //     },
-                //     data: flashcard
-                // }).then(res => {
-                //     console.log('flashcard POSTed to the backend API');
-                //     // navigate user to his/her collection of cards
-                //     navigation.navigate("Home");
-                // }).catch(err => {
-                //     console.log(err);
-                // });
+                
                 await fetch(`https://tangoatsumare-api.herokuapp.com/api/flashcards`, { // put into .env
                 method: 'POST',
                 headers: {
@@ -161,6 +147,18 @@ export const OCR = ({ route, navigation }) => {
         }
     };
 
+    // read layout from the DOM and synchronously re-render
+    React.useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <Button 
+                    icon="send" 
+                    onPress={submitFlashCard}
+                >Send</Button>
+            )
+        })
+    })
+
     return (
         <ScrollView 
         contentContainerStyle={{ alignItems: "center", justifyContent: "center"}}
@@ -168,7 +166,8 @@ export const OCR = ({ route, navigation }) => {
         >
             <Image 
                 source={{ uri: image }} 
-                style={styles.logo} 
+                style={styles.image}
+                resizeMode="contain"
             />
             <View 
                 style={styles.responseContainer}
@@ -187,42 +186,16 @@ export const OCR = ({ route, navigation }) => {
                 <Text>You've selected</Text>
                 <Text style={styles.responseText}>{selectedText}</Text>
             </View>
-            {/* <View style={styles.testing}> */}
-            {/* <Button
-                mode="contained"
-                onPress={receiveDictionaryInfo}
-                style={styles.button}
-            >
-                Look up the Dictionary
-            </Button> */}
             <View style={styles.dictionaryLookup}></View>
             <Text>Here is the dictionary lookup result:</Text>
             <Text style={styles.lookupText}>{resultFromDictionaryLookup}</Text>
-            {/* <Button
-                mode="contained"
-                onPress={uploadToFirebaseCloudStorage}
-                style={styles.button}
-            >
-                Upload to Firebase Cloud Storage
-            </Button> */}
-            <Button 
+            {/* <Button 
                 mode="contained"
                 style={styles.button}
                 onPress={submitFlashCard}
             >
                 Send
-            </Button>
-            {/* <View>
-                <Text>
-                    1. upload photo to cloud storage
-                </Text>
-                <Text>
-                    2. if 1 is successful, gather everything
-                </Text>
-                <Text>
-                    3. send HTTP POST request to backend API
-                </Text>
-            </View> */}
+            </Button> */}
         </ScrollView>
     );
 };
@@ -231,12 +204,11 @@ const styles = StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: '#fff',
-    //   alignItems: 'center',
-    //   justifyContent: 'center',
     },
-    logo: {
+    image: {
         width: 305,
-        height: 159
+        height: 159,
+        margin: 20
     },
     button: {
         margin: 20,
@@ -247,21 +219,14 @@ const styles = StyleSheet.create({
     },
     responseText: {
         fontSize: 50,
-        // padding: 20
+        margin: 20
     },
     userTextSelection: {
         alignItems: 'center',
         justifyContent: 'center',
-        // padding: 20,
         fontSize: 50,
     },
-    testing: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
     dictionaryLookup: {
-        padding: 20,
         fontSize: 30,
     },
     lookupText: {
