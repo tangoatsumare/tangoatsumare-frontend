@@ -34,9 +34,10 @@ const sendImageToCloudVisionApi = async (image) => {
         const responseJson = await response.json();
 
         if (responseJson) {
-            if (responseJson.responses[0].textAnnotations[0].description) {
-                // setResponseText(responseJson.responses[0].textAnnotations[0].description);
+            if (Object.keys(responseJson.responses[0]).length !== 0) {
                 return responseJson.responses[0].textAnnotations[0].description;
+            } else {
+                return "no word detected"
             }
         }
     } catch (err) {

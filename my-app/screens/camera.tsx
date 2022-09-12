@@ -12,7 +12,7 @@ export const Camera = () => {
 
     const [image, setImage] = useState<string>(""); // typescript?
     const [base64, setBase64 ] = useState<string>("");
-
+ 
     const openCamera = async () => {
         const permissionCheck = await ImagePicker.requestCameraPermissionsAsync();
 
@@ -52,7 +52,7 @@ export const Camera = () => {
     return (
         <View style={styles.container}>
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                {image && <Image source={{ uri: image }} style={{ width: 300, height: 300 }} />}
+                {image && <Image source={{ uri: image }} style={{ width: 300, height: 300 }} resizeMode="contain"/>}
                 <Button icon="camera" onPress={openCamera}>
                     <Text>Open Camera</Text>
                 </Button>
@@ -61,21 +61,26 @@ export const Camera = () => {
                 </Button>
             </View>
             <Button 
-                // icon="eye" 
-                mode="contained" 
+                // icon="eye"
+                mode="contained-tonal" 
                 style={styles.button}
+                disabled={image ? false : true}
                 onPress={()=>{
-                    navigation.navigate("OCR", {
-                        image_uri: image,
-                        image_base64: base64
-                    })
+                    if (image) {
+                        navigation.navigate("OCR", {
+                            image_uri: image,
+                            image_base64: base64
+                        })
+                        setImage('');
+                    }
                 }}
             >
                 <Text>continue creation</Text>
             </Button>
             <Button 
                 // icon="eye" 
-                mode="contained" 
+                mode="outlined"
+                textColor="black"
                 style={styles.button}
                     onPress={()=>{
                         navigation.navigate("Home")
