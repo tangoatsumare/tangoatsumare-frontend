@@ -1,5 +1,6 @@
 import { useNavigation} from "@react-navigation/core";
 import { StackNavigationProp} from '@react-navigation/stack';
+import { useIsFocused } from "@react-navigation/native";
 import { StackParamsList } from "../library/routeProp";
 import {Button, Card, Paragraph, Title} from "react-native-paper";
 
@@ -11,56 +12,58 @@ import axios from "axios";
 export const Collection = () => {
 
   const navigation = useNavigation<StackNavigationProp<StackParamsList>>();
-const [flashcards, setFlashcards] = useState([])
-
+  const [flashcards, setFlashcards] = useState([]);
+  const isFocused = useIsFocused();
 
   useEffect(() => {
-    axios
-      .get("https://tangoatsumare-api.herokuapp.com/api/flashcards")
-      .then((response: any) => {
-        const flashcards =
-          response.data;
-        setFlashcards(flashcards)
-      });
-  }, []);
-  
-      const handleShowFlashcard = (flashcardID: string) => {
-        navigation.navigate("Card", {id: flashcardID})
-        console.log(flashcardID)
-  
-        }
+    // why using "isFocused"
+    // https://stackoverflow.com/questions/60182942/useeffect-not-called-in-react-native-when-back-to-screen
+    if (isFocused) {
+      axios
+        .get("https://tangoatsumare-api.herokuapp.com/api/flashcards")
+        .then((response: any) => {
+          const flashcards =
+            response.data;
+          setFlashcards(flashcards)
+        });
+    }
+  }, [isFocused]);
 
-    const displayFlashcard = (flashcards: readonly any[] | null | undefined) => {
-        return (
-            <FlatList
+  const handleShowFlashcard = (flashcardID: string) => {
+    navigation.navigate("Card", {id: flashcardID})
+    console.log(flashcardID)
+  }
+
+  const displayFlashcard = (flashcards: readonly any[] | null | undefined) => {
+      return (
+          <FlatList
             inverted
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
-          data={flashcards}
-          keyExtractor={(flashcard, index) => index.toString()}
-          renderItem={({item}) => {
-
-            return (
-              <TouchableOpacity onPress={() => {
-                handleShowFlashcard(item._id)
-              }}
-            >
-              <Card key={item.target_word} style={styles.card}>
-                    <Card.Content>
-                    <Card.Cover   source={{uri: item.image ? item.image : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}} />
-                    <Title style={styles.textVocab}>{item.target_word}</Title>
-                    <Paragraph style={styles.text}>Sentence: {item.context}</Paragraph>
-                    </Card.Content>
-                    <Card.Actions>
-             
-                </Card.Actions>
-               </Card>
-              </TouchableOpacity>
-            );
-          }
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
+            data={flashcards}
+            keyExtractor={(flashcard, index) => index.toString()}
+            renderItem={({item}) => {
+              return (
+                <TouchableOpacity onPress={() => {
+                  handleShowFlashcard(item._id)
+                }}
+          >
+            <Card key={item.target_word} style={styles.card}>
+                  <Card.Content>
+                  <Card.Cover   source={{uri: item.image ? item.image : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}} />
+                  <Title style={styles.textVocab}>{item.target_word}</Title>
+                  <Paragraph style={styles.text}>Sentence: {item.context}</Paragraph>
+                  </Card.Content>
+                  <Card.Actions>
+            
+              </Card.Actions>
+              </Card>
+            </TouchableOpacity>
+          );
         }
-        />
-        );
       }
+      />
+      );
+    }
 
   return (
     <View style={styles.container}>
