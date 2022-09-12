@@ -31,6 +31,7 @@ export const OCR = ({ route, navigation }) => {
     const [ responseText, setResponseText ] = useState('');
     const [ selectedText, setSelectedText ] = useState('');
     const [ resultFromDictionaryLookup, setResultFromDictionaryLookup ] = useState('');
+    const [ sentenceEditMode, setSentenceEditMode ] = useState(false);
 
     // send to cloud vision once components are mounted
     useEffect(() => {
@@ -172,11 +173,20 @@ export const OCR = ({ route, navigation }) => {
             <View 
                 style={styles.responseContainer}
             >
-                <Text>Select a word to learn</Text>
+                <View style={styles.responseTitleContainer}>
+                    <Text style={styles.responseTitle}>Select a word to learn</Text>
+                    <Button 
+                        icon={sentenceEditMode ? "check-bold" : "cog"}
+                        textColor={sentenceEditMode ? "green" : "purple"}
+                        onPress={() => setSentenceEditMode((prev) => !prev)}
+                    >
+                        {sentenceEditMode ? "done" : "edit"}
+                    </Button>
+                </View>
                 <TextInput
-                    style={styles.responseText}
+                    style={sentenceEditMode ? styles.responseTextEditMode : styles.responseText}
                     onSelectionChange={handleSelectionChange}
-                    editable={false}
+                    editable={sentenceEditMode ? true : false}
                     multiline={true}
                 >
                     {responseText}
@@ -186,16 +196,8 @@ export const OCR = ({ route, navigation }) => {
                 <Text>You've selected</Text>
                 <Text style={styles.responseText}>{selectedText}</Text>
             </View>
-            <View style={styles.dictionaryLookup}></View>
             <Text>Here is the dictionary lookup result:</Text>
             <Text style={styles.lookupText}>{resultFromDictionaryLookup}</Text>
-            {/* <Button 
-                mode="contained"
-                style={styles.button}
-                onPress={submitFlashCard}
-            >
-                Send
-            </Button> */}
         </ScrollView>
     );
 };
@@ -217,8 +219,30 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    responseTitleContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+    },
+    responseTitle: {
+        backgroundColor: 'rgba(0,0,0,0.1)',
+        paddingLeft: 20,
+        paddingRight: 20,
+        paddingTop: 10,
+        paddingBottom: 10,
+        borderStyle: 'solid',
+        borderRadius: 10,
+        overflow: 'hidden'
+    },
     responseText: {
         fontSize: 50,
+        margin: 20
+    },
+    responseTextEditMode: {
+        borderStyle: 'solid',
+        borderWidth: 1,
+        padding: 10,
+        borderRadius: 10,
         margin: 20
     },
     userTextSelection: {
