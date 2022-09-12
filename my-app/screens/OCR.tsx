@@ -186,6 +186,7 @@ export const OCR = ({ route, navigation }) => {
                 <TextInput
                     style={sentenceEditMode ? styles.responseTextEditMode : styles.responseText}
                     onSelectionChange={handleSelectionChange}
+                    onChangeText={(text) => setResponseText(text)}
                     editable={sentenceEditMode ? true : false}
                     multiline={true}
                 >
