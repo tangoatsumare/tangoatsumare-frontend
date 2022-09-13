@@ -1,4 +1,6 @@
-{
+import 'dotenv/config';
+
+export default {
   "expo": {
     "name": "my-app",
     "slug": "my-app",
@@ -28,6 +30,14 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      firebaseApiKey: process.env.FIREBASE_APP_APIKEY,
+      firebaseAuthDomain: process.env.FIREBASE_APP_AUTHDOMAIN,
+      firebaseProjectId: process.env.FIREBASE_APP_PROJECTID,
+      firebaseStorageBucket: process.env.FIREBASE_APP_STORAGEBUCKET,
+      firebaseMessagingSenderId: process.env.FIREBASE_APP_MESSAGINGSENDERID,
+      firebaseAppId: process.env.FIREBASE_APP_APPID
     }
   }
 }
