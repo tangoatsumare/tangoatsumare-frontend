@@ -34,6 +34,7 @@ export const OCR = ({ route, navigation }) => {
     const [ sentenceEditMode, setSentenceEditMode ] = useState(false);
     const [ cardSubmissionBtnIsClick, setCardSubmissionBtnIsClick ] = useState(false);
     const [ cardIsSubmitted, setCardIsSubmitted ] = useState(false);
+    const [ cardSubmissionError, setCardSubmissionError ] = useState(false);
 
     // send to cloud vision once components are mounted
     useEffect(() => {
@@ -108,48 +109,6 @@ export const OCR = ({ route, navigation }) => {
         }
     };
 
-    useEffect(() => {
-        (async () => { 
-            if (cardSubmissionBtnIsClick) { // if card submission button is clicked, execute photo upload
-                await uploadToFirebaseCloudStorage();
-            }
-        })();
-    }, [cardSubmissionBtnIsClick]);
-
-    useEffect(() => {
-        (async () => {
-            if (cloudStoragePath) { // if photo is successfully uploaded to firebase, execute the flashcard POST request
-                console.log(cloudStoragePath);
-                const flashcard = {
-                    target_word: selectedText,
-                    context: responseText,
-                    reading: '',
-                    english_definition: [resultFromDictionaryLookup],
-                    image: cloudStoragePath,
-                    parts_of_speech: ''
-                };
-                
-                await fetch(`https://tangoatsumare-api.herokuapp.com/api/flashcards`, { // put into .env
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(flashcard)
-                }).then(res => {
-                    console.log('flashcard POSTed to the backend API');
-                    setCardIsSubmitted(true);
-                    // navigate user to his/her collection of cards
-                    // navigation.navigate("Home");
-
-                    // TODO: the home screen needs to refresh based on the updated flashcards in the server
-
-                }).catch(err => {
-                    console.log(err);
-                });
-            }
-        })();
-    }, [cloudStoragePath]);
-
     const submitFlashCard = async () => {
         try {
             if (selectedText && responseText && resultFromDictionaryLookup) {
@@ -161,6 +120,43 @@ export const OCR = ({ route, navigation }) => {
             console.log(err);
         }
     };
+
+    useEffect(() => {
+        (async () => { 
+            if (cardSubmissionBtnIsClick) { // if card submission button is clicked, execute photo upload
+                await uploadToFirebaseCloudStorage();
+            }
+        })();
+    }, [cardSubmissionBtnIsClick]);
+
+    useEffect(() => {
+        (async () => {
+            if (cloudStoragePath) { // if photo is successfully uploaded to firebase, execute the flashcard POST request
+                const flashcard = {
+                    target_word: selectedText,
+                    context: responseText,
+                    reading: '',
+                    english_definition: [resultFromDictionaryLookup],
+                    image: cloudStoragePath,
+                    parts_of_speech: ''
+                };
+                try {
+                    await fetch(`https://tangoatsumare-api.herokuapp.com/api/flashcards`, { // put into .env
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(flashcard)
+                    });
+                    console.log('flashcard POSTed to the backend API');
+                    setCardIsSubmitted(true);
+                } catch (err) {
+                    console.log(err);
+                    setCardSubmissionError(true);
+                }
+            }
+        })();
+    }, [cloudStoragePath]);
 
     // read layout from the DOM and synchronously re-render
     React.useLayoutEffect(() => {
@@ -218,8 +214,9 @@ export const OCR = ({ route, navigation }) => {
                 <Text style={styles.lookupText}>{resultFromDictionaryLookup}</Text>
             </>
                 :
-            !cardIsSubmitted ? 
+            !cardIsSubmitted && !cardSubmissionError ? 
                 <Text>executing card submission</Text> : 
+                cardIsSubmitted && !cardSubmissionError ?
                 <View style={styles.submissionContainer}>
                     <Text>Submit successfully!</Text>
                     <Button
@@ -228,7 +225,23 @@ export const OCR = ({ route, navigation }) => {
                         textColor="green"
                     ></Button>
                     <Button 
-                        // icon="eye" 
+                        mode="outlined"
+                        textColor="black"
+                        style={styles.button}
+                            onPress={()=>{
+                                navigation.navigate("Home")
+                            }}
+                    >Return Home</Button>
+                </View> :
+                <View>
+                    <Text>Oh no.. something went wrong!</Text>
+                    <Text>Try again or contact the dev team 🙇 </Text>
+                    <Button
+                        icon="close-circle-outline" 
+                        labelStyle={{fontSize: 150}}
+                        textColor="red"
+                    ></Button>
+                    <Button 
                         mode="outlined"
                         textColor="black"
                         style={styles.button}
