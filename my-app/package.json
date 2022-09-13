@@ -19,6 +19,7 @@
     "@react-navigation/native-stack": "^6.8.0",
     "@react-navigation/stack": "^6.2.3",
     "axios": "^0.27.2",
+    "babel-plugin-dotenv-import": "^2.2.0",
     "color": "^3.1.2",
     "dotenv": "^16.0.2",
     "expo": "~46.0.9",

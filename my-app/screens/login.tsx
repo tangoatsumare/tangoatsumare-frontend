@@ -1,8 +1,8 @@
 import { useNavigation } from "@react-navigation/core";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
-import { getFirebaseAuth } from '../firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+//import { getFirebaseAuth } from '../firebase';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native'
@@ -11,7 +11,7 @@ import { Button } from "react-native-paper";
 export const Login = () => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
-  const auth = getFirebaseAuth();
+  const auth = getAuth();
 
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -19,7 +19,7 @@ export const Login = () => {
 
   const handleLogin = async () => {
     if (email === "" || password === "") {
-      setValidationMessage('Please fill email and password')
+      setValidationMessage('Please fill in your email and password')
       return;
     }
 
@@ -50,9 +50,7 @@ export const Login = () => {
         />
       </View>
       <Button icon="eye" mode="contained" style={styles.button}
-        onPress={() => {
-          navigation.navigate("Home")
-        }}>
+        onPress={handleLogin}>
         <Text>Login</Text>
       </Button>
       <Button icon="eye" mode="contained" style={styles.button}
