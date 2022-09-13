@@ -1,19 +1,13 @@
 // import { useNavigation} from "@react-navigation/core";
 import { Image, StyleSheet, Text, TextInput, View, ScrollView, TouchableOpacity } from 'react-native';
 import { Button } from 'react-native-paper';
-import imageSource from '../assets/ocr-test.jpeg';
-import cat from '../assets/wakeupcat.jpeg';
-// import SelectableText from 'react-native-selectable-text';
-// Imports the Google Cloud client library
-// import vision from '@google-cloud/vision';
 import React, { useState, useEffect } from 'react';
 import { sendImageToCloudVisionApi } from '../utils/flashcard';
 import { app } from '../firebase';
 import { 
     getStorage,
     ref, 
-    uploadBytesResumable, 
-    uploadString,
+    uploadBytesResumable,
     getDownloadURL
 } from 'firebase/storage';
 // https://www.npmjs.com/package/react-native-uuid
@@ -23,17 +17,23 @@ import {lookupJishoApi} from '../utils/jisho';
 import { async } from '@firebase/util';
 import axios from 'axios';
 
-export const OCR = ({ route, navigation }) => {
+interface OCRProps {
+    route: any;
+    navigation: any;
+}
+
+export const OCR = ({ route, navigation }: OCRProps) => {
     const storage = getStorage(app);
     const { image_uri, image_base64 } = route.params;
-    const [ image, setImage ] = useState(image_uri);
-    const [ cloudStoragePath, setCloudStoragePath ] = useState('');
-    const [ responseText, setResponseText ] = useState('');
-    const [ selectedText, setSelectedText ] = useState('');
-    const [ resultFromDictionaryLookup, setResultFromDictionaryLookup ] = useState('');
-    const [ sentenceEditMode, setSentenceEditMode ] = useState(false);
-    const [ cardSubmissionBtnIsClick, setCardSubmissionBtnIsClick ] = useState(false);
-    const [ cardIsSubmitted, setCardIsSubmitted ] = useState(false);
+    const [ image, setImage ] = useState<string>(image_uri);
+    const [ cloudStoragePath, setCloudStoragePath ] = useState<string>('');
+    const [ responseText, setResponseText ] = useState<string>('');
+    const [ selectedText, setSelectedText ] = useState<string>('');
+    const [ resultFromDictionaryLookup, setResultFromDictionaryLookup ] = useState<string>('');
+    const [ sentenceEditMode, setSentenceEditMode ] = useState<boolean>(false);
+    const [ cardSubmissionBtnIsClick, setCardSubmissionBtnIsClick ] = useState<boolean>(false);
+    const [ cardIsSubmitted, setCardIsSubmitted ] = useState<boolean>(false);
+    const [ cardSubmissionError, setCardSubmissionError ] = useState<boolean>(false);
 
     // send to cloud vision once components are mounted
     useEffect(() => {
@@ -47,10 +47,10 @@ export const OCR = ({ route, navigation }) => {
         })();
     }, []);
     
-    async function uploadImageAsync(uri) {
+    async function uploadImageAsync(uri: string): Promise<string> {
         // Why are we using XMLHttpRequest? See:
         // https://github.com/expo/expo/issues/2402#issuecomment-443726662
-        const blob = await new Promise((resolve, reject) => {
+        const blob: Blob = await new Promise((resolve, reject) => {
           const xhr = new XMLHttpRequest();
           xhr.onload = function () {
             resolve(xhr.response);
@@ -68,21 +68,23 @@ export const OCR = ({ route, navigation }) => {
         const result = await uploadBytesResumable(fileRef, blob);
       
         // We're done with the blob, close and release it
-        blob.close();
+        // blob.close();
       
         return await getDownloadURL(fileRef);
       }
 
-    const uploadToFirebaseCloudStorage = async () => {
-        try {
-            const uploadURL = await uploadImageAsync(image);
-            setCloudStoragePath(uploadURL);
-        } catch (err) {
-            console.log(err);
+    const uploadToFirebaseCloudStorage = async (): Promise<void> => {
+        if (image) {
+            try {
+                const uploadURL = await uploadImageAsync(image);
+                setCloudStoragePath(uploadURL);
+            } catch (err) {
+                console.log(err);
+            }
         }
     };
 
-    const handleSelectionChange = (e) => {
+    const handleSelectionChange = (e: any) => {
         if (responseText) {
             const start = e.nativeEvent.selection.start;
             const end = e.nativeEvent.selection.end;
@@ -93,16 +95,28 @@ export const OCR = ({ route, navigation }) => {
 
     useEffect(() => {
         async function fetchData () {
-            await receiveDictionaryInfo(selectedText);
+            await receiveDictionaryInfo();
         };
         if (selectedText !== '') fetchData(); 
         else setResultFromDictionaryLookup('');
     }, [selectedText]);
 
-    const receiveDictionaryInfo = async () => {
+    const receiveDictionaryInfo = async (): Promise<void> => {
         try {
             let result = await lookupJishoApi(selectedText);
             setResultFromDictionaryLookup(result[0].toString());
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
+    const submitFlashCard = async (): Promise<void> => {
+        try {
+            if (selectedText && responseText && resultFromDictionaryLookup) {
+                // await uploadToFirebaseCloudStorage();
+                console.log('ok')
+                setCardSubmissionBtnIsClick(true);
+            } else console.log('hmmm....');
         } catch (err) {
             console.log(err);
         }
@@ -119,7 +133,6 @@ export const OCR = ({ route, navigation }) => {
     useEffect(() => {
         (async () => {
             if (cloudStoragePath) { // if photo is successfully uploaded to firebase, execute the flashcard POST request
-                console.log(cloudStoragePath);
                 const flashcard = {
                     target_word: selectedText,
                     context: responseText,
@@ -128,39 +141,23 @@ export const OCR = ({ route, navigation }) => {
                     image: cloudStoragePath,
                     parts_of_speech: ''
                 };
-                
-                await fetch(`https://tangoatsumare-api.herokuapp.com/api/flashcards`, { // put into .env
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(flashcard)
-                }).then(res => {
+                try {
+                    await fetch(`https://tangoatsumare-api.herokuapp.com/api/flashcards`, { // put into .env
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(flashcard)
+                    });
                     console.log('flashcard POSTed to the backend API');
                     setCardIsSubmitted(true);
-                    // navigate user to his/her collection of cards
-                    // navigation.navigate("Home");
-
-                    // TODO: the home screen needs to refresh based on the updated flashcards in the server
-
-                }).catch(err => {
+                } catch (err) {
                     console.log(err);
-                });
+                    setCardSubmissionError(true);
+                }
             }
         })();
     }, [cloudStoragePath]);
-
-    const submitFlashCard = async () => {
-        try {
-            if (selectedText && responseText && resultFromDictionaryLookup) {
-                // await uploadToFirebaseCloudStorage();
-                console.log('ok')
-                setCardSubmissionBtnIsClick(true);
-            } else console.log('hmmm....');
-        } catch (err) {
-            console.log(err);
-        }
-    };
 
     // read layout from the DOM and synchronously re-render
     React.useLayoutEffect(() => {
@@ -183,7 +180,7 @@ export const OCR = ({ route, navigation }) => {
             { !cardSubmissionBtnIsClick ? 
             <>
                 <Image 
-                    source={{ uri: image }} 
+                    source={{ uri: image ? image : ""}} 
                     style={styles.image}
                     resizeMode="contain"
                 />
@@ -218,17 +215,34 @@ export const OCR = ({ route, navigation }) => {
                 <Text style={styles.lookupText}>{resultFromDictionaryLookup}</Text>
             </>
                 :
-            !cardIsSubmitted ? 
+            !cardIsSubmitted && !cardSubmissionError ? 
                 <Text>executing card submission</Text> : 
+                cardIsSubmitted && !cardSubmissionError ?
                 <View style={styles.submissionContainer}>
                     <Text>Submit successfully!</Text>
                     <Button
                         icon="check-circle-outline" 
                         labelStyle={{fontSize: 150}}
                         textColor="green"
-                    ></Button>
+                    >{null}</Button>
                     <Button 
-                        // icon="eye" 
+                        mode="outlined"
+                        textColor="black"
+                        style={styles.button}
+                            onPress={()=>{
+                                navigation.navigate("Home")
+                            }}
+                    >Return Home</Button>
+                </View> :
+                <View>
+                    <Text>Oh no.. something went wrong!</Text>
+                    <Text>Try again or contact the dev team 🙇 </Text>
+                    <Button
+                        icon="close-circle-outline" 
+                        labelStyle={{fontSize: 150}}
+                        textColor="red"
+                    >{null}</Button>
+                    <Button 
                         mode="outlined"
                         textColor="black"
                         style={styles.button}
