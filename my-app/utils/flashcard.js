@@ -1,4 +1,5 @@
-import { GOOGLE_CLOUD_VISION_API_KEY } from '@env';
+// import { GOOGLE_CLOUD_VISION_API_KEY } from '@env';
+import axios from 'axios';
 
 const sendImageToCloudVisionApi = async (image) => {
     try {
@@ -9,9 +10,10 @@ const sendImageToCloudVisionApi = async (image) => {
                         { type: 'DOCUMENT_TEXT_DETECTION', maxResults: 1}
                     ],
                     image: {
-                        source: {
-                            imageUri: image
-                        }
+                        // source: {
+                        //     imageUri: image
+                        // }
+                        content: image
                     }
                 }
             ]
@@ -19,7 +21,7 @@ const sendImageToCloudVisionApi = async (image) => {
 
         const response = await fetch(
             'https://vision.googleapis.com/v1/images:annotate?key=' +
-                GOOGLE_CLOUD_VISION_API_KEY,
+                process.env.GOOGLE_CLOUD_VISION_API_KEY,
             {
                 headers: {
                     Accept: 'application/json',
@@ -31,9 +33,12 @@ const sendImageToCloudVisionApi = async (image) => {
         );
         const responseJson = await response.json();
 
-        if (responseJson.responses[0].textAnnotations[0].description) {
-            // setResponseText(responseJson.responses[0].textAnnotations[0].description);
-            return responseJson.responses[0].textAnnotations[0].description;
+        if (responseJson) {
+            if (Object.keys(responseJson.responses[0]).length !== 0) {
+                return responseJson.responses[0].textAnnotations[0].description;
+            } else {
+                return "no word detected"
+            }
         }
     } catch (err) {
         console.log(err);

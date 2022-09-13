@@ -11,12 +11,9 @@ export const Settings = () => {
 
     return (
         <View style={styles.container}>
-            <Button icon="eye" mode="contained" style={styles.button}
-                    onPress={()=>{
-                        navigation.navigate("Home")
-                    }}>
-                <Text>To Home</Text>
-            </Button>
+      
+                <Text>Settings screen coming soon</Text>
+         
         </View>
     )
 }

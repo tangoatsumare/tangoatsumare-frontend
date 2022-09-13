@@ -1,24 +1,24 @@
-// import { useNavigation} from "@react-navigation/core";
-// import { StackNavigationProp} from '@react-navigation/stack';
-// import { ParamListBase } from '@react-navigation/native'
+import { useNavigation} from "@react-navigation/core";
+import { StackNavigationProp} from '@react-navigation/stack';
+import { ParamListBase } from '@react-navigation/native'
 
 import React, { useEffect, useState } from "react";
 import {View, Text, StyleSheet, FlatList, TouchableOpacity} from 'react-native'
-import { SegmentedButtons} from "react-native-paper";
-// import { Collection } from "../Components/collection";
+import { SegmentedButtons, Button} from "react-native-paper";
+import { Collection } from "../Components/collection";
 import { Feed } from "../Components/feed";
 
 export const Home = () => {
-    // const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
+    const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
     const [value, setValue] = React.useState('collection');
-    //
-    // const handleCollection: any = () => {
-    // if (value === 'collection'){
-    //     return <Collection/>
-    // } else {
-    //     return <Feed/>
-    // }
-    // }
+    
+    const handleCollection: any = () => {
+    if (value === 'collection'){
+        return <Collection/>
+    } else {
+        return <Feed/>
+    }
+    }
 
 
     return (
@@ -38,6 +38,7 @@ export const Home = () => {
                 ]}
                 style={styles.segment}
             />
+            <Collection />
         </View>
        
     )
@@ -48,11 +49,12 @@ const styles = StyleSheet.create({
             alignItems: 'center',
         },
         container: {
+            marginTop: 30,
             alignItems: 'center',
             justifyContent: 'center',
         },
         segment: {
-            
+            marginBottom: 5
         },
     }
 );

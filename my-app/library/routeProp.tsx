@@ -1,7 +1,12 @@
-import { IStackScreenProps} from "./stackScreenProps";
-import React from "react";
 
-export interface IRouteProp{
-    component: any;
-    name: string;
-}
+import { RouteProp } from '@react-navigation/native';
+
+export type StackParamsList = {
+    Card: {
+      id: string;
+    };
+};
+
+export type ScreenRouteProp = RouteProp<StackParamsList, 'Card'>;
+
+

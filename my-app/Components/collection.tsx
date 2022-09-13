@@ -1,89 +1,105 @@
-// import { useNavigation} from "@react-navigation/core";
-// import { StackNavigationProp} from '@react-navigation/stack';
-// import { ParamListBase } from '@react-navigation/native'
-//
-// import React, { useEffect, useState } from "react";
-// import {View, Text, StyleSheet, FlatList, TouchableOpacity} from 'react-native'
-// import axios from "axios";
-//
-// const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
-// const [flashcards, setFlashcards] = useState([])
-//
-// useEffect(() => {
-//   axios
-//     .get("https://tangoatsumare-api.herokuapp.com//api/flashcards")
-//     .then((response: any) => {
-//       const flashcards =
-//         response.data;
-//       setFlashcards(flashcards)
-//     });
-// }, []);
-//
-//     const handleShowFlashcard = (flashcardName: any) => {
-//   //navigate
-//   console.log(flashcardName)
-//
-//       }
-//
-// export const Collection = () => {
-//
-//
-//     const displayFlashcard = (flashcards: readonly any[] | null | undefined) => {
-//         return (
-//             <FlatList
-//           ItemSeparatorComponent={() => <View style={styles.separator} />}
-//           data={flashcards}
-//           keyExtractor={(flashcard, index) => index.toString()}
-//           renderItem={({item}) => {
-//             return (
-//               <View key={item.name}>
-//
-//               <TouchableOpacity
-//                   onPress={() => {
-//                     handleShowFlashcard(item.name)
-//                   }}
-//                   style={styles.recipeButton}
-//                 >
-//                 <Text>Target Word: {item.target_word}</Text>
-//                 <Text>Context: {item.context}</Text>
-//                 </TouchableOpacity>
-//                </View>
-//             );
-//           }
-//         }
-//         />
-//         );
-//       }
-//
-//   return (
-//     <View style={styles.container}>
-//       {displayFlashcard(flashcards)}
-//     </View>
-//   )
-// }
-//
-// const styles = StyleSheet.create({
-//         button: {
-//             alignItems: 'center',
-//         },
-//         container: {
-//             alignItems: 'center',
-//             justifyContent: 'center',
-//         },
-//         segment: {
-//
-//         },
-//           separator: {
-//             height: 1,
-//             backgroundColor: "grey"
-//           },
-//           recipeButton: {
-//             backgroundColor: '#white',
-//             width: '80%',
-//             padding: 5,
-//             borderRadius: 5,
-//             alignItems: 'center',
-//             marginTop: 5,
-//           }
-//     }
-// );
+import { useNavigation} from "@react-navigation/core";
+import { StackNavigationProp} from '@react-navigation/stack';
+import { useIsFocused } from "@react-navigation/native";
+import { StackParamsList } from "../library/routeProp";
+import {Button, Card, Paragraph, Title} from "react-native-paper";
+
+import React, { useEffect, useState } from "react";
+import {View, Text, StyleSheet, FlatList, TouchableOpacity} from 'react-native'
+import axios from "axios";
+
+
+export const Collection = () => {
+
+  const navigation = useNavigation<StackNavigationProp<StackParamsList>>();
+  const [flashcards, setFlashcards] = useState([]);
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    // why using "isFocused"
+    // https://stackoverflow.com/questions/60182942/useeffect-not-called-in-react-native-when-back-to-screen
+    if (isFocused) {
+      axios
+        .get("https://tangoatsumare-api.herokuapp.com/api/flashcards")
+        .then((response: any) => {
+          const flashcards =
+            response.data;
+          setFlashcards(flashcards)
+        });
+    }
+  }, [isFocused]);
+
+  const handleShowFlashcard = (flashcardID: string) => {
+    navigation.navigate("Card", {id: flashcardID})
+    console.log(flashcardID)
+  }
+
+  const displayFlashcard = (flashcards: readonly any[] | null | undefined) => {
+      return (
+          <FlatList
+            inverted
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
+            data={flashcards}
+            keyExtractor={(flashcard, index) => index.toString()}
+            renderItem={({item}) => {
+              return (
+                <TouchableOpacity onPress={() => {
+                  handleShowFlashcard(item._id)
+                }}
+          >
+            <Card key={item.target_word} style={styles.card}>
+                  <Card.Content>
+                  <Card.Cover   source={{uri: item.image ? item.image : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}} />
+                  <Title style={styles.textVocab}>{item.target_word}</Title>
+                  <Paragraph style={styles.text}>Sentence: {item.context}</Paragraph>
+                  </Card.Content>
+                  <Card.Actions>
+            
+              </Card.Actions>
+              </Card>
+            </TouchableOpacity>
+          );
+        }
+      }
+      />
+      );
+    }
+
+  return (
+    <View style={styles.container}>
+      {displayFlashcard(flashcards)}
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+        button: {
+            alignItems: 'center',
+        },
+        container: {
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        segment: {
+
+        },
+          separator: {
+            height: 0,
+            backgroundColor: "grey"
+          },
+          text: {
+            textAlign: 'center',
+          },
+          textVocab: {
+            textAlign: 'center',
+            fontWeight: "bold"
+          },
+          card: {
+            borderRadius: 10,
+            margin: 10,
+            marginTop: 2, 
+
+          },
+         
+    }
+);
