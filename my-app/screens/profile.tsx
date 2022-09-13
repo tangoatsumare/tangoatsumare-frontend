@@ -5,7 +5,7 @@ import { ParamListBase } from '@react-navigation/native'
 import React, { useState, useEffect } from "react";
 import {View, Text, StyleSheet, ScrollView, FlatList, TouchableOpacity} from 'react-native'
 import {Button, Divider, Avatar, Title, Card,} from "react-native-paper";
-import CountryFlag from "react-native-country-flag";
+// import CountryFlag from "react-native-country-flag";
 import axios from 'axios';
 import { Item } from "react-native-paper/lib/typescript/components/List/List";
 
@@ -13,6 +13,15 @@ export const Profile = () => {
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
     const [flashcards, setFlashcards] = useState([]);
+    const [topTwo, setTopTwo] = useState([]);
+
+    const tempUser = {
+        userImage: "",
+        userName: "Abraham Lincoln",
+        userHandle: "Baberaham",
+        userCountry: "us",
+        userLearning: "jp",
+    }
 
     useEffect(() => {
         axios
@@ -21,17 +30,19 @@ export const Profile = () => {
             const flashcards =
               response.data;
             setFlashcards(flashcards)
+            const temp = [flashcards[flashcards.length-1], flashcards[flashcards.length-2]];
+            setTopTwo(temp); //typescript?
           });
     }, []);
 
     const displayCard = () => {
-        const topTwo = [flashcards[flashcards.length-1], flashcards[flashcards.length-2]];
-        
+
         return (
             <FlatList
             nestedScrollEnabled
-            columnWrapperStyle={{justifyContent: 'space-evenly'}}
-            numColumns={2}
+            // columnWrapperStyle={{justifyContent: 'space-evenly'}}
+            // numColumns={2}
+            horizontal={true}
                 data={topTwo}
                 renderItem={({item}) => {
                     return (
@@ -58,10 +69,11 @@ export const Profile = () => {
                 <View style={styles.profileBox}>
                     {/* <Text> profile area </Text> */}
                     <View style={styles.profileInfo}>
-                        <Text style={styles.text}>Abraham Lincoln <CountryFlag isoCode="us" size={22}/></Text>
-                        <Text style={styles.text}>@BaberahamLincoln</Text>
+                        <Text style={styles.text}>{tempUser.userName}</Text>
+                        {/* <Text style={styles.text}>Abraham Lincoln <CountryFlag isoCode="us" size={22}/></Text> */}
+                        <Text style={styles.text}>@{tempUser.userHandle}</Text>
                         <Text style={styles.text}>Currently learning: </Text>
-                        <CountryFlag isoCode="jp" size={22} />
+                        {/* <CountryFlag isoCode="jp" size={22} /> */}
                     </View>
 
                     <View style={styles.avatarBox}>
@@ -91,7 +103,7 @@ export const Profile = () => {
                 {/* Favorites? */}
                 <Title style={styles.sectionTitle}>Recent Favorites</Title>
                 <View style={{marginBottom: 25}}>
-                    <View>
+                    <View style={styles.cardBox}>
                         {displayCard()}
                     </View>
                     <Button onPress={() => {
@@ -141,9 +153,11 @@ const styles = StyleSheet.create({
             // marginLeft: 20,
         },
         cardBox: {
-            flexDirection: 'row',
+            // display: 'flex',
+            // flexDirection: 'row',
             // flexWrap: 'wrap',
-            justifyContent: 'space-evenly',
+            // justifyContent: 'space-evenly',
+            padding: 10,
             // backgroundColor: 'red',
             
         },
