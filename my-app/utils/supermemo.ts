@@ -82,15 +82,17 @@ const dayjs = require('dayjs');
   export type SuperMemoGrade = 0 | 1 | 2 | 3 | 4 | 5;
 
   export interface SRSTangoFlashcard extends TangoFlashcard, SuperMemoItem {
+    counter: number;
     dueDate: string;
   }
 
   export const initializeSRSFlashcard = (flashcard: TangoFlashcard): SRSTangoFlashcard => {
+    const counter = 0;
     const interval = 0;
     const repetition = 0;
     const efactor = 2.5;
     const dueDate = dayjs(Date.now()).toISOString();
-    return { ...flashcard, interval, repetition, efactor, dueDate };
+    return { ...flashcard, counter, interval, repetition, efactor, dueDate };
   };
 
   export const initializeSRSFlashcards = (flashcards: TangoFlashcard[]): SRSTangoFlashcard[] => {
@@ -126,7 +128,14 @@ const dayjs = require('dayjs');
   export const practiseFlashcard = (flashcard: SRSTangoFlashcard, grade: SuperMemoGrade): SRSTangoFlashcard => {
     const { interval, repetition, efactor } = supermemo(flashcard, grade); // call the review session & gets the new properties
     const dueDate = dayjs(Date.now()).add(interval, 'day').toISOString(); 
-    return { ...flashcard, interval, repetition, efactor, dueDate };
+    return { 
+      ...flashcard, 
+      counter: flashcard.counter + 1,
+      interval, 
+      repetition,
+      efactor,
+      dueDate 
+    };
   };
 
   export const setFlashcardAsGood = (flashcard: SRSTangoFlashcard): SRSTangoFlashcard => {

@@ -38,11 +38,14 @@ export const SRS = () => {
             axios
             .get("https://tangoatsumare-api.herokuapp.com/api/flashcards")
             .then((response: any) => {
-              const flashcards = response.data.slice(0, 3); // TO CHANGE
+              const flashcards = response.data.slice(0, 10); // TO CHANGE
               // TO CHANGE
               // Right now, assume the cards for initialize here.
               // But instead, they gotta be initialized beforehand. 
               // because each represents the state of SRS review progress for each card
+
+              // So, it is more appropriate to implement getReviewableSRSFlashcards here
+              // once the backend is working
               setFlashcardsForReview(initializeSRSFlashcards(flashcards));
             });
         }
@@ -50,27 +53,34 @@ export const SRS = () => {
 
     useEffect(() => {
         if (flashcardsForReview) {
-            // console.log(flashcardsForReview);
-            // setFlashcardsForReview((prev) => initializeSRSFlashcards(prev));
+            const newCards = flashcardsForReview.filter(card => card.counter === 0).length;
+            const failedCards = flashcardsForReview.filter(card => card.counter !== 0 && card.repetition === 0).length;
+            const reviewCards = flashcardsForReview.filter(card => card.counter !== 0 && card.repetition !== 0).length;
+            setMetrics({
+                new: newCards,
+                failed: failedCards,
+                review: reviewCards
+            })
         }
     }, [flashcardsForReview]);
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
-            <Text>How to classify?</Text>
+            {/* <Text>How to classify?</Text> */}
             <Text>new: {metrics.new}</Text>
             <Text>failed: {metrics.failed}</Text>
             <Text>review: {metrics.review}</Text>
-            <Text>Show the flashcards here</Text>
+            {/* <Text>Show the flashcards here</Text> */}
             {/* <Text>SRS Flashcard feature coming soon</Text> */}
             {flashcardsForReview? 
                 flashcardsForReview.map(flashcard => {
                     return (
                         <View 
-                            key={flashcard["_id"]}
+                            key={flashcard._id}
                             style={styles.flashcard}
                         >
                             <Text>Target word: {flashcard.target_word}</Text>
+                            <Text>Review counter: {flashcard.counter}</Text>
                             <Text>Interval: {flashcard.interval}</Text>
                             <Text>Repetition: {flashcard.repetition}</Text>
                             <Text>E-Factor: {flashcard.efactor.toFixed(2)}</Text>
