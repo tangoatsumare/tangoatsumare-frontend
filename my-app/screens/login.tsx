@@ -25,6 +25,7 @@ export const Login = () => {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      navigation.navigate('Home');
     } catch(error: any) {
       setValidationMessage(error.message);
     }
