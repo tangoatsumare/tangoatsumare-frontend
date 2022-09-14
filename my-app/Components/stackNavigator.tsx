@@ -7,6 +7,7 @@ import {Register} from "../screens/register";
 import {SRS} from "../screens/srs";
 import {Camera} from "../screens/camera";
 import { OCR } from "../screens/OCR";
+import { Review } from "../screens/review";
 import React from 'react';
 import {createMaterialBottomTabNavigator} from "@react-navigation/material-bottom-tabs";
 import { Collection } from "./collection";

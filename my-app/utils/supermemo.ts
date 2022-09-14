@@ -1,23 +1,23 @@
 const { supermemo } = require('supermemo'); // consider typescript later
 const dayjs = require('dayjs');
 
-let item: SuperMemoItem = {
-    interval: 0,
-    repetition: 0,
-    efactor: 2.5,
-  };
-  console.log(item);
+// let item: SuperMemoItem = {
+//     interval: 0,
+//     repetition: 0,
+//     efactor: 2.5,
+//   };
+//   console.log(item);
   
   // each one of this function call is equivalent to a flashcard revision session
   // the grade ranges from 0 to 5, 5 being the best
-  item = supermemo(item, 3); // item, grade
-  console.log(item);
+  // item = supermemo(item, 3); // item, grade
+  // console.log(item);
   
-  item = supermemo(item, 3); // 3 - 5 . 1st interval= 1day, 2nd=6day, 3rd -> 
-  console.log(item);
+  // item = supermemo(item, 3); // 3 - 5 . 1st interval= 1day, 2nd=6day, 3rd -> 
+  // console.log(item);
 
-  item = supermemo(item, 2); 
-  console.log(item);
+  // item = supermemo(item, 2); 
+  // console.log(item);
 
   // 4: OK, 1: AGAIN
 
@@ -73,15 +73,15 @@ let item: SuperMemoItem = {
     partsOfSpeech: string,
   }
 
-  interface SuperMemoItem {
+  export interface SuperMemoItem {
     interval: number;
     repetition: number;
     efactor: number;
   };
   
-  type SuperMemoGrade = 0 | 1 | 2 | 3 | 4 | 5;
+  export type SuperMemoGrade = 0 | 1 | 2 | 3 | 4 | 5;
 
-  interface SRSTangoFlashcard extends TangoFlashcard, SuperMemoItem {
+  export interface SRSTangoFlashcard extends TangoFlashcard, SuperMemoItem {
     dueDate: string;
   }
 
@@ -93,7 +93,7 @@ let item: SuperMemoItem = {
     return { ...flashcard, interval, repetition, efactor, dueDate };
   };
 
-  const initializeSRSFlashcards = (flashcards: TangoFlashcard[]): SRSTangoFlashcard[] => {
+  export const initializeSRSFlashcards = (flashcards: TangoFlashcard[]): SRSTangoFlashcard[] => {
     const result = [];
     for (let flashcard of flashcards) {
       result.push(initializeSRSFlashcard(flashcard));
@@ -101,21 +101,44 @@ let item: SuperMemoItem = {
     return result;
   };
 
-  const validateSRSFlashcards = (flashcards: SRSTangoFlashcard[]): SRSTangoFlashcard[] => {
+  export const validateFlashcard = (flashcard: SRSTangoFlashcard): boolean => {
     // variable for comparing which card is valid for the review deck for today.
     const currentDate = dayjs(Date.now());
-    
-    // if the current date is larger than the due date of a card, push that card into the review deck
-    const reviewDeck = []; // this will be the starting state for the Review Page
+    // const currentDate = dayjs('2022-09-14 00:00');
+    const { dueDate } = flashcard;
+    // console.log(dayjs(dueDate).diff(currentDate));
+    const diff = dayjs(dueDate).diff(currentDate);
+    // if dueDate - currentDate is negative
+    // that means the card is due and can be reviewed
+    return diff < 0 ? true : false;
+  };
 
-    return flashcards;
+  export const getReviewableSRSFlashcards = (flashcards: SRSTangoFlashcard[]): SRSTangoFlashcard[] => {
+    const reviewDeck = []; // this will be the starting state for the Review Page
+    for (const flashcard of flashcards) {
+      if (validateFlashcard(flashcard)) {
+        reviewDeck.push(flashcard);
+      }
+    }
+    return reviewDeck;
   }
 
-  const practiseFlashcard = (flashcard: SRSTangoFlashcard, grade: SuperMemoGrade): SRSTangoFlashcard => {
+  export const practiseFlashcard = (flashcard: SRSTangoFlashcard, grade: SuperMemoGrade): SRSTangoFlashcard => {
     const { interval, repetition, efactor } = supermemo(flashcard, grade); // call the review session & gets the new properties
     const dueDate = dayjs(Date.now()).add(interval, 'day').toISOString(); 
     return { ...flashcard, interval, repetition, efactor, dueDate };
   };
+
+  export const setFlashcardAsGood = (flashcard: SRSTangoFlashcard): SRSTangoFlashcard => {
+    const GOOD: SuperMemoGrade = 5;
+    return practiseFlashcard(flashcard, GOOD);
+  };
+
+  export const setFlashcardAsAgain = (flashcard: SRSTangoFlashcard): SRSTangoFlashcard => {
+    const AGAIN: SuperMemoGrade = 1;
+    return practiseFlashcard(flashcard, AGAIN);
+  };
+
 
   const tangoFlashcardFactory = (targetWord: string, 
       context: string, reading: string, englishDefinition: [], image: string, partsOfSpeech: string
@@ -137,11 +160,23 @@ let item: SuperMemoItem = {
 
   // first, we need to initialize the flashcards so that they are SRS compatible
   const SRSTangos = initializeSRSFlashcards(tangos);
-  console.log(SRSTangos);
+  // console.log(SRSTangos);
 
   // then, we need to determine the flashcards that are valid for review
-  const SRSTangosForReview = validateSRSFlashcards(SRSTangos);
+  const SRSTangosForReview = getReviewableSRSFlashcards(SRSTangos);
   console.log(SRSTangosForReview);
 
   // const validatedTangos = validateFlashcards(tangos);
   // console.log(validatedTangos);
+
+  // const batchReview = () => {
+  //   for (let i = 0; i < SRSTangosForReview.length; i++) {
+  //     SRSTangosForReview[i] = practiseFlashcard(SRSTangosForReview[i], 4);
+  //     // SRSTangosForReview[i] = practiseFlashcard(SRSTangosForReview[i], 1);
+  //   }
+  // };
+  // batchReview();
+  // console.log(SRSTangosForReview);
+
+  // const validity = validateFlashcard(SRSTangosForReview[0]);
+  // console.log(validity);
