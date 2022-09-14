@@ -20,19 +20,29 @@ export const Register = () => {
 
   const checkPassword = (firstPassword: string, secoundPassword: string) => {
     if (firstPassword !== secoundPassword){
-      setValidationMessage('Password do not match') 
+      setValidationMessage('Password do not match.') 
     }
     else setValidationMessage('')
   }
 
   const createUserAccount = async () => {
     if (email ==='' || password ===''){
-      setValidationMessage('Please fill in your email and password') 
+      setValidationMessage('Please fill in your email and password.') 
     }
-    try { await createUserWithEmailAndPassword(auth, email, password);
+    try { await createUserWithEmailAndPassword(auth, email, password)
+        .then(result => {
+          console.log(result);
           navigation.navigate('Home');
+        })
     } catch(error: any) {
-      setValidationMessage(error.message);
+      console.log(error);
+      if (error.code.include('auth/weak-password')) {
+        setValidationMessage('Please enter a strong password.')
+      } else if (error.code.include('auth/email-already-in-use')) {
+        setValidationMessage('Email already in use.');
+      } else {
+        setValidationMessage('Unable to register. Please try again later.');
+      }
     }
   }
 
@@ -69,6 +79,13 @@ export const Register = () => {
       <Button icon="eye" mode="contained" style={styles.button}
         onPress={createUserAccount}>
         <Text>Register</Text>
+      </Button>
+      <Text>Already have an account?</Text>
+      <Button mode="contained" style={styles.button}
+        onPress={() => {
+          navigation.navigate("Login")
+        }}>
+        <Text>Login</Text>
       </Button>
     </View>
   )
