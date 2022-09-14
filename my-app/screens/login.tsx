@@ -26,19 +26,22 @@ export const Login = () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       navigation.navigate('Home');
-    } catch(error: any) {
+    } catch (error: any) {
       setValidationMessage(error.message);
     }
   }
 
   return (
     <View style={styles.container}>
+      <View>
+        <Text>Hello user! Welcome back!</Text>
+      </View>
       <View style={styles.wrapperInput}>
         <TextInput
           style={styles.input}
           placeholder="Email"
           value={email}
-          onChangeText={(text: string) => setEmail(text)} 
+          onChangeText={(text: string) => setEmail(text)}
         />
       </View>
       <View style={styles.wrapperInput}>
@@ -50,16 +53,20 @@ export const Login = () => {
           secureTextEntry={true}
         />
       </View>
-      <Button icon="eye" mode="contained" style={styles.button}
-        onPress={handleLogin}>
-        <Text>Login</Text>
-      </Button>
-      <Button icon="eye" mode="contained" style={styles.button}
-        onPress={() => {
-          navigation.navigate("Register")
-        }}>
-        <Text>Register</Text>
-      </Button>
+      <View>
+        <Button icon="eye" mode="contained" style={styles.button}
+          onPress={handleLogin}>
+          <Text>Login</Text>
+        </Button>
+      </View>
+      <View>
+        <Button icon="eye" mode="contained" style={styles.button}
+          onPress={() => {
+            navigation.navigate("Register")
+          }}>
+          <Text>Register</Text>
+        </Button>
+      </View>
     </View>
   )
 }
