@@ -8,26 +8,63 @@ import { Button, Card, Paragraph, Text, Title } from "react-native-paper";
 import { rgb } from "color";
 import axios from "axios";
 
+import { 
+  setFlashcardAsGood,
+  setFlashcardAsAgain,
+} from "../utils/supermemo";
 
-export const Back = () => {
+export const Back = ({route}) => {
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
     const [flashcards, setFlashcards] = useState([]);
     const [flashcard, setFlashcard] = useState({})
     const [engDef, setEngDef] = useState('')
 
-    useEffect(() => {
-        axios
-          .get("https://tangoatsumare-api.herokuapp.com/api/flashcards")
-          .then((response: any) => {
-            const flashcards =
-              response.data;
-            setFlashcards(flashcards)
-            const temp = flashcards[flashcards.length - 1];
-            setFlashcard(temp); //typescript?
-            setEngDef(temp.english_definition[0])
+    let { flashcardsAll, index } = route.params;
+    
+    // useEffect(() => {
+    //   console.log(flashcardsAll);
+    // }, []);
 
-          });
-    }, []);
+    useEffect(() => {
+      if (flashcardsAll) {
+        setFlashcard(flashcardsAll[index]);
+        setEngDef(flashcardsAll[index].english_definition[0])
+      }
+    }, [flashcardsAll]);
+
+    const updateFlashCardsAllWithGood = () => {
+      const result = [...flashcardsAll];
+      for (let i = 0; i < result.length; i++) {
+          if (result[i]._id === flashcard._id) {
+              result[i] = setFlashcardAsGood(result[i]);
+          }
+      }
+      return result;
+    }
+
+    const updateFlashCardsAllWithAgain = () => {
+      const result = [...flashcardsAll];
+      for (let i = 0; i < result.length; i++) {
+          if (result[i]._id === flashcard._id) {
+              result[i] = setFlashcardAsAgain(result[i]);
+          }
+      }
+      return result;
+    }
+    
+    // useEffect(() => {
+    //     axios
+    //       .get("https://tangoatsumare-api.herokuapp.com/api/flashcards")
+    //       .then((response: any) => {
+    //         const flashcards =
+    //           response.data;
+    //         setFlashcards(flashcards)
+    //         const temp = flashcards[flashcards.length - 1];
+    //         setFlashcard(temp); //typescript?
+    //         setEngDef(temp.english_definition[0])
+
+    //       });
+    // }, []);
 
     const displayCard = (card: any) => {
         return (
@@ -47,25 +84,65 @@ export const Back = () => {
     return (
         <View style={styles.container}>
          {displayCard(flashcard)}
-            
-            <Button mode="contained" style={styles.againButton}
-                    onPress={()=>{
-                        navigation.navigate("Front")
-                    }}>
+            <View style={styles.buttonGroup}>
+              <Button 
+                mode="contained" 
+                style={styles.againButton}
+                buttonColor="green"
+                onPress={()=>{
+                    // fire the update flashcardsAll function
+                    flashcardsAll = updateFlashCardsAllWithGood()
+
+                    // if current index is the last item of the array
+                    // navigate back to the SRS screen
+                    if (index === flashcardsAll.length - 1) {
+                      console.log('the end');
+                      navigation.navigate("SRS", {
+                        flashcardsAllModified: flashcardsAll
+                      });
+                    } else {
+                      navigation.push("Front", {
+                        flashcardsAll,
+                        index: index + 1 // increment by 1 (populate the next flashcard in the array)
+                      })
+                    }
+                }}
+              >
                 <Text>Good</Text>
-                </Button>
-                <Button mode="contained" style={styles.againButton}
-                    onPress={()=>{
-                        navigation.navigate("Front")
-                    }}>
+              </Button>
+              <Button 
+                mode="contained" 
+                style={styles.againButton}
+                onPress={()=>{
+                    flashcardsAll = updateFlashCardsAllWithAgain()
+
+                    if (index === flashcardsAll.length - 1) {
+                      console.log('the end');
+                      navigation.navigate("SRS", {
+                        flashcardsAllModified: flashcardsAll
+                      });
+                    } else {
+                      navigation.push("Front", {
+                        flashcardsAll,
+                        index: index + 1
+                      })
+                    }
+                }}
+              >
                 <Text>Again</Text>
-            </Button>
+              </Button>
+            </View>
           
         </View>
     )
 }
 
 const styles = StyleSheet.create({
+        buttonGroup: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-around'
+        },
         button: {
             alignItems: 'center',
                   },

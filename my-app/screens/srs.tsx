@@ -11,28 +11,17 @@ import utc from 'dayjs/plugin/utc';
 import tz from 'dayjs/plugin/timezone';
 
 import { 
-    TangoFlashcard,
-    SuperMemoItem,
-    SuperMemoGrade,
     SRSTangoFlashcard,
-    initializeSRSFlashcard,
     initializeSRSFlashcards,
-    validateFlashcard,
     getReviewableSRSFlashcards,
-    practiseFlashcard,
     setFlashcardAsGood,
     setFlashcardAsAgain,
     SRSProperties
  } from "../utils/supermemo";
 
-let newCards = 10;
-let failed = 1;
-let review = 69;
-
-export const SRS = () => {
+export const SRS = ({route}) => {
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
-    // not for rendering neccessarily. for prop drilling onto the review screens
-
+    
     // all the SRS flashcards
     const [ flashcardsAll, setFlashcardsAll ] = useState<SRSTangoFlashcard[]>([]); 
     // a rolling state for reviewable flashcards
@@ -48,11 +37,11 @@ export const SRS = () => {
     const [ modalVisible, setModalVisible ] = useState(false);
 
     useEffect(() => {
-        if (isFocused) {
+        if (isFocused && !route.params?.flashcardsAllModified) {
             axios
             .get("https://tangoatsumare-api.herokuapp.com/api/flashcards")
             .then((response: any) => {
-              const flashcards = response.data.slice(0, 2); // TO CHANGE
+              const flashcards = response.data.slice(0, 3); // TO CHANGE
               // TO CHANGE
               // Right now, assume the cards for initialize here.
               // But instead, they gotta be initialized beforehand. 
@@ -62,15 +51,12 @@ export const SRS = () => {
               // once the backend is working
               setFlashcardsAll(initializeSRSFlashcards(flashcards));
             });
+        } else if (isFocused && route.params?.flashcardsAllModified) {
+            console.log(route.params.flashcardsAllModified);
+            setFlashcardsAll(route.params.flashcardsAllModified); // update the UI with the modified flashcard data
+            // TODO: do a PATCH request to the backend API user-to-flashcards table to update the flashcard scheduling data
         }
-    },[isFocused]);
-
-    useEffect(() => {
-        dayjs.extend(utc);
-        dayjs.extend(tz);
-        const now = dayjs();
-
-    }, []);
+    },[isFocused, route.params?.flashcardsAllModified]);
 
     useEffect(() => {
         if (flashcardsAll) {
@@ -93,19 +79,20 @@ export const SRS = () => {
         }
     }, [flashcardsAll]);
 
+
     // https://callstack.github.io/react-native-paper/modal.html
     const showModal = () => setModalVisible(true);
     const hideModal = () => setModalVisible(false);
-
 
     const [ textForGOOD, setTextForGOOD ] = useState(SRSProperties.getGradeForGood().toString());
     const [ textForAGAIN, setTextForAGAIN ] = useState(SRSProperties.getGradeForAgain().toString());
     const [ textForFirstInterval, setTextForFirstInterval ] = useState(SRSProperties.getFirstInterval().toString());
     const [ textForSecondInterval, setTextForSecondInterval ] = useState(SRSProperties.getSecondInterval().toString());
 
+    const [ testing, setTesting ] = useState<string>('Hello World!');
+
     return (
         <ScrollView contentContainerStyle={styles.container}>
-            {/* <Text>SRS Flashcard feature coming soon</Text> */}
             <Portal>
                 <Modal
                     visible={modalVisible}
@@ -148,13 +135,29 @@ export const SRS = () => {
                     }}>Update</Button>
                 </Modal>
             </Portal>
+            {/* <Text>SRS Flashcard feature coming soon</Text> */}
             <Button onPress={showModal}>Setting</Button>
-            <Text>NEW: {metrics.new}</Text>
-            <Text>LEARNING: {metrics.learning} (coming soon)</Text>
-            <Text>DUE: {metrics.due}</Text>
+            <View style={styles.container}>
+                <Text>New Cards: {metrics.new} </Text>
+                <Text>Learning: {metrics.learning} (coming soon)</Text>
+                <Text>Due: {metrics.due} </Text>
+                <Button 
+                    mode="contained" 
+                    style={styles.button}
+                    disabled={flashcardsReviewable.length === 0 ? true: false}
+                    onPress={()=>{
+                        // testing the passing of props
+                        navigation.navigate("Front", {
+                            flashcardsAll,
+                            index: 0 // starts off at index 0
+                        });
+                    }}>
+                    <Text>Study</Text>
+                </Button>
+            </View>
             <Text>Reviewable cards (new+learning+due) ({flashcardsReviewable ? flashcardsReviewable.length : 0})</Text>
             {/* <Text>use the due date to determine this</Text> */}
-            {flashcardsReviewable? 
+            {/* {flashcardsReviewable? 
                 flashcardsReviewable.map(flashcard => {
                     return (
                         <View
@@ -166,10 +169,10 @@ export const SRS = () => {
                     );
                 })
                 : null
-            }            
+            }             */}
 
             <Text>All the Cards ({flashcardsAll ? flashcardsAll.length : 0})</Text>
-            {flashcardsAll? 
+            {/* {flashcardsAll? 
                 flashcardsAll.map(flashcard => {
                     return (
                         <View 
@@ -209,18 +212,7 @@ export const SRS = () => {
                         </View>
                     )
                 }) : null
-            }
-        <View style={styles.container}>
-                <Text>New Cards: {newCards} </Text>
-                <Text>Reviewing: {failed} </Text>
-                <Text>Due Today: {review} </Text>
-                <Button mode="contained" style={styles.button}
-                    onPress={()=>{
-                        navigation.navigate("Front")
-                    }}>
-                <Text>Study</Text>
-            </Button>
-        </View>
+            } */}
         </ScrollView>
     )
 }
@@ -248,7 +240,6 @@ const styles = StyleSheet.create({
             backgroundColor: 'white',
             padding: 20,
             margin: 20
-
         }
     }
 );
