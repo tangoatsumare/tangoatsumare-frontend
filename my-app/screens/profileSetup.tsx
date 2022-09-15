@@ -5,28 +5,41 @@ import { ParamListBase } from '@react-navigation/native'
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image } from 'react-native'
 import { Button } from "react-native-paper";
 import * as ImagePicker from 'expo-image-picker';
 
-export const profileSetup = () => {
+export const ProfileSetup = () => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
   const auth = getAuth();
 
-  const [firstName, setFirstName] = useState<string>('');
-  const [lastName, setLastName] = useState<string>('');
+  // change to full name✅
+  // target language (currently learning?) ✅
+  // target UI language
+  // about me section ✅
+  
+  // const [firstName, setFirstName] = useState<string>('');
+  // const [lastName, setLastName] = useState<string>('');
+  const [fullName, setFullName] = useState<string>('');
+
   const [username, setUsername] = useState<string>('');
   const [profilePic, setProfilePic] = useState<string>('');
   const [base64, setBase64] = useState<string>('');
   const [homeCountry, setHomeCountry] = useState<string>('');
   const [currentlyLearning, setCurrentlyLearning] = useState<string>('');
+  const [aboutMe, setAboutMe] = useState<string>('');
   const [validationMessage, setValidationMessage] = useState<string>('');
 
   const usernameAvailibility = () => {
     // check db for username availability
     // if available, green check mark next to input box
     // else, red x mark next to input box 
+  }
+
+  const submitProfileInfo = () => {
+    // submits all user info into db
+    console.log("submit pushed");
   }
 
   const selectProfilePic = async () => {
@@ -39,7 +52,7 @@ export const profileSetup = () => {
     });
     if (!result.cancelled) {
         setProfilePic(result.uri);
-        setBase64(result.base64); // typescript?
+        // setBase64(result.base64); // typescript?
     }
   }
 
@@ -63,7 +76,65 @@ export const profileSetup = () => {
 
   return (
     <View style={styles.container}>
-
+      <View style={{alignItems: 'center', justifyContent: 'center' }}>
+        {profilePic && <Image source={{ uri: profilePic }} style={ styles.avatar } resizeMode="contain"/>}
+          <Button onPress={selectProfilePic} style={{marginBottom: 25}}>
+            <Text>Select An Image</Text>
+          </Button>
+      </View>
+      <View style={styles.wrapperInput}>
+        <TextInput
+        style={styles.input}
+        placeholder="Full Name"
+        value={fullName}
+        onChangeText={(text: string) => setFullName(text)} 
+        />
+      </View>
+      {/* <View style={styles.wrapperInput}>
+        <TextInput
+        style={styles.input}
+        placeholder="Last Name"
+        value={lastName}
+        onChangeText={(text: string) => setLastName(text)} 
+        />
+      </View> */}
+      <View style={styles.wrapperInput}>
+        <TextInput
+        style={styles.input}
+        placeholder="Username"
+        value={username}
+        onChangeText={(text: string) => setUsername(text)} 
+        />
+      </View>
+      <View style={styles.wrapperInput}>
+        <TextInput
+        style={styles.input}
+        placeholder="Home Country"
+        value={homeCountry}
+        onChangeText={(text: string) => setHomeCountry(text)} 
+        />
+      </View>
+      <View style={styles.wrapperInput}>
+        <TextInput
+        style={styles.input}
+        placeholder="Currently learning"
+        value={currentlyLearning}
+        onChangeText={(text: string) => setCurrentlyLearning(text)} 
+        />
+      </View>
+      <View style={styles.wrapperInput}>
+        <TextInput
+        style={styles.input}
+        placeholder="About Me"
+        value={aboutMe}
+        onChangeText={(text: string) => setAboutMe(text)} 
+        />
+      </View>
+      <View style={{alignItems: 'center', justifyContent: 'center' }}>
+          <Button mode="contained" onPress={submitProfileInfo} style={{marginTop: 25}}>
+            <Text>Submit</Text>
+          </Button>
+      </View>
     </View>
   )
 }
@@ -87,7 +158,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    marginTop: 70,
+    // justifyContent: 'center',
+  },
+  avatar: {
+    width: 200,
+    height: 200,
+    borderRadius: 150,
+    borderWidth: 0.25,
+    marginBottom: 20
   }
 }
 );
