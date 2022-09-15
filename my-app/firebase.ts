@@ -9,7 +9,6 @@ const firebaseConfig = {
     messagingSenderId: Constants.manifest?.extra?.firebaseMessagingSenderId,
     appId: Constants.manifest?.extra?.firebaseAppId,
 };
-console.log(firebaseConfig);
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 

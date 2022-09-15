@@ -3,7 +3,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TextInput } from 'react-native'
+import { View, Text, StyleSheet, TextInput, ViewComponent } from 'react-native'
 import { Button } from "react-native-paper";
 
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
@@ -19,32 +19,47 @@ export const Register = () => {
   const [validationMessage, setValidationMessage] = useState<string>('');
 
   const checkPassword = (firstPassword: string, secoundPassword: string) => {
-    if (firstPassword !== secoundPassword){
-      setValidationMessage('Password do not match') 
+    if (firstPassword !== secoundPassword) {
+      setValidationMessage('Password do not match.')
     }
     else setValidationMessage('')
   }
 
   const createUserAccount = async () => {
-    if (email ==='' || password ===''){
-      setValidationMessage('Please fill in your email and password') 
+    if (email === '' || password === '') {
+      setValidationMessage('Please fill in your email and password.')
+      return;
     }
-    try { await createUserWithEmailAndPassword(auth, email, password);
+    try {
+      await createUserWithEmailAndPassword(auth, email, password)
+        .then(result => {
+          console.log(result);
           navigation.navigate('Home');
-    } catch(error: any) {
-      setValidationMessage(error.message);
+        })
+    } catch (error: any) {
+      console.log(error);
+      if (error.code.include('auth/weak-password')) {
+        setValidationMessage('Please enter a strong password.')
+      } else if (error.code.include('auth/email-already-in-use')) {
+        setValidationMessage('Email already in use.');
+      } else {
+        setValidationMessage('Unable to register. Please try again later.');
+      }
     }
   }
 
 
   return (
     <View style={styles.container}>
+      <View>
+        <Text>Hello user! Wanna learn something new?</Text>
+      </View>
       <View style={styles.wrapperInput}>
         <TextInput
           style={styles.input}
           placeholder="Email"
           value={email}
-          onChangeText={(text: string) => setEmail(text)} 
+          onChangeText={(text: string) => setEmail(text)}
         />
       </View>
       <View style={styles.wrapperInput}>
@@ -63,12 +78,21 @@ export const Register = () => {
           value={confirmPassword}
           onChangeText={(text: string) => setConfirmPassword(text)}
           secureTextEntry={true}
-          onBlur={() => checkPassword(password,confirmPassword)}
+          onBlur={() => checkPassword(password, confirmPassword)}
         />
       </View>
-      <Button icon="eye" mode="contained" style={styles.button}
-        onPress={createUserAccount}>
-        <Text>Register</Text>
+      <View>
+        <Button icon="eye" mode="contained" style={styles.button}
+          onPress={createUserAccount}>
+          <Text>Register</Text>
+        </Button>
+      </View>
+      <Text>Already have an account?</Text>
+      <Button mode="contained" style={styles.button}
+        onPress={() => {
+          navigation.navigate("Login")
+        }}>
+        <Text>Login</Text>
       </Button>
     </View>
   )
