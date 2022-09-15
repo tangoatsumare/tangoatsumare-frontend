@@ -5,9 +5,10 @@ import { ParamListBase } from '@react-navigation/native'
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image } from 'react-native'
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Keyboard, Platform } from 'react-native'
 import { Button } from "react-native-paper";
 import * as ImagePicker from 'expo-image-picker';
+import { ScrollView, TouchableWithoutFeedback } from "react-native-gesture-handler";
 
 export const ProfileSetup = () => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
@@ -40,6 +41,15 @@ export const ProfileSetup = () => {
   const submitProfileInfo = () => {
     // submits all user info into db
     console.log("submit pushed");
+    const test = {
+      profilePic,
+      fullName,
+      username,
+      homeCountry,
+      currentlyLearning,
+      aboutMe
+    }
+    console.log("test usestate info: ", test)
   }
 
   const selectProfilePic = async () => {
@@ -74,68 +84,76 @@ export const ProfileSetup = () => {
 //     }
 //   }
 
+  // touchablewithoutfeedback disables buttons and makes them not pressable...
+
   return (
-    <View style={styles.container}>
-      <View style={{alignItems: 'center', justifyContent: 'center' }}>
-        {profilePic && <Image source={{ uri: profilePic }} style={ styles.avatar } resizeMode="contain"/>}
-          <Button onPress={selectProfilePic} style={{marginBottom: 25}}>
-            <Text>Select An Image</Text>
-          </Button>
-      </View>
-      <View style={styles.wrapperInput}>
-        <TextInput
-        style={styles.input}
-        placeholder="Full Name"
-        value={fullName}
-        onChangeText={(text: string) => setFullName(text)} 
-        />
-      </View>
-      {/* <View style={styles.wrapperInput}>
-        <TextInput
-        style={styles.input}
-        placeholder="Last Name"
-        value={lastName}
-        onChangeText={(text: string) => setLastName(text)} 
-        />
-      </View> */}
-      <View style={styles.wrapperInput}>
-        <TextInput
-        style={styles.input}
-        placeholder="Username"
-        value={username}
-        onChangeText={(text: string) => setUsername(text)} 
-        />
-      </View>
-      <View style={styles.wrapperInput}>
-        <TextInput
-        style={styles.input}
-        placeholder="Home Country"
-        value={homeCountry}
-        onChangeText={(text: string) => setHomeCountry(text)} 
-        />
-      </View>
-      <View style={styles.wrapperInput}>
-        <TextInput
-        style={styles.input}
-        placeholder="Currently learning"
-        value={currentlyLearning}
-        onChangeText={(text: string) => setCurrentlyLearning(text)} 
-        />
-      </View>
-      <View style={styles.wrapperInput}>
-        <TextInput
-        style={styles.input}
-        placeholder="About Me"
-        value={aboutMe}
-        onChangeText={(text: string) => setAboutMe(text)} 
-        />
-      </View>
-      <View style={{alignItems: 'center', justifyContent: 'center' }}>
-          <Button mode="contained" onPress={submitProfileInfo} style={{marginTop: 25}}>
-            <Text>Submit</Text>
-          </Button>
-      </View>
-    </View>
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} enabled style={styles.container} keyboardVerticalOffset={100}>
+      {/* <ScrollView> */}
+      {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */}
+        <View>
+          <View style={{alignItems: 'center', justifyContent: 'center' }}>
+            {profilePic && <Image source={{ uri: profilePic }} style={ styles.avatar } resizeMode="contain"/>}
+              <Button onPress={selectProfilePic} style={{marginBottom: 25}}>
+                <Text>Select An Image</Text>
+              </Button>
+          </View>
+          <View style={styles.wrapperInput}>
+            <TextInput
+            style={styles.input}
+            placeholder="Full Name"
+            value={fullName}
+            onChangeText={(text: string) => setFullName(text)} 
+            />
+          </View>
+          {/* <View style={styles.wrapperInput}>
+            <TextInput
+            style={styles.input}
+            placeholder="Last Name"
+            value={lastName}
+            onChangeText={(text: string) => setLastName(text)} 
+            />
+          </View> */}
+          <View style={styles.wrapperInput}>
+            <TextInput
+            style={styles.input}
+            placeholder="Username"
+            value={username}
+            onChangeText={(text: string) => setUsername(text)} 
+            />
+          </View>
+          <View style={styles.wrapperInput}>
+            <TextInput
+            style={styles.input}
+            placeholder="Home Country"
+            value={homeCountry}
+            onChangeText={(text: string) => setHomeCountry(text)} 
+            />
+          </View>
+          <View style={styles.wrapperInput}>
+            <TextInput
+            style={styles.input}
+            placeholder="Currently learning"
+            value={currentlyLearning}
+            onChangeText={(text: string) => setCurrentlyLearning(text)} 
+            />
+          </View>
+          <View style={styles.wrapperInput}>
+            <TextInput
+            style={styles.input}
+            placeholder="About Me"
+            value={aboutMe}
+            onChangeText={(text: string) => setAboutMe(text)} 
+            />
+          </View>
+          <View style={{alignItems: 'center', justifyContent: 'center' }}>
+              <Button mode="contained" onPress={submitProfileInfo} style={{marginTop: 25}}>
+                <Text>Submit</Text>
+              </Button>
+          </View>
+        </View>
+      {/* </TouchableWithoutFeedback> */}
+    {/* </ScrollView> */}
+    </KeyboardAvoidingView>
   )
 }
 
@@ -158,7 +176,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    marginTop: 70,
+    marginTop: 60,
+    padding: 10,
+    // height: 'auto'
     // justifyContent: 'center',
   },
   avatar: {

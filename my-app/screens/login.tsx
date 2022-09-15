@@ -56,7 +56,8 @@ export const Login = () => {
       </Button>
       <Button icon="eye" mode="contained" style={styles.button}
         onPress={() => {
-          navigation.navigate("Register")
+          // navigation.navigate("Register")
+          navigation.navigate("ProfileSetup")
         }}>
         <Text>Register</Text>
       </Button>
