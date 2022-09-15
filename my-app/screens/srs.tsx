@@ -25,6 +25,10 @@ import {
     SRSProperties
  } from "../utils/supermemo";
 
+let newCards = 10;
+let failed = 1;
+let review = 69;
+
 export const SRS = () => {
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
     // not for rendering neccessarily. for prop drilling onto the review screens
@@ -206,6 +210,17 @@ export const SRS = () => {
                     )
                 }) : null
             }
+        <View style={styles.container}>
+                <Text>New Cards: {newCards} </Text>
+                <Text>Reviewing: {failed} </Text>
+                <Text>Due Today: {review} </Text>
+                <Button mode="contained" style={styles.button}
+                    onPress={()=>{
+                        navigation.navigate("Front")
+                    }}>
+                <Text>Study</Text>
+            </Button>
+        </View>
         </ScrollView>
     )
 }
@@ -233,6 +248,7 @@ const styles = StyleSheet.create({
             backgroundColor: 'white',
             padding: 20,
             margin: 20
+
         }
     }
 );
