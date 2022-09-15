@@ -34,7 +34,8 @@ export const Register = () => {
       await createUserWithEmailAndPassword(auth, email, password)
         .then(result => {
           console.log(result);
-          navigation.navigate('Home');
+          // navigation.navigate('Home');
+          navigation.navigate("ProfileSetup");
         })
     } catch (error: any) {
       console.log(error);
@@ -81,19 +82,22 @@ export const Register = () => {
           onBlur={() => checkPassword(password, confirmPassword)}
         />
       </View>
-      <View>
-        <Button icon="eye" mode="contained" style={styles.button}
-          onPress={createUserAccount}>
+      <View style={styles.btnContainer}>
+        <Button icon="clipboard" mode="contained" style={styles.button}
+          onPress={() => {
+            createUserAccount();
+            // navigation.navigate("ProfileSetup");
+          }}>
           <Text>Register</Text>
         </Button>
+        <Text>Already have an account?</Text>
+        <Button icon="login" mode="contained" style={styles.button}
+          onPress={() => {
+            navigation.navigate("Login")
+          }}>
+          <Text>Login</Text>
+        </Button>
       </View>
-      <Text>Already have an account?</Text>
-      <Button mode="contained" style={styles.button}
-        onPress={() => {
-          navigation.navigate("Login")
-        }}>
-        <Text>Login</Text>
-      </Button>
     </View>
   )
 }
@@ -101,6 +105,7 @@ export const Register = () => {
 const styles = StyleSheet.create({
   button: {
     alignItems: 'center',
+    margin: 5,
   },
   wrapperInput: {
     borderWidth: 0.5,
@@ -118,6 +123,13 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 20,
+  },
+  btnContainer: {
+    justifyContent: 'center',
+    alignContent: 'center',
+    // width: '60%',
+    marginTop: 30,
   }
 }
 );

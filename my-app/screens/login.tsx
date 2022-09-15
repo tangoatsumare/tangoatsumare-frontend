@@ -5,7 +5,7 @@ import { ParamListBase } from '@react-navigation/native'
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native'
 import { Button } from "react-native-paper";
 
 export const Login = () => {
@@ -16,6 +16,7 @@ export const Login = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [validationMessage, setValidationMessage] = useState<string>('');
+  const [renderingIndicator, setRenderingIndicator] = useState<boolean>(false);
 
   const handleLogin = async () => {
     if (email === "" || password === "") {
@@ -25,14 +26,24 @@ export const Login = () => {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigation.navigate('Home');
-    } catch (error: any) {
+      await setRenderingIndicator(true);
+      await setTimeout(() => {
+        setRenderingIndicator(false);
+        navigation.navigate('Home');
+      }, 1000);
+
+    } catch(error: any) {
       setValidationMessage(error.message);
     }
   }
 
   return (
     <View style={styles.container}>
+      <ActivityIndicator
+        size='large'
+        color="#333"
+        animating={renderingIndicator}
+      />
       <View>
         <Text>Hello user! Welcome back!</Text>
       </View>
@@ -53,16 +64,16 @@ export const Login = () => {
           secureTextEntry={true}
         />
       </View>
-      <View>
-        <Button icon="eye" mode="contained" style={styles.button}
+      <View style={styles.btnContainer}>
+        <Button icon="login" mode="contained" style={styles.button}
           onPress={handleLogin}>
           <Text>Login</Text>
         </Button>
-      </View>
-      <View>
-        <Button icon="eye" mode="contained" style={styles.button}
+        <Text>Don't have an account?</Text>
+        <Button icon="clipboard" mode="contained" style={styles.button}
           onPress={() => {
-            navigation.navigate("Register")
+            // navigation.navigate("Register")
+            navigation.navigate("ProfileSetup")
           }}>
           <Text>Register</Text>
         </Button>
@@ -74,6 +85,7 @@ export const Login = () => {
 const styles = StyleSheet.create({
   button: {
     alignItems: 'center',
+    margin: 5,
   },
   wrapperInput: {
     borderWidth: 0.5,
@@ -91,6 +103,13 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 20,
+  },
+  btnContainer: {
+    justifyContent: 'center',
+    alignContent: 'center',
+    // width: '60%',
+    marginTop: 30,
   }
 }
 );
