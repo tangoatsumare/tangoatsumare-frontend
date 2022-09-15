@@ -9,6 +9,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, KeyboardAvo
 import { Button } from "react-native-paper";
 import * as ImagePicker from 'expo-image-picker';
 import { ScrollView, TouchableWithoutFeedback } from "react-native-gesture-handler";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 export const ProfileSetup = () => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
@@ -87,8 +88,8 @@ export const ProfileSetup = () => {
   // touchablewithoutfeedback disables buttons and makes them not pressable...
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} enabled style={styles.container} keyboardVerticalOffset={100}>
-      {/* <ScrollView> */}
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container} keyboardVerticalOffset={5}>
+      <KeyboardAwareScrollView>
       {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */}
         <View>
           <View style={{alignItems: 'center', justifyContent: 'center' }}>
@@ -97,14 +98,14 @@ export const ProfileSetup = () => {
                 <Text>Select An Image</Text>
               </Button>
           </View>
-          <View style={styles.wrapperInput}>
+          {/* <View style={styles.wrapperInput}>
             <TextInput
             style={styles.input}
             placeholder="Full Name"
             value={fullName}
             onChangeText={(text: string) => setFullName(text)} 
             />
-          </View>
+          </View> */}
           {/* <View style={styles.wrapperInput}>
             <TextInput
             style={styles.input}
@@ -121,14 +122,14 @@ export const ProfileSetup = () => {
             onChangeText={(text: string) => setUsername(text)} 
             />
           </View>
-          <View style={styles.wrapperInput}>
+          {/* <View style={styles.wrapperInput}>
             <TextInput
             style={styles.input}
-            placeholder="Home Country"
+            placeholder="Preferred Languages"
             value={homeCountry}
             onChangeText={(text: string) => setHomeCountry(text)} 
             />
-          </View>
+          </View> */}
           <View style={styles.wrapperInput}>
             <TextInput
             style={styles.input}
@@ -152,7 +153,7 @@ export const ProfileSetup = () => {
           </View>
         </View>
       {/* </TouchableWithoutFeedback> */}
-    {/* </ScrollView> */}
+    </KeyboardAwareScrollView>
     </KeyboardAvoidingView>
   )
 }
@@ -177,7 +178,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     marginTop: 60,
-    padding: 10,
+    padding: 10
     // height: 'auto'
     // justifyContent: 'center',
   },
