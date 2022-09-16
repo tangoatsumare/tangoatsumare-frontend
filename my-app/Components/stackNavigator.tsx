@@ -12,7 +12,9 @@ import React from 'react';
 import {createMaterialBottomTabNavigator} from "@react-navigation/material-bottom-tabs";
 import { Collection } from "./collection";
 import { SingleCard } from "./card";
-import { Button } from "react-native-paper";
+import { Front } from "../screens/front";
+import { Back } from "../screens/back";
+
 
 
 const Tab = createMaterialBottomTabNavigator();
@@ -68,6 +70,10 @@ export const StackNav = () => {
             <RootStack.Screen name="OCR" component={OCR}/>
             <RootStack.Screen name="Collection" component={Collection}/>
             <RootStack.Screen name="Card" component={SingleCard}/>
+            <RootStack.Screen name="Front" component={Front}/>
+            <RootStack.Screen name="Back" component={Back}/>
+
+
         </RootStack.Navigator>
     )
 }

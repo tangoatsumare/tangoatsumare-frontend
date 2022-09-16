@@ -3,8 +3,12 @@ import { StackNavigationProp} from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 
 import React from "react";
-import {View, Text, StyleSheet} from 'react-native'
-import {Button} from "react-native-paper";
+import {View, StyleSheet} from 'react-native'
+import {Button, Text } from "react-native-paper";
+
+let newCards = 10;
+let failed = 1;
+let review = 69;
 
 export const SRS = () => {
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
@@ -12,8 +16,16 @@ export const SRS = () => {
     return (
         <View style={styles.container}>
             
-                <Text>SRS Flashcard feature coming soon</Text>
-            
+                <Text>New Cards: {newCards} </Text>
+                <Text>Reviewing: {failed} </Text>
+                <Text>Due Today: {review} </Text>
+                <Button mode="contained" style={styles.button}
+                    onPress={()=>{
+                        navigation.navigate("Front")
+                    }}>
+                <Text>Study</Text>
+            </Button>
+
         </View>
     )
 }
@@ -24,8 +36,7 @@ const styles = StyleSheet.create({
         },
         container: {
             flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center',
+            justifyContent: 'center'
         }
     }
 );

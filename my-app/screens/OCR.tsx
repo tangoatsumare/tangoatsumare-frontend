@@ -1,19 +1,13 @@
 // import { useNavigation} from "@react-navigation/core";
 import { Image, StyleSheet, Text, TextInput, View, ScrollView, TouchableOpacity } from 'react-native';
 import { Button } from 'react-native-paper';
-import imageSource from '../assets/ocr-test.jpeg';
-import cat from '../assets/wakeupcat.jpeg';
-// import SelectableText from 'react-native-selectable-text';
-// Imports the Google Cloud client library
-// import vision from '@google-cloud/vision';
 import React, { useState, useEffect } from 'react';
 import { sendImageToCloudVisionApi } from '../utils/flashcard';
 import { app } from '../firebase';
 import { 
     getStorage,
     ref, 
-    uploadBytesResumable, 
-    uploadString,
+    uploadBytesResumable,
     getDownloadURL
 } from 'firebase/storage';
 // https://www.npmjs.com/package/react-native-uuid
@@ -23,15 +17,23 @@ import {lookupJishoApi} from '../utils/jisho';
 import { async } from '@firebase/util';
 import axios from 'axios';
 
-export const OCR = ({ route, navigation }) => {
+interface OCRProps {
+    route: any;
+    navigation: any;
+}
+
+export const OCR = ({ route, navigation }: OCRProps) => {
     const storage = getStorage(app);
     const { image_uri, image_base64 } = route.params;
-    const [ image, setImage ] = useState(image_uri);
-    const [ cloudStoragePath, setCloudStoragePath ] = useState('');
-    const [ responseText, setResponseText ] = useState('');
-    const [ selectedText, setSelectedText ] = useState('');
-    const [ resultFromDictionaryLookup, setResultFromDictionaryLookup ] = useState('');
-    const [ sentenceEditMode, setSentenceEditMode ] = useState(false);
+    const [ image, setImage ] = useState<string>(image_uri);
+    const [ cloudStoragePath, setCloudStoragePath ] = useState<string>('');
+    const [ responseText, setResponseText ] = useState<string>('');
+    const [ selectedText, setSelectedText ] = useState<string>('');
+    const [ resultFromDictionaryLookup, setResultFromDictionaryLookup ] = useState<string>('');
+    const [ sentenceEditMode, setSentenceEditMode ] = useState<boolean>(false);
+    const [ cardSubmissionBtnIsClick, setCardSubmissionBtnIsClick ] = useState<boolean>(false);
+    const [ cardIsSubmitted, setCardIsSubmitted ] = useState<boolean>(false);
+    const [ cardSubmissionError, setCardSubmissionError ] = useState<boolean>(false);
 
     // send to cloud vision once components are mounted
     useEffect(() => {
@@ -45,10 +47,10 @@ export const OCR = ({ route, navigation }) => {
         })();
     }, []);
     
-    async function uploadImageAsync(uri) {
+    async function uploadImageAsync(uri: string): Promise<string> {
         // Why are we using XMLHttpRequest? See:
         // https://github.com/expo/expo/issues/2402#issuecomment-443726662
-        const blob = await new Promise((resolve, reject) => {
+        const blob: Blob = await new Promise((resolve, reject) => {
           const xhr = new XMLHttpRequest();
           xhr.onload = function () {
             resolve(xhr.response);
@@ -66,21 +68,23 @@ export const OCR = ({ route, navigation }) => {
         const result = await uploadBytesResumable(fileRef, blob);
       
         // We're done with the blob, close and release it
-        blob.close();
+        // blob.close();
       
         return await getDownloadURL(fileRef);
       }
 
-    const uploadToFirebaseCloudStorage = async () => {
-        try {
-            const uploadURL = await uploadImageAsync(image);
-            setCloudStoragePath(uploadURL);
-        } catch (err) {
-            console.log(err);
+    const uploadToFirebaseCloudStorage = async (): Promise<void> => {
+        if (image) {
+            try {
+                const uploadURL = await uploadImageAsync(image);
+                setCloudStoragePath(uploadURL);
+            } catch (err) {
+                console.log(err);
+            }
         }
     };
 
-    const handleSelectionChange = (e) => {
+    const handleSelectionChange = (e: any) => {
         if (responseText) {
             const start = e.nativeEvent.selection.start;
             const end = e.nativeEvent.selection.end;
@@ -91,13 +95,13 @@ export const OCR = ({ route, navigation }) => {
 
     useEffect(() => {
         async function fetchData () {
-            await receiveDictionaryInfo(selectedText);
+            await receiveDictionaryInfo();
         };
         if (selectedText !== '') fetchData(); 
         else setResultFromDictionaryLookup('');
     }, [selectedText]);
 
-    const receiveDictionaryInfo = async () => {
+    const receiveDictionaryInfo = async (): Promise<void> => {
         try {
             let result = await lookupJishoApi(selectedText);
             setResultFromDictionaryLookup(result[0].toString());
@@ -106,10 +110,29 @@ export const OCR = ({ route, navigation }) => {
         }
     };
 
+    const submitFlashCard = async (): Promise<void> => {
+        try {
+            if (selectedText && responseText && resultFromDictionaryLookup) {
+                // await uploadToFirebaseCloudStorage();
+                console.log('ok')
+                setCardSubmissionBtnIsClick(true);
+            } else console.log('hmmm....');
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
+    useEffect(() => {
+        (async () => { 
+            if (cardSubmissionBtnIsClick) { // if card submission button is clicked, execute photo upload
+                await uploadToFirebaseCloudStorage();
+            }
+        })();
+    }, [cardSubmissionBtnIsClick]);
+
     useEffect(() => {
         (async () => {
-            if (cloudStoragePath) {
-                console.log(cloudStoragePath);
+            if (cloudStoragePath) { // if photo is successfully uploaded to firebase, execute the flashcard POST request
                 const flashcard = {
                     target_word: selectedText,
                     context: responseText,
@@ -118,87 +141,117 @@ export const OCR = ({ route, navigation }) => {
                     image: cloudStoragePath,
                     parts_of_speech: ''
                 };
-                
-                await fetch(`https://tangoatsumare-api.herokuapp.com/api/flashcards`, { // put into .env
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(flashcard)
-                }).then(res => {
+                try {
+                    await fetch(`https://tangoatsumare-api.herokuapp.com/api/flashcards`, { // put into .env
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(flashcard)
+                    });
                     console.log('flashcard POSTed to the backend API');
-                    // navigate user to his/her collection of cards
-                    navigation.navigate("Home");
-                    // TODO: the home screen needs to refresh based on the updated flashcards in the server
-
-                }).catch(err => {
+                    setCardIsSubmitted(true);
+                } catch (err) {
                     console.log(err);
-                });
+                    setCardSubmissionError(true);
+                }
             }
         })();
     }, [cloudStoragePath]);
 
-    const submitFlashCard = async () => {
-        try {
-            if (selectedText && responseText && resultFromDictionaryLookup) {
-                await uploadToFirebaseCloudStorage();
-            } else console.log('hmmm....');
-        } catch (err) {
-            console.log(err);
-        }
-    };
-
     // read layout from the DOM and synchronously re-render
     React.useLayoutEffect(() => {
         navigation.setOptions({
-            headerRight: () => (
-                <Button 
-                    icon="send" 
-                    onPress={submitFlashCard}
-                >Send</Button>
-            )
+            headerRight: () => {
+                if (!cardSubmissionBtnIsClick) {
+                    return (
+                        <Button 
+                            icon="send" 
+                            onPress={submitFlashCard}
+                        >Send</Button>
+                    );
+                }
+            }
         })
     })
 
     return (
-        <ScrollView 
-        contentContainerStyle={{ alignItems: "center", justifyContent: "center"}}
-        style={styles.container}
-        >
-            <Image 
-                source={{ uri: image }} 
-                style={styles.image}
-                resizeMode="contain"
-            />
-            <View 
-                style={styles.responseContainer}
-            >
-                <View style={styles.responseTitleContainer}>
-                    <Text style={styles.responseTitle}>Select a word to learn</Text>
-                    <Button 
-                        icon={sentenceEditMode ? "check-bold" : "cog"}
-                        textColor={sentenceEditMode ? "green" : "purple"}
-                        onPress={() => setSentenceEditMode((prev) => !prev)}
-                    >
-                        {sentenceEditMode ? "done" : "edit"}
-                    </Button>
-                </View>
-                <TextInput
-                    style={sentenceEditMode ? styles.responseTextEditMode : styles.responseText}
-                    onSelectionChange={handleSelectionChange}
-                    onChangeText={(text) => setResponseText(text)}
-                    editable={sentenceEditMode ? true : false}
-                    multiline={true}
+        <ScrollView contentContainerStyle={styles.container}>
+            { !cardSubmissionBtnIsClick ? 
+            <>
+                <Image 
+                    source={{ uri: image ? image : ""}} 
+                    style={styles.image}
+                    resizeMode="contain"
+                />
+                <View 
+                    style={styles.responseContainer}
                 >
-                    {responseText}
-                </TextInput>
-            </View>
-            <View style={styles.userTextSelection}>
-                <Text>You've selected</Text>
-                <Text style={styles.responseText}>{selectedText}</Text>
-            </View>
-            <Text>Here is the dictionary lookup result:</Text>
-            <Text style={styles.lookupText}>{resultFromDictionaryLookup}</Text>
+                    <View style={styles.responseTitleContainer}>
+                        <Text style={styles.responseTitle}>Select a word to learn</Text>
+                        <Button 
+                            icon={sentenceEditMode ? "check-bold" : "cog"}
+                            textColor={sentenceEditMode ? "green" : "purple"}
+                            onPress={() => setSentenceEditMode((prev) => !prev)}
+                        >
+                            {sentenceEditMode ? "done" : "edit"}
+                        </Button>
+                    </View>
+                    <TextInput
+                        style={sentenceEditMode ? styles.responseTextEditMode : styles.responseText}
+                        onSelectionChange={handleSelectionChange}
+                        onChangeText={(text) => setResponseText(text)}
+                        editable={sentenceEditMode ? true : false}
+                        multiline={true}
+                    >
+                        {responseText}
+                    </TextInput>
+                </View>
+                <View style={styles.userTextSelection}>
+                    <Text>You've selected</Text>
+                    <Text style={styles.responseText}>{selectedText}</Text>
+                </View>
+                <Text>Here is the dictionary lookup result:</Text>
+                <Text style={styles.lookupText}>{resultFromDictionaryLookup}</Text>
+            </>
+                :
+            !cardIsSubmitted && !cardSubmissionError ? 
+                <Text>executing card submission</Text> : 
+                cardIsSubmitted && !cardSubmissionError ?
+                <View style={styles.submissionContainer}>
+                    <Text>Submit successfully!</Text>
+                    <Button
+                        icon="check-circle-outline" 
+                        labelStyle={{fontSize: 150}}
+                        textColor="green"
+                    >{null}</Button>
+                    <Button 
+                        mode="outlined"
+                        textColor="black"
+                        style={styles.button}
+                            onPress={()=>{
+                                navigation.navigate("Home")
+                            }}
+                    >Return Home</Button>
+                </View> :
+                <View>
+                    <Text>Oh no.. something went wrong!</Text>
+                    <Text>Try again or contact the dev team 🙇 </Text>
+                    <Button
+                        icon="close-circle-outline" 
+                        labelStyle={{fontSize: 150}}
+                        textColor="red"
+                    >{null}</Button>
+                    <Button 
+                        mode="outlined"
+                        textColor="black"
+                        style={styles.button}
+                            onPress={()=>{
+                                navigation.navigate("Home")
+                            }}
+                    >Return Home</Button>
+                </View>
+            }
         </ScrollView>
     );
 };
@@ -207,6 +260,8 @@ const styles = StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: '#fff',
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     image: {
         width: 305,
@@ -257,6 +312,11 @@ const styles = StyleSheet.create({
     lookupText: {
         fontSize: 20,
         padding: 20
+    },
+    submissionContainer: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
     }
   });
   

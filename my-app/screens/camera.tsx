@@ -11,7 +11,7 @@ export const Camera = () => {
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
     const [image, setImage] = useState<string>(""); // typescript?
-    const [base64, setBase64 ] = useState<string>("");
+    const [base64, setBase64 ] = useState<string | undefined>("");
  
     const openCamera = async () => {
         const permissionCheck = await ImagePicker.requestCameraPermissionsAsync();
