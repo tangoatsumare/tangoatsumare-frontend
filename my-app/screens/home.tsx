@@ -2,6 +2,8 @@ import { useNavigation } from "@react-navigation/core";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 
+import { getAuth } from 'firebase/auth';
+
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native'
 import { SegmentedButtons, Button } from "react-native-paper";
@@ -20,6 +22,17 @@ export const Home = () => {
       return <Feed />
     }
   }
+
+  // should be in utils maybe?
+  const handleUID = () => {
+    const auth = getAuth();
+    const userId = auth.currentUser?.uid
+    setUserUid(userId || '') // typescript??
+  }
+
+  useEffect(() => {
+    handleUID();
+  }, []);
 
 
   return (
