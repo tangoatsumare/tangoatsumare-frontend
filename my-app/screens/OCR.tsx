@@ -3,7 +3,7 @@ import { Image, StyleSheet, Text, TextInput, View, ScrollView, TouchableOpacity 
 import { Button } from 'react-native-paper';
 import React, { useState, useEffect } from 'react';
 import { sendImageToCloudVisionApi } from '../utils/flashcard';
-import { app } from '../firebase';
+import app from '../firebase';
 import { 
     getStorage,
     ref, 

@@ -1,5 +1,6 @@
 // import { GOOGLE_CLOUD_VISION_API_KEY } from '@env';
 import axios from 'axios';
+import  Constants from "expo-constants";
 
 const sendImageToCloudVisionApi = async (image) => {
     try {
@@ -21,7 +22,7 @@ const sendImageToCloudVisionApi = async (image) => {
 
         const response = await fetch(
             'https://vision.googleapis.com/v1/images:annotate?key=' +
-                process.env.GOOGLE_CLOUD_VISION_API_KEY,
+                Constants.manifest?.extra?.cloudVisionApiKey,
             {
                 headers: {
                     Accept: 'application/json',
