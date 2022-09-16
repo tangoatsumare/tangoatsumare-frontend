@@ -10,6 +10,10 @@ import { SegmentedButtons, Button } from "react-native-paper";
 import { Collection } from "../Components/collection";
 import { Feed } from "../Components/feed";
 
+//test
+  import { getProfileInfoById } from "../utils/profileInfo";
+//test
+
 export const Home = () => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
   const [value, setValue] = React.useState('collection');
@@ -32,8 +36,13 @@ export const Home = () => {
 
   useEffect(() => {
     handleUID();
+    // handleProfileInfo();
   }, []);
 
+  // const handleProfileInfo = async () => {
+  //   const response = await getProfileInfoById(12345);
+  //   console.log("🧟‍♀️🧟‍♀️🧟‍♀️🧟‍♀️ response in home screen awrawerawer: ", response);
+  // }
 
   return (
     <View style={styles.container}>
