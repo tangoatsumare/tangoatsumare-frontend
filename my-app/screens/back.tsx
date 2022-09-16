@@ -13,6 +13,8 @@ import {
   setFlashcardAsAgain,
 } from "../utils/supermemo";
 
+import {TabHome} from "../Components/stackNavigator";
+
 export const Back = ({route}) => {
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
     const [flashcards, setFlashcards] = useState([]);
@@ -20,10 +22,6 @@ export const Back = ({route}) => {
     const [engDef, setEngDef] = useState('')
 
     let { flashcardsAll, index } = route.params;
-    
-    // useEffect(() => {
-    //   console.log(flashcardsAll);
-    // }, []);
 
     useEffect(() => {
       if (flashcardsAll) {
@@ -51,20 +49,6 @@ export const Back = ({route}) => {
       }
       return result;
     }
-    
-    // useEffect(() => {
-    //     axios
-    //       .get("https://tangoatsumare-api.herokuapp.com/api/flashcards")
-    //       .then((response: any) => {
-    //         const flashcards =
-    //           response.data;
-    //         setFlashcards(flashcards)
-    //         const temp = flashcards[flashcards.length - 1];
-    //         setFlashcard(temp); //typescript?
-    //         setEngDef(temp.english_definition[0])
-
-    //       });
-    // }, []);
 
     const displayCard = (card: any) => {
         return (
@@ -97,9 +81,20 @@ export const Back = ({route}) => {
                     // navigate back to the SRS screen
                     if (index === flashcardsAll.length - 1) {
                       console.log('the end');
+                      
                       navigation.navigate("SRS", {
                         flashcardsAllModified: flashcardsAll
                       });
+                      // TO FIX
+                      // https://reactnavigation.org/docs/nesting-navigators/#navigating-to-a-screen-in-a-nested-navigator
+                      // navigation.navigate("TabHome", {
+                      //   screen: "SRSNav",
+                      //   // params: {flashcardsAllModified: flashcardsAll}
+                      //   params: {
+                      //     screen: "SRS",
+                      //     params: {flashcardsAllModified: flashcardsAll}
+                      //   }
+                      // });
                     } else {
                       navigation.push("Front", {
                         flashcardsAll,
@@ -118,9 +113,19 @@ export const Back = ({route}) => {
 
                     if (index === flashcardsAll.length - 1) {
                       console.log('the end');
+                   
                       navigation.navigate("SRS", {
                         flashcardsAllModified: flashcardsAll
                       });
+                      // TO FIX
+                      // navigation.navigate("TabHome", {
+                      //   screen: "SRSNav",
+                      //   // params: {flashcardsAllModified: flashcardsAll}
+                      //   params: {
+                      //     screen: "SRS",
+                      //     params: {flashcardsAllModified: flashcardsAll}
+                      //   }
+                      // });
                     } else {
                       navigation.push("Front", {
                         flashcardsAll,

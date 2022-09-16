@@ -6,20 +6,20 @@ import React, { useEffect, useState } from "react";
 import {ScrollView, View, StyleSheet} from 'react-native'
 import {TextInput, Text, Button, Modal, Portal} from "react-native-paper";
 import { useIsFocused } from "@react-navigation/native";
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import tz from 'dayjs/plugin/timezone';
+// import dayjs from 'dayjs';
+// import utc from 'dayjs/plugin/utc';
+// import tz from 'dayjs/plugin/timezone';
+import { useTheme } from 'react-native-paper';
 
 import { 
     SRSTangoFlashcard,
     initializeSRSFlashcards,
     getReviewableSRSFlashcards,
-    setFlashcardAsGood,
-    setFlashcardAsAgain,
     SRSProperties
  } from "../utils/supermemo";
 
 export const SRS = ({route}) => {
+    const theme = useTheme();
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
     
     // all the SRS flashcards
@@ -35,6 +35,12 @@ export const SRS = ({route}) => {
     });
 
     const [ modalVisible, setModalVisible ] = useState(false);
+
+    useEffect(() => {
+        if (route.params?.flashcardsAllModified) {
+            console.log(route.params?.flashcardsAllModified);
+        }
+    },[route.params]);
 
     useEffect(() => {
         if (isFocused && !route.params?.flashcardsAllModified) {
@@ -79,7 +85,6 @@ export const SRS = ({route}) => {
         }
     }, [flashcardsAll]);
 
-
     // https://callstack.github.io/react-native-paper/modal.html
     const showModal = () => setModalVisible(true);
     const hideModal = () => setModalVisible(false);
@@ -88,8 +93,6 @@ export const SRS = ({route}) => {
     const [ textForAGAIN, setTextForAGAIN ] = useState(SRSProperties.getGradeForAgain().toString());
     const [ textForFirstInterval, setTextForFirstInterval ] = useState(SRSProperties.getFirstInterval().toString());
     const [ textForSecondInterval, setTextForSecondInterval ] = useState(SRSProperties.getSecondInterval().toString());
-
-    const [ testing, setTesting ] = useState<string>('Hello World!');
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
@@ -135,84 +138,26 @@ export const SRS = ({route}) => {
                     }}>Update</Button>
                 </Modal>
             </Portal>
-            {/* <Text>SRS Flashcard feature coming soon</Text> */}
-            <Button onPress={showModal}>Setting</Button>
+
             <View style={styles.container}>
-                <Text>New Cards: {metrics.new} </Text>
-                <Text>Learning: {metrics.learning} (coming soon)</Text>
-                <Text>Due: {metrics.due} </Text>
+                <View style={styles.metrics}>
+                    <Text>New: {metrics.new} </Text>
+                    <Text>Due: {metrics.due} </Text>
+                </View>
                 <Button 
                     mode="contained" 
                     style={styles.button}
+                    buttonColor={theme.colors.secondary}
                     disabled={flashcardsReviewable.length === 0 ? true: false}
                     onPress={()=>{
-                        // testing the passing of props
-                        navigation.navigate("Front", {
-                            flashcardsAll,
-                            index: 0 // starts off at index 0
+                        navigation.navigate("Review", {
+                            flashcardsAll
                         });
                     }}>
                     <Text>Study</Text>
                 </Button>
+                <Button onPress={showModal}>Setting</Button>
             </View>
-            <Text>Reviewable cards (new+learning+due) ({flashcardsReviewable ? flashcardsReviewable.length : 0})</Text>
-            {/* <Text>use the due date to determine this</Text> */}
-            {/* {flashcardsReviewable? 
-                flashcardsReviewable.map(flashcard => {
-                    return (
-                        <View
-                            key={flashcard._id}
-                            style={styles.flashcardReviewable}
-                        >
-                            <Text>Target word: {flashcard.target_word}</Text>
-                        </View>
-                    );
-                })
-                : null
-            }             */}
-
-            <Text>All the Cards ({flashcardsAll ? flashcardsAll.length : 0})</Text>
-            {/* {flashcardsAll? 
-                flashcardsAll.map(flashcard => {
-                    return (
-                        <View 
-                            key={flashcard._id}
-                            style={styles.flashcard}
-                        >
-                            <Text>Target word: {flashcard.target_word}</Text>
-                            <Text>Review counter: {flashcard.counter}</Text>
-                            <Text>Interval: {flashcard.interval}</Text>
-                            <Text>Repetition: {flashcard.repetition}</Text>
-                            <Text>E-Factor: {flashcard.efactor.toFixed(2)}</Text>
-                            <Text>Due date: {dayjs(flashcard.dueDate).format('YYYY-MM-DDTHH:mm:ss')}</Text>
-                            <Button 
-                                textColor="green"
-                                onPress={() => setFlashcardsAll((prev) => {
-                                    const result = [...prev];
-                                    for (let i = 0; i < result.length; i++) {
-                                        if (result[i]._id === flashcard._id) {
-                                            result[i] = setFlashcardAsGood(result[i]);
-                                        }
-                                    }
-                                    return result;
-                                })}
-                            >good</Button>
-                            <Button
-                                textColor="red"
-                                onPress={() => setFlashcardsAll((prev) => {
-                                    const result = [...prev];
-                                    for (let i = 0; i < result.length; i++) {
-                                        if (result[i]._id === flashcard._id) {
-                                            result[i] = setFlashcardAsAgain(result[i]);
-                                        }
-                                    }
-                                    return result;
-                                })}
-                            >again</Button>
-                        </View>
-                    )
-                }) : null
-            } */}
         </ScrollView>
     )
 }
@@ -220,11 +165,16 @@ export const SRS = ({route}) => {
 const styles = StyleSheet.create({
         button: {
             alignItems: 'center',
+            margin: 20
         },
         container: {
             padding: 10,
+            flex: 1,
             alignItems: 'center',
             justifyContent: 'center',
+        },
+        metrics: {
+            alignItems: 'flex-start'
         },
         flashcard: {
             margin: 10,

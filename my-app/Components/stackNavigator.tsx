@@ -71,8 +71,7 @@ export const StackNav = () => {
             <RootStack.Screen name="Card" component={SingleCard}/>
             <RootStack.Screen name="Front" component={Front}/>
             <RootStack.Screen name="Back" component={Back}/>
-
-
+            <RootStack.Screen name="Review" component={Review}/>
         </RootStack.Navigator>
     )
 }

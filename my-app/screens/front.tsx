@@ -8,7 +8,6 @@ import { Button, Card, Paragraph, Text, Title } from "react-native-paper";
 import { rgb } from "color";
 import axios from "axios";
 
-
 export const Front = ({route}) => {
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
     const [flashcards, setFlashcards] = useState([]);
@@ -20,29 +19,12 @@ export const Front = ({route}) => {
 
     // testing passing of props
     const { flashcardsAll, index } = route.params;
-    
-    // useEffect(() => {
-    //   console.log(flashcardsAll);
-    // }, []);
 
     useEffect(() => {
       if (flashcardsAll) {
         setFlashcard(flashcardsAll[index]);
       }
     }, [flashcardsAll]);
-
-
-    // useEffect(() => {
-    //     axios
-    //       .get("https://tangoatsumare-api.herokuapp.com/api/flashcards")
-    //       .then((response: any) => {
-    //         const flashcards =
-    //           response.data;
-    //         setFlashcards(flashcards)
-    //         const temp = flashcards[flashcards.length - 1];
-    //         setFlashcard(temp); //typescript?
-    //       });
-    // }, []);
 
     const displayCard = (card: any) => {
         return (
@@ -52,7 +34,6 @@ export const Front = ({route}) => {
                     <Title style={styles.textVocab}>{card.target_word}</Title>
                     <Paragraph style={styles.text}>Sentence: {card.context}</Paragraph>
                     </Card.Content>
-                    
                </Card>
             );
         };
