@@ -8,23 +8,23 @@ import { Button, Card, Paragraph, Text, Title } from "react-native-paper";
 import { rgb } from "color";
 import axios from "axios";
 
-
-export const Front = () => {
+export const Front = ({route}) => {
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
     const [flashcards, setFlashcards] = useState([]);
     const [flashcard, setFlashcard] = useState({})
 
+    // https://reactnavigation.org/docs/troubleshooting/#i-get-the-warning-non-serializable-values-were-found-in-the-navigation-state
+    // https://reactnavigation.org/docs/hello-react-navigation/#passing-additional-props
+    // React Navigation docs recommend using React Context for passing data to screens
+
+    // testing passing of props
+    const { flashcardsAll, index } = route.params;
+
     useEffect(() => {
-        axios
-          .get("https://tangoatsumare-api.herokuapp.com/api/flashcards")
-          .then((response: any) => {
-            const flashcards =
-              response.data;
-            setFlashcards(flashcards)
-            const temp = flashcards[flashcards.length - 1];
-            setFlashcard(temp); //typescript?
-          });
-    }, []);
+      if (flashcardsAll) {
+        setFlashcard(flashcardsAll[index]);
+      }
+    }, [flashcardsAll]);
 
     const displayCard = (card: any) => {
         return (
@@ -34,7 +34,6 @@ export const Front = () => {
                     <Title style={styles.textVocab}>{card.target_word}</Title>
                     <Paragraph style={styles.text}>Sentence: {card.context}</Paragraph>
                     </Card.Content>
-                    
                </Card>
             );
         };
@@ -45,7 +44,12 @@ export const Front = () => {
             
             <Button mode="contained" style={styles.againButton}
                     onPress={()=>{
-                        navigation.navigate("Back")
+                      // using push instead of navigate
+                      // so a new "Back" screen is pushed to the stack
+                      navigation.push("Back", { 
+                          flashcardsAll,
+                          index
+                        })
                     }}>
                 <Text>Answer</Text>
             </Button>

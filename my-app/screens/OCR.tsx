@@ -140,6 +140,7 @@ export const OCR = ({ route, navigation }: OCRProps) => {
                     english_definition: [resultFromDictionaryLookup],
                     image: cloudStoragePath,
                     parts_of_speech: ''
+                    // TODO: include the "created by current user (firebase auth UID (uuid))"
                 };
                 try {
                     await fetch(`https://tangoatsumare-api.herokuapp.com/api/flashcards`, { // put into .env

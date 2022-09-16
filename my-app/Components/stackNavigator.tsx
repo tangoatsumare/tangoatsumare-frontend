@@ -7,6 +7,7 @@ import {Register} from "../screens/register";
 import {SRS} from "../screens/srs";
 import {Camera} from "../screens/camera";
 import { OCR } from "../screens/OCR";
+import { Review } from "../screens/review";
 import { ProfileSetup } from "../screens/profileSetup";
 import React from 'react';
 import {createMaterialBottomTabNavigator} from "@react-navigation/material-bottom-tabs";
@@ -72,8 +73,7 @@ export const StackNav = () => {
             <RootStack.Screen name="Card" component={SingleCard}/>
             <RootStack.Screen name="Front" component={Front}/>
             <RootStack.Screen name="Back" component={Back}/>
-
-
+            <RootStack.Screen name="Review" component={Review}/>
         </RootStack.Navigator>
     )
 }
