@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
     MD3LightTheme as DefaultTheme, Provider as PaperProvider,
 } from 'react-native-paper';
@@ -25,8 +25,14 @@ export const HomeNav = () => {
             </PaperProvider>
     );
 };
-export const SRSNav = () => {
+export const SRSNav = ({route}) => {
     //handle themes and languages here
+
+    useEffect(() => {
+        if (route.params) {
+            console.log(route.params);
+        }
+    }, [route.params]);
     return (
         <PaperProvider theme={theme}>
             <SRSNavigator />

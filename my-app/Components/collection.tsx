@@ -8,8 +8,12 @@ import React, { useEffect, useState } from "react";
 import {View, Text, StyleSheet, FlatList, TouchableOpacity} from 'react-native'
 import axios from "axios";
 
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 
 export const Collection = () => {
+
+  const auth = getAuth();
+  const userId = auth.currentUser?.uid;
 
   const navigation = useNavigation<StackNavigationProp<StackParamsList>>();
   const [flashcards, setFlashcards] = useState([]);
@@ -19,12 +23,20 @@ export const Collection = () => {
     // why using "isFocused"
     // https://stackoverflow.com/questions/60182942/useeffect-not-called-in-react-native-when-back-to-screen
     if (isFocused) {
-      axios
-        .get("https://tangoatsumare-api.herokuapp.com/api/flashcards")
+      console.log(userId);
+      // axios
+        // .get
+        fetch(`https://tangoatsumare-api.herokuapp.com/api/flashcardsby/${userId}`)
+        .then((response: any) => response.json())
         .then((response: any) => {
-          const flashcards =
-            response.data;
-          setFlashcards(flashcards)
+          console.log('hihi');
+          const flashcards = response;
+          const reverseFlashcards = flashcards.reverse();
+          // console.log(reverseFlashcards);
+          setFlashcards(reverseFlashcards);
+        })
+        .catch((err) => {
+          console.log(err)
         });
     }
   }, [isFocused]);
@@ -37,7 +49,7 @@ export const Collection = () => {
   const displayFlashcard = (flashcards: readonly any[] | null | undefined) => {
       return (
           <FlatList
-            inverted
+            // inverted
             ItemSeparatorComponent={() => <View style={styles.separator} />}
             data={flashcards}
             keyExtractor={(flashcard, index) => index.toString()}
@@ -49,9 +61,9 @@ export const Collection = () => {
           >
             <Card key={item.target_word} style={styles.card}>
                   <Card.Content>
-                  <Card.Cover   source={{uri: item.image ? item.image : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}} />
+                  <Card.Cover   source={{uri: item.picture_url ? item.picture_url : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}} />
                   <Title style={styles.textVocab}>{item.target_word}</Title>
-                  <Paragraph style={styles.text}>Sentence: {item.context}</Paragraph>
+                  <Paragraph style={styles.text}>Sentence: {item.example_sentence}</Paragraph>
                   </Card.Content>
                   <Card.Actions>
             
@@ -98,8 +110,6 @@ const styles = StyleSheet.create({
             borderRadius: 10,
             margin: 10,
             marginTop: 2, 
-
           },
-         
     }
 );
