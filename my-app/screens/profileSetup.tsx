@@ -4,12 +4,32 @@ import { ParamListBase } from '@react-navigation/native'
 
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Keyboard, Platform } from 'react-native'
 import { Button } from "react-native-paper";
 import * as ImagePicker from 'expo-image-picker';
 import { ScrollView, TouchableWithoutFeedback } from "react-native-gesture-handler";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+
+//test
+import { getProfileInfoById } from "../utils/profileInfo";
+import axios from 'axios';
+//test
+interface UserInfo {
+  uuid: string,
+  real_name: string,
+  user_name: string,
+  avatar_url: string,
+  about_me: string,
+  nationality: string,
+  target_language: string,
+  cards: {
+    user_cards: string[],
+    user_favorite: string[],
+  },
+  save_new_card_to_deck: boolean,
+  ui_language: string,
+}
 
 export const ProfileSetup = () => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
@@ -23,7 +43,7 @@ export const ProfileSetup = () => {
 
   // UPDATED
   // only username, currently learning, and about me
-  
+
   // const [firstName, setFirstName] = useState<string>('');
   // const [lastName, setLastName] = useState<string>('');
   // const [fullName, setFullName] = useState<string>('');
@@ -33,9 +53,95 @@ export const ProfileSetup = () => {
   const [profilePic, setProfilePic] = useState<string>('');
   const [base64, setBase64] = useState<string>('');
   // const [homeCountry, setHomeCountry] = useState<string>('');
+  const [getUserinfo, setGetUserinfo] = useState<UserInfo[]>();
   const [currentlyLearning, setCurrentlyLearning] = useState<string>('');
   const [aboutMe, setAboutMe] = useState<string>('');
   const [validationMessage, setValidationMessage] = useState<string>('');
+  // const [userProfileInfo, setUserProfileInfo] = useState<string>('');
+  const [userUid, setUserUid] = useState<string>('');
+  const [submitted, setSubmitted] = useState<boolean>(false);
+
+  useEffect(() => {
+    handleUID();
+    // getProfileInfoById(userUid)
+  }, []);
+
+  // useEffect(() => {
+  //   if (submitted) {
+  //     (async () => {
+  //       try {
+  //         const response = await fetch(`https://tangoatsumare-api.herokuapp.com/api/users`, {
+  //           method: 'GET',
+  //           headers: {
+  //             'Content-Type': 'application/json',
+  //           }
+  //         })
+  //         const resposeToJSON = await response.json();
+
+  //         console.log('response -------------------------->', resposeToJSON);
+  //         console.log("🍕🍕🍕🍕🍕🍕🍕🍕",Object.keys(resposeToJSON));
+  //         setGetUserinfo(resposeToJSON);
+
+
+  //       } catch (err) {
+  //         console.log(err);
+  //       }
+  //     })();
+  //   }
+  // }, [submitted]);
+  useEffect(() => {
+    (async () => {
+      try {
+        await fetch(`https://tangoatsumare-api.herokuapp.com/api/users`, {
+          method: 'GET',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        })
+        .then(async response => {
+          // console.log(response);
+          const result = await response.json();
+          // console.log(result);
+          setGetUserinfo(result);
+        })
+      } catch(err) {
+        console.log(err);
+      }
+    })()
+  }, [submitted]);
+
+  // useEffect(() => {
+  //   (async () => {
+  //     const userinfo: UserInfo = {
+  //       uuid: userUid,
+  //       real_name: '',
+  //       user_name: username,
+  //       avatar_url: profilePic,
+  //       about_me: aboutMe,
+  //       nationality: '',
+  //       target_language: currentlyLearning,
+  //       cards: {
+  //         user_cards: [],
+  //         user_favorite: [],
+  //       },
+  //       save_new_card_to_deck: true,
+  //       ui_language: 'en',
+  //     }
+  //     try {
+  //       await fetch(`https://tangoatsumare-api.herokuapp.com/api/users`, {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //         body: JSON.stringify(userinfo)
+  //       });
+  //       console.log("Userinfo POSTed to heroku backend");
+  //     } catch(err) {
+  //       console.log(err);
+  //     }
+  //   })();
+  // }, [submitted])
 
   const tempDbObj = [
     {
@@ -48,21 +154,30 @@ export const ProfileSetup = () => {
     }
   ];
 
+  const handleUID = () => {
+    const auth = getAuth();
+    const userId = auth.currentUser?.uid
+    setUserUid(userId || '') // typescript??
+  }
+
   // async
   const usernameAvailibility = () => {
     // check db for username availability
     // if available, green check mark next to input box
     // else, red x mark next to input box 
     let isAvailable = true;
+
+    // replace tempDbObj with all usernames from database when available
     for (const user of tempDbObj) {
       if (user.username.toLowerCase() === username.toLowerCase()) {
         isAvailable = false;
       }
     }
+
     return isAvailable;
   }
 
-  const submitProfileInfo = () => {
+  function submitProfileInfo() {
     // submits all user info into db
 
     if (username === '') {
@@ -73,65 +188,110 @@ export const ProfileSetup = () => {
     if (usernameAvailibility() === true) {
       console.log("username available and submitted")
     } else {
+      alert("Username unavailable");
       console.log("username unavailable and not submitted");
       return;
     }
 
-    console.log("submit pushed");
-    const test = {
-      profilePic,
-      username,
-      currentlyLearning,
-      aboutMe
-    }
-    console.log("test usestate info: ", test)
+    // post user information to heroku db VV
+
+    // post user information to heroku db ^^
+
+    // console.log("submit pushed");
+    // const test = {
+    //   profilePic,
+    //   username,
+    //   currentlyLearning,
+    //   aboutMe
+    // }
+    // console.log("test usestate info: ", test)
     navigation.navigate("Home");
+  }
+
+  // const sendInfoToDb = async () => {
+  //   const userInfo: UserInfo = {
+  //     uuid: userUid,
+  //     real_name: '',
+  //     username: username,
+  //     avatar_url: profilePic,
+  //     about_me: aboutMe,
+  //     nationality: '',
+  //     target_language: currentlyLearning,
+  //     cards: {
+  //       user_cards: [],
+  //       user_favorite: [],
+  //     },
+  //     save_new_card_to_deck: true,
+  //     ui_language: 'en',
+  //   }
+  //   try {
+  //     // const api = `https://tangoatsumare-api.herokuapp.com/api/users`;
+  //     const postInfo = await axios.post(`https://tangoatsumare-api.herokuapp.com/api/users`, userInfo);
+  //     console.log("postInfo.data: ", postInfo.data);
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // }
+
+  const handleSendInfoToDb = () => {
+    (async () => {
+      const userinfo: UserInfo = {
+        uuid: userUid,
+        real_name: '',
+        user_name: username,
+        avatar_url: profilePic,
+        about_me: aboutMe,
+        nationality: '',
+        target_language: currentlyLearning,
+        cards: {
+          user_cards: [],
+          user_favorite: [],
+        },
+        save_new_card_to_deck: true,
+        ui_language: 'en',
+      }
+      try {
+        await fetch(`https://tangoatsumare-api.herokuapp.com/api/users`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(userinfo)
+        });
+        console.log("Userinfo POSTed to heroku backend");
+      } catch (err) {
+        console.log(err);
+      }
+    })();
   }
 
   const selectProfilePic = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
-        base64: true
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+      base64: true
     });
     if (!result.cancelled) {
-        setProfilePic(result.uri);
-        // setBase64(result.base64); // typescript?
+      setProfilePic(result.uri);
+      // setBase64(result.base64); // typescript?
     }
   }
 
-//   const [email, setEmail] = useState<string>('');
-//   const [password, setPassword] = useState<string>('');
-//   const [validationMessage, setValidationMessage] = useState<string>('');
-
-//   const handleLogin = async () => {
-//     if (email === "" || password === "") {
-//       setValidationMessage('Please fill in your email and password')
-//       return;
-//     }
-
-//     try {
-//       await signInWithEmailAndPassword(auth, email, password);
-//       navigation.navigate('Home');
-//     } catch(error: any) {
-//       setValidationMessage(error.message);
-//     }
-//   }
 
   // touchablewithoutfeedback disables buttons and makes them not pressable...
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container} keyboardVerticalOffset={5}>
       <KeyboardAwareScrollView>
-      {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */}
+        {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */}
         <View>
-          <View style={{alignItems: 'center', justifyContent: 'center' }}>
-            {profilePic && <Image source={{ uri: profilePic }} style={ styles.avatar } resizeMode="contain"/>}
-              <Button onPress={selectProfilePic} style={{marginBottom: 25}}>
-                <Text>Select An Image</Text>
-              </Button>
+          <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+            {profilePic && <Image source={{ uri: profilePic }} style={styles.avatar} resizeMode="contain" />}
+            <Button onPress={selectProfilePic} style={{ marginBottom: 25 }}>
+              <Text>Select An Image</Text>
+            </Button>
           </View>
           {/* <View style={styles.wrapperInput}>
             <TextInput
@@ -151,10 +311,10 @@ export const ProfileSetup = () => {
           </View> */}
           <View style={styles.wrapperInput}>
             <TextInput
-            style={styles.input}
-            placeholder="Username"
-            value={username}
-            onChangeText={(text: string) => setUsername(text)} 
+              style={styles.input}
+              placeholder="Username"
+              value={username}
+              onChangeText={(text: string) => setUsername(text)}
             />
           </View>
           <Text>
@@ -170,33 +330,35 @@ export const ProfileSetup = () => {
           </View> */}
           <View style={styles.wrapperInput}>
             <TextInput
-            style={styles.input}
-            placeholder="Currently learning"
-            value={currentlyLearning}
-            onChangeText={(text: string) => setCurrentlyLearning(text)} 
+              style={styles.input}
+              placeholder="Currently learning"
+              value={currentlyLearning}
+              onChangeText={(text: string) => setCurrentlyLearning(text)}
             />
           </View>
           <View style={styles.wrapperInput}>
             <TextInput
-            style={styles.input}
-            placeholder="About Me"
-            value={aboutMe}
-            onChangeText={(text: string) => setAboutMe(text)} 
+              style={styles.input}
+              placeholder="About Me"
+              value={aboutMe}
+              onChangeText={(text: string) => setAboutMe(text)}
             />
           </View>
-          <View style={{alignItems: 'center', justifyContent: 'center' }}>
-              <Button mode="contained" style={{marginTop: 25}}
-                onPress={() => {
-                  submitProfileInfo();
-                  // navigation.navigate("Home");
-                }}
-              >
-                <Text>Submit</Text>
-              </Button>
+          <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+            <Button mode="contained" style={{ marginTop: 25 }}
+              onPress={() => {
+                submitProfileInfo();
+                setSubmitted(true);
+                handleSendInfoToDb();
+                // navigation.navigate("Home");
+              }}
+            >
+              <Text>Submit</Text>
+            </Button>
           </View>
         </View>
-      {/* </TouchableWithoutFeedback> */}
-    </KeyboardAwareScrollView>
+        {/* </TouchableWithoutFeedback> */}
+      </KeyboardAwareScrollView>
     </KeyboardAvoidingView>
   )
 }

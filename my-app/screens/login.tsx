@@ -72,8 +72,8 @@ export const Login = () => {
         <Text>Don't have an account?</Text>
         <Button icon="clipboard" mode="contained" style={styles.button}
           onPress={() => {
-            // navigation.navigate("Register")
-            navigation.navigate("ProfileSetup")
+            navigation.navigate("Register")
+            // navigation.navigate("ProfileSetup")
           }}>
           <Text>Register</Text>
         </Button>

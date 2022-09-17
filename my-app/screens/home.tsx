@@ -18,6 +18,7 @@ export const Home = () => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
   const [value, setValue] = React.useState('collection');
   const [userUid, setUserUid] = React.useState<string>('');
+  const [userProfileInfo, setUserProfileInfo] = React.useState<any>();
 
   const handleCollection: any = () => {
     if (value === 'collection') {
@@ -36,8 +37,18 @@ export const Home = () => {
 
   useEffect(() => {
     handleUID();
+    handleUserProfileInfo();
     // handleProfileInfo();
+    // getProfileInfoById(12345);
   }, []);
+
+  const handleUserProfileInfo = async () => {
+    const info = await getProfileInfoById(12345);
+    setUserProfileInfo(info);
+    // console.log("🏁🏁🏁🏁🏁🏁 info.data[0].nationality: ", info);
+    // console.log("❓❓❓❓❓ test: ", userProfileInfo.nationality);
+  }
+
 
   // const handleProfileInfo = async () => {
   //   const response = await getProfileInfoById(12345);
