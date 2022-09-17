@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import {
   DrawerItem,
@@ -15,10 +15,43 @@ import { useNavigation } from "@react-navigation/core";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { ParamListBase } from "@react-navigation/native";
 import { getAuth } from 'firebase/auth';
+import axios from 'axios';
+
+interface UserInfo {
+  __v: number,
+  _id: string
+  uuid: string,
+  real_name: string,
+  user_name: string,
+  avatar_url: string,
+  about_me: string,
+  nationality: string,
+  target_language: string,
+  cards: {
+    user_cards: string[],
+    user_favorite: string[],
+  },
+  save_new_card_to_deck: boolean,
+  ui_language: string,
+}
 
 export function DrawerContent(props: any) {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
+  
+  const [userProfileInfo, setUserProfileInfo] = useState<UserInfo[]>();
+
   const auth = getAuth();
+
+  useEffect(() => {
+    const uid = auth.currentUser?.uid;
+    axios
+      .get(`https://tangoatsumare-api.herokuapp.com/api/usersuid/${uid}`)
+      .then((response: any) => {
+        const userdata = response.data;
+        setUserProfileInfo(userdata);
+      });
+
+  }, []);
 
   const logout = () => {
     auth.signOut()
@@ -41,8 +74,8 @@ export function DrawerContent(props: any) {
                         }}
                         size={50}
                     /> */}
-          <Title style={styles.title}>Dean</Title>
-          <Caption style={styles.caption}>@DeaNihongo</Caption>
+          {/* <Title style={styles.title}>@{userProfileInfo && userProfileInfo[0].user_name}</Title> */}
+          {/* <Caption style={styles.caption}>@DeaNihongo</Caption> */}
 
         </View>
         <Drawer.Section style={styles.drawerSection}>
