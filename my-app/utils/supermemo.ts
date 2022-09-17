@@ -39,12 +39,22 @@ function supermemo(
 }
 
   export interface TangoFlashcard { // before initialization
-    targetWord: string,
-    context: string,
+    // targetWord: string,
+    // context: string,
+    // reading: string,
+    // englishDefinition: [],
+    // image: string,
+    // partsOfSpeech: string,
+    target_word: string,
+    example_sentence: string,
     reading: string,
-    englishDefinition: [],
-    image: string,
-    partsOfSpeech: string,
+    card_language: string,
+    Eng_meaning: string[],
+    created_by: string | undefined,
+    created_timestamp: string,
+    picture_url: string,
+    // parts_of_speech: string,
+    flagged_inappropriate: boolean
   }
 
   export interface SuperMemoItem {
@@ -57,7 +67,7 @@ function supermemo(
 
   export interface SRSTangoFlashcard extends TangoFlashcard, SuperMemoItem {
     counter: number;
-    dueDate: string;
+    due_date: string;
   }
 
   export const initializeSRSFlashcard = (flashcard: TangoFlashcard): SRSTangoFlashcard => {
@@ -65,8 +75,8 @@ function supermemo(
     const interval = 0;
     const repetition = 0;
     const efactor = 2.5;
-    const dueDate = dayjs(Date.now()).toISOString();
-    return { ...flashcard, counter, interval, repetition, efactor, dueDate };
+    const due_date = dayjs(Date.now()).toISOString();
+    return { ...flashcard, counter, interval, repetition, efactor, due_date };
   };
 
   export const initializeSRSFlashcards = (flashcards: TangoFlashcard[]): SRSTangoFlashcard[] => {
@@ -89,9 +99,9 @@ function supermemo(
     // console.log(currentDate);
 
     // const currentDate = dayjs('2022-09-14 00:00');
-    const { dueDate } = flashcard;
+    const { due_date } = flashcard;
     // console.log(dayjs(dueDate).diff(currentDate));
-    const diff = dayjs(dueDate).diff(currentDate);
+    const diff = dayjs(due_date).diff(currentDate);
     // if dueDate - currentDate is negative
     // that means the card is due and can be reviewed
     return diff < 0 ? true : false;
@@ -114,14 +124,14 @@ function supermemo(
     // When decimal values are passed for days and weeks, they are rounded to the nearest integer before adding.
 
     // so, adopt adding by seconds to avoid the unwanted rounding
-    const dueDate = dayjs(Date.now()).add(interval * 24 * 60 * 60, 'second').toISOString(); 
+    const due_date = dayjs(Date.now()).add(interval * 24 * 60 * 60, 'second').toISOString(); 
     return { 
       ...flashcard, 
       counter: flashcard.counter + 1,
       interval, 
       repetition,
       efactor,
-      dueDate 
+      due_date 
     };
   };
 
@@ -143,6 +153,9 @@ function supermemo(
     const setGradeForAgain = (grade: SuperMemoGrade) => {
       AGAIN = grade;
     }
+    const setFirstIntervalForAgain = () => {
+      FIRST_INTERVAL = 0;
+    }
     const setFirstInterval = (value: number) => {
       FIRST_INTERVAL = value;
     }
@@ -158,7 +171,8 @@ function supermemo(
       getFirstInterval,
       getSecondInterval,
       setFirstInterval,
-      setSecondInterval
+      setSecondInterval,
+      setFirstIntervalForAgain
     }
   })();
 
@@ -168,8 +182,22 @@ function supermemo(
   };
 
   export const setFlashcardAsAgain = (flashcard: SRSTangoFlashcard): SRSTangoFlashcard => {
-    const AGAIN: SuperMemoGrade = SRSProperties.getGradeForAgain();
-    return practiseFlashcard(flashcard, AGAIN);
+    
+    // TO CHANGE.
+    // set the interval to be zero
+    // set the duedate to be now
+    // set the repetition to be zero
+    // increment counter by 1
+
+    let { interval, due_date, repetition, counter } = flashcard;
+    interval = 0;
+    due_date = dayjs(Date.now());
+    repetition = 0;
+    counter = counter + 1;
+    return { ...flashcard, interval, due_date, repetition, counter };
+
+    // const AGAIN: SuperMemoGrade = SRSProperties.getGradeForAgain();
+    // return practiseFlashcard(flashcard, AGAIN);
   };
 
 

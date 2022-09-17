@@ -9,8 +9,11 @@ import {
     setFlashcardAsAgain,
   } from "../utils/supermemo";
 import axios from "axios";
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 
 export const Review = ({route}) => {
+    const auth = getAuth();
+    const userId = auth.currentUser?.uid;
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
     const [flashcard, setFlashcard] = useState({});
     const [engDef, setEngDef] = useState<string>('');
@@ -19,30 +22,52 @@ export const Review = ({route}) => {
     const [ isEndOfReview, setIsEndOfReview ] = useState<boolean>(false);
 
     let { flashcardsAll } = route.params; // not a state. is a variable that gets updated throughout the review
+    const [flashcards, setFlashcards] = useState(flashcardsAll);
 
     useEffect(() => {
-        setFlashcard(flashcardsAll[index]);
-        setEngDef(flashcardsAll[index].english_definition[0]);
+        setFlashcard(flashcardsAll[index].Flashcard[0]); // Updated per endpoint response format
+        setEngDef(flashcardsAll[index].Flashcard[0].Eng_meaning[0]); // Updated per endpoint response format
     }, []);
 
     useEffect(() => {
       if (index && sideOfFlashcard === "Front") {
-        setFlashcard(flashcardsAll[index]);
-        setEngDef(flashcardsAll[index].english_definition[0]);
+        setFlashcard(flashcardsAll[index].Flashcard[0]); // Updated per endpoint response format
+        setEngDef(flashcardsAll[index].Flashcard[0].Eng_meaning[0]); // Updated per endpoint response format
       }
     }, [index, sideOfFlashcard]);
 
     useEffect(() => {
-        if (isEndOfReview) {
+        if (isEndOfReview && flashcards) {
+            console.log(flashcards);
+
+            // array of objects
+            const requestBody = [];
+            for (const flashcard of flashcards) {
+                const item = {
+                    _id: flashcard._id,
+                    counter: flashcard.counter,
+                    efactor: flashcard.efactor,
+                    interval: flashcard.interval,
+                    repetition: flashcard.repetition,
+                    due_date: flashcard.due_date,
+                }
+                requestBody.push(item);
+            }
+            
+            console.log(requestBody);
+
             // TODO: PATCH request to update the user_to_flashcard scheduling table
-            // axios.patch()
+            axios.patch(`https://tangoatsumare-api.herokuapp.com/api/userstocards/`, requestBody)
+            // axios.patch(`https://tangoatsumare-api.herokuapp.com/api/userstocardsuid/${userId}`, requestBody)
+            .then(res => console.log("success"))
+            .catch(err => console.log(err));
         }
-    }, [isEndOfReview]);
+    }, [isEndOfReview, flashcards]);
 
     const updateFlashCardsAllWithGood = () => {
         const result = [...flashcardsAll];
         for (let i = 0; i < result.length; i++) {
-            if (result[i]._id === flashcard._id) {
+            if (result[i].Flashcard[0]._id === flashcard._id) {
                 result[i] = setFlashcardAsGood(result[i]);
             }
         }
@@ -52,7 +77,7 @@ export const Review = ({route}) => {
     const updateFlashCardsAllWithAgain = () => {
         const result = [...flashcardsAll];
         for (let i = 0; i < result.length; i++) {
-            if (result[i]._id === flashcard._id) {
+            if (result[i].Flashcard[0]._id === flashcard._id) {
                 result[i] = setFlashcardAsAgain(result[i]);
             }
         }
@@ -63,11 +88,11 @@ export const Review = ({route}) => {
         return (
             <Card key={card.target_word} style={styles.card}>
                 <Card.Content>
-                    <Card.Cover  source={{uri: card.image ? card.image :  'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}}style={styles.photo} />
+                    <Card.Cover  source={{uri: card.picture_url ? card.picture_url :  'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}}style={styles.photo} />
                     <Title style={styles.textVocab}>{card.target_word}</Title>
                     {sideOfFlashcard === 'Back' && <Paragraph style={styles.text}>{card.reading}</Paragraph>}
                     {sideOfFlashcard === 'Back' && <Paragraph style={styles.text}> Meaning: {engDef}</Paragraph>}
-                    <Paragraph style={styles.text}>Sentence: {card.context}</Paragraph>
+                    <Paragraph style={styles.text}>Sentence: {card.example_sentence}</Paragraph>
                 </Card.Content>        
             </Card>
             );
@@ -97,10 +122,11 @@ export const Review = ({route}) => {
                             onPress={()=>{
                                 // fire the update flashcardsAll function
                                 flashcardsAll = updateFlashCardsAllWithGood();
-            
+                                setFlashcards(flashcardsAll);
+                                console.log(flashcards);
                                 if (index === flashcardsAll.length - 1) {
-                                console.log('the end');
-                                setIsEndOfReview(true);
+                                    console.log('the end');
+                                    setIsEndOfReview(true);
                                 } else {
                                     setIndex((prev) => prev + 1); // increment the index
                                     setSideOfFlashcard("Front");
@@ -114,10 +140,11 @@ export const Review = ({route}) => {
                             style={styles.againButton}
                             onPress={()=>{
                                 flashcardsAll = updateFlashCardsAllWithAgain();
-            
+                                setFlashcards(flashcardsAll);
+                                console.log(flashcards);
                                 if (index === flashcardsAll.length - 1) {
-                                console.log('the end');
-                                setIsEndOfReview(true);
+                                    console.log('the end');
+                                    setIsEndOfReview(true);
                                 } else {
                                     setIndex((prev) => prev + 1); // increment the index
                                     setSideOfFlashcard("Front");

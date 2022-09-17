@@ -18,7 +18,7 @@ export const HomeNavigator = () => {
 export const SRSNavigator = () => {
     return (
         <Drawer.Navigator useLegacyImplementation={true} drawerContent={props => <DrawerContent {...props} />}>
-            <Drawer.Screen name="SRS Screen" options={{headerTitle:"SRS"}} component={SRS} />
+            <Drawer.Screen name="SRS Screen" options={{headerTitle:"Review"}} component={SRS} />
         </Drawer.Navigator>
     );
 };

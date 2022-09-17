@@ -16,6 +16,9 @@ import uuid from 'react-native-uuid';
 import {lookupJishoApi} from '../utils/jisho';
 import { async } from '@firebase/util';
 import axios from 'axios';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import dayjs from 'dayjs';
+import { initializeSRSFlashcard, TangoFlashcard } from '../utils/supermemo';
 
 interface OCRProps {
     route: any;
@@ -23,6 +26,8 @@ interface OCRProps {
 }
 
 export const OCR = ({ route, navigation }: OCRProps) => {
+    const auth = getAuth();
+    const userId = auth.currentUser?.uid;
     const storage = getStorage(app);
     const { image_uri, image_base64 } = route.params;
     const [ image, setImage ] = useState<string>(image_uri);
@@ -64,7 +69,7 @@ export const OCR = ({ route, navigation }: OCRProps) => {
           xhr.send(null);
         });
       
-        const fileRef = ref(storage, `testing/${uuid.v4()}`); // uuid for the photo object's name
+        const fileRef = ref(storage, `flashcards/${userId}/${uuid.v4()}`); // uuid for the photo object's name
         const result = await uploadBytesResumable(fileRef, blob);
       
         // We're done with the blob, close and release it
@@ -133,24 +138,72 @@ export const OCR = ({ route, navigation }: OCRProps) => {
     useEffect(() => {
         (async () => {
             if (cloudStoragePath) { // if photo is successfully uploaded to firebase, execute the flashcard POST request
-                const flashcard = {
+                const flashcard: TangoFlashcard = {
                     target_word: selectedText,
-                    context: responseText,
+                    example_sentence: responseText,
                     reading: '',
-                    english_definition: [resultFromDictionaryLookup],
-                    image: cloudStoragePath,
-                    parts_of_speech: ''
-                    // TODO: include the "created by current user (firebase auth UID (uuid))"
+                    card_language: 'jp',
+                    Eng_meaning: [resultFromDictionaryLookup],
+                    created_by: userId,
+                    created_timestamp: dayjs(new Date()).toISOString(),
+                    picture_url: 
+                    // 'https://1.bp.blogspot.com/-YIfQT6q8ZM4/Vzyq5z1B8HI/AAAAAAAAAAc/UmWSSMLKtKgtH7CACElUp12zXkrPK5UoACLcB/s1600/image00.png',
+                    cloudStoragePath,
+                    flagged_inappropriate: false
+
+                    // target_word: String,
+                    // example_sentence: String,
+                    // reading: String,
+                    // card_language: String,
+                    // Eng_meaning: [],
+                    // created_by: String,
+                    // created_timestamp: String,
+                    // picture_url: String,
+                    // flagged_inappropriate: Boolean,
                 };
                 try {
-                    await fetch(`https://tangoatsumare-api.herokuapp.com/api/flashcards`, { // put into .env
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(flashcard)
+                    console.log(cloudStoragePath);
+                    const response = await fetch(`https://tangoatsumare-api.herokuapp.com/api/flashcards`, { // put into .env
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(flashcard)
                     });
+                    const responseJson = await response.json();
+                    console.log(responseJson);
                     console.log('flashcard POSTed to the backend API');
+
+                    // Note: adding boolean for setting by default ....
+                    // POST request to user_to_cards table
+                    const SRSFlashcard = initializeSRSFlashcard(flashcard);
+                    console.log(SRSFlashcard);
+
+                    // uid -> userId
+                    // flashcard_id -> return value from the flashcards POST request (type: ObjectId)
+                    // interval -> from SRSFlashcard
+                    // efactor -> from SRSFlashcard
+                    // repetition -> from SRSFlashcard
+                    // due_date -> from SRSFlashcard
+
+                    const requestBodyForUsersToCards = {
+                        uid: userId,
+                        flashcard_id: responseJson._id,
+                        counter: SRSFlashcard.counter,
+                        interval: SRSFlashcard.interval,
+                        efactor: SRSFlashcard.efactor,
+                        repetition: SRSFlashcard.repetition,
+                        due_date: SRSFlashcard.due_date
+                    }
+
+                    await fetch(`https://tangoatsumare-api.herokuapp.com/api/userstocards`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(requestBodyForUsersToCards)
+                    });
+                    console.log('SRS flashcard POSTed to the backend API');
                     setCardIsSubmitted(true);
                 } catch (err) {
                     console.log(err);
