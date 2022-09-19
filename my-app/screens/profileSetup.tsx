@@ -205,7 +205,7 @@ export const ProfileSetup = () => {
     //   aboutMe
     // }
     // console.log("test usestate info: ", test)
-    navigation.navigate("Home");
+    navigation.navigate("TabHome");
   }
 
   // const sendInfoToDb = async () => {

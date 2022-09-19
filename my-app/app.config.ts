@@ -5,6 +5,7 @@ export default {
     "name": "my-app",
     "slug": "my-app",
     "version": "1.0.0",
+    "owner": "team-tango",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -20,7 +21,8 @@ export default {
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "tango-atsumare"
     },
     "android": {
       "adaptiveIcon": {
@@ -38,7 +40,10 @@ export default {
       firebaseStorageBucket: process.env.FIREBASE_STORAGE_BUCKET,
       firebaseMessagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
       firebaseAppId: process.env.FIREBASE_APP_ID,
-      cloudVisionApiKey: process.env.GOOGLE_CLOUD_VISION_API_KEY
+      cloudVisionApiKey: process.env.GOOGLE_CLOUD_VISION_API_KEY,
+      "eas": {
+        "projectId": "00bc8170-cc77-4137-8a08-6592c5c46dfe"
+      }
     },
   }
 }

@@ -122,8 +122,8 @@ export const Review = ({route}) => {
                             onPress={()=>{
                                 // fire the update flashcardsAll function
                                 flashcardsAll = updateFlashCardsAllWithGood();
+                                console.log(flashcardsAll[flashcardsAll.indexOf(flashcard)]);
                                 setFlashcards(flashcardsAll);
-                                console.log(flashcards);
                                 if (index === flashcardsAll.length - 1) {
                                     console.log('the end');
                                     setIsEndOfReview(true);
