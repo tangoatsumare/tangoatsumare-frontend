@@ -1,7 +1,8 @@
 import axios from "axios";
 import { SRSTangoFlashcard } from "./supermemo";
 
-const FLASHCARDS_BY_USER_URL = `https://tangoatsumare-api.herokuapp.com/api/cardflashjoinuid/`;
+
+const SRS_FLASHCARDS_BY_USER_URL = `https://tangoatsumare-api.herokuapp.com/api/cardflashjoinuid/`;
 const USERSTOCARDS_URL = `https://tangoatsumare-api.herokuapp.com/api/userstocards/`;
 
 export interface UsersToCardsSRSProps {
@@ -18,7 +19,7 @@ export type UserId = string | undefined
 const HTTPRequest = (() => {
     const getSRSFlashcardsByUser = (userId: UserId): Promise<SRSTangoFlashcard[]> => {
         return axios
-        .get(FLASHCARDS_BY_USER_URL + userId)
+        .get(SRS_FLASHCARDS_BY_USER_URL + userId)
         .then((response: any) => {
             return response.data;
         });
