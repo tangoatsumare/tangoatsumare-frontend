@@ -1,71 +1,60 @@
 import { useNavigation} from "@react-navigation/core";
 import { StackNavigationProp} from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { View, StyleSheet, FlatList } from 'react-native'
 import { Button, Card, Paragraph, Text, Title } from "react-native-paper";
 import { 
     setFlashcardAsGood,
     setFlashcardAsAgain,
   } from "../utils/supermemo";
-import axios from "axios";
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { UsersToCardsSRSProps, HTTPRequest } from "../utils/httpRequest";
+import { getAuth } from 'firebase/auth';
 
 export const Review = ({route}) => {
     const auth = getAuth();
     const userId = auth.currentUser?.uid;
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
+    
+    let { flashcardsAll } = route.params;
+    const [flashcards, setFlashcards] = useState(flashcardsAll);
     const [flashcard, setFlashcard] = useState({});
     const [engDef, setEngDef] = useState<string>('');
+
     const [ sideOfFlashcard, setSideOfFlashcard ] = useState<string>("Front"); // Front and Back
     const [ index, setIndex ] = useState<number>(0);
+    
     const [ isEndOfReview, setIsEndOfReview ] = useState<boolean>(false);
-
-    let { flashcardsAll } = route.params; // not a state. is a variable that gets updated throughout the review
-    const [flashcards, setFlashcards] = useState(flashcardsAll);
+    const isFirst = useRef(true);
 
     useEffect(() => {
         setFlashcard(flashcardsAll[index].Flashcard[0]); // Updated per endpoint response format
         setEngDef(flashcardsAll[index].Flashcard[0].Eng_meaning[0]); // Updated per endpoint response format
-    }, []);
+    }, [index]); // update states whenever index is changed
+
+    const handleGoodButtonClick = () => {
+        setFlashcards(updateFlashCardsAllWithGood());
+    };
+
+    const handleAgainButtonClick = () => {
+        setFlashcards(updateFlashCardsAllWithAgain());
+    };
 
     useEffect(() => {
-      if (index && sideOfFlashcard === "Front") {
-        setFlashcard(flashcardsAll[index].Flashcard[0]); // Updated per endpoint response format
-        setEngDef(flashcardsAll[index].Flashcard[0].Eng_meaning[0]); // Updated per endpoint response format
-      }
-    }, [index, sideOfFlashcard]);
-
-    useEffect(() => {
-        if (isEndOfReview && flashcards) {
-            console.log(flashcards);
-
-            // array of objects
-            const requestBody = [];
-            for (const flashcard of flashcards) {
-                const item = {
-                    _id: flashcard._id,
-                    counter: flashcard.counter,
-                    efactor: flashcard.efactor,
-                    interval: flashcard.interval,
-                    repetition: flashcard.repetition,
-                    due_date: flashcard.due_date,
-                }
-                requestBody.push(item);
+        if (isFirst.current) isFirst.current = false; // avoid useEffect to trigger at initial flashcard setState
+        else {
+            if (index === flashcardsAll.length - 1) {
+                console.log('the end');
+                setIsEndOfReview(true);
+            } else {
+                setIndex((prev) => prev + 1); // increment the index
+                setSideOfFlashcard("Front");
             }
-            
-            console.log(requestBody);
-
-            // TODO: PATCH request to update the user_to_flashcard scheduling table
-            axios.patch(`https://tangoatsumare-api.herokuapp.com/api/userstocards/`, requestBody)
-            // axios.patch(`https://tangoatsumare-api.herokuapp.com/api/userstocardsuid/${userId}`, requestBody)
-            .then(res => console.log("success"))
-            .catch(err => console.log(err));
         }
-    }, [isEndOfReview, flashcards]);
+    }, [flashcards]);
 
     const updateFlashCardsAllWithGood = () => {
-        const result = [...flashcardsAll];
+        const result = [...flashcards];
         for (let i = 0; i < result.length; i++) {
             if (result[i].Flashcard[0]._id === flashcard._id) {
                 result[i] = setFlashcardAsGood(result[i]);
@@ -75,7 +64,7 @@ export const Review = ({route}) => {
     };
   
     const updateFlashCardsAllWithAgain = () => {
-        const result = [...flashcardsAll];
+        const result = [...flashcards];
         for (let i = 0; i < result.length; i++) {
             if (result[i].Flashcard[0]._id === flashcard._id) {
                 result[i] = setFlashcardAsAgain(result[i]);
@@ -83,6 +72,28 @@ export const Review = ({route}) => {
         }
         return result;
     };
+
+    useEffect(() => {
+        (async () => {
+            if (isEndOfReview) {
+                // array of objects
+                const requestBody = [];
+                for (const flashcard of flashcards) {
+                    const item: UsersToCardsSRSProps = {
+                        _id: flashcard._id,
+                        counter: flashcard.counter,
+                        efactor: flashcard.efactor,
+                        interval: flashcard.interval,
+                        repetition: flashcard.repetition,
+                        due_date: flashcard.due_date,
+                    }
+                    requestBody.push(item);
+                }            
+    
+                await HTTPRequest.updateFlashcardsSRSProperties(requestBody);
+            }
+        })();
+    }, [isEndOfReview]);
 
     const DisplayCard = (card: any) => {
         return (
@@ -119,40 +130,13 @@ export const Review = ({route}) => {
                             mode="contained" 
                             style={styles.goodButton}
                             buttonColor="green"
-                            onPress={()=>{
-                                // fire the update flashcardsAll function
-                                flashcardsAll = updateFlashCardsAllWithGood();
-                                console.log(flashcardsAll[flashcardsAll.indexOf(flashcard)]);
-                                setFlashcards(flashcardsAll);
-                                if (index === flashcardsAll.length - 1) {
-                                    console.log('the end');
-                                    setIsEndOfReview(true);
-                                } else {
-                                    setIndex((prev) => prev + 1); // increment the index
-                                    setSideOfFlashcard("Front");
-                                }
-                            }}
-                        >
-                            <Text>Good</Text>
-                        </Button>
+                            onPress={handleGoodButtonClick}
+                        ><Text>Good</Text></Button>
                         <Button 
                             mode="contained" 
                             style={styles.againButton}
-                            onPress={()=>{
-                                flashcardsAll = updateFlashCardsAllWithAgain();
-                                setFlashcards(flashcardsAll);
-                                console.log(flashcards);
-                                if (index === flashcardsAll.length - 1) {
-                                    console.log('the end');
-                                    setIsEndOfReview(true);
-                                } else {
-                                    setIndex((prev) => prev + 1); // increment the index
-                                    setSideOfFlashcard("Front");
-                                }
-                            }}
-                        >
-                            <Text>Again</Text>
-                        </Button>
+                            onPress={handleAgainButtonClick}
+                        ><Text>Again</Text></Button>
                     </View>
                 </>
                 :
