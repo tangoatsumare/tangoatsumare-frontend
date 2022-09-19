@@ -3,8 +3,8 @@ import { StackNavigationProp} from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 import { useIsFocused } from "@react-navigation/native";
 import React, {useState, useEffect} from "react";
-import {Button, Card, Paragraph, Title} from "react-native-paper";
-import {View, Text, StyleSheet, FlatList, TouchableOpacity} from 'react-native'
+import {Text, Button, Card, Paragraph, Title, Avatar} from "react-native-paper";
+import {View, StyleSheet, FlatList, TouchableOpacity} from 'react-native'
 import { HTTPRequest } from "../utils/httpRequest";
 
 export const Feed = () => {
@@ -18,10 +18,20 @@ export const Feed = () => {
         (async () => {
           if (isFocused) {
             try {
-              const flashcards = await HTTPRequest.getFlashcards();
-              setFlashcards(flashcards.reverse());
+                const flashcardsAll = await HTTPRequest.getFlashcards();
+                const usersAll = await HTTPRequest.getUsers();
+              
+                for (const card of flashcardsAll) {
+                    const result = usersAll.find((user: any) => user.uuid === card.created_by);
+                    if (result) {
+                        console.log(result.user_name);
+                        card.created_by = result.user_name; // replace uid with username
+                        card.avatar = result.avatar_url; // add field
+                    }
+                }
+                setFlashcards(flashcardsAll.reverse());
             } catch (err) {
-              console.log(err);
+                console.log(err);
             }
           }
         })();
@@ -46,16 +56,25 @@ export const Feed = () => {
                       handleShowFlashcard(item._id)
                     }}
               >
-                <Card key={item.target_word} style={styles.card}>
-                      <Card.Content>
-                      <Card.Cover   source={{uri: item.picture_url ? item.picture_url : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}} />
-                      <Title style={styles.textVocab}>{item.target_word}</Title>
-                      <Paragraph style={styles.text}>Sentence: {item.example_sentence}</Paragraph>
-                      </Card.Content>
-                      <Card.Actions>
-                
-                  </Card.Actions>
-                  </Card>
+                <View key={item.target_word} style={styles.item}>
+                    <View style={styles.user}>
+                        <Avatar.Image size={50} source={item.avatar} style={styles.userLeft}/>
+                        <View style={styles.userRight}>
+                            <Text variant="bodyLarge">{item.created_by}</Text>
+                            <Text variant="bodySmall">{item.created_timestamp}</Text>
+                        </View>
+                    </View>
+                    <Card style={styles.card}>
+                        <Card.Content>
+                        <Card.Cover source={{uri: item.picture_url ? item.picture_url : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}} />
+                        <Title style={styles.textVocab}>{item.target_word}</Title>
+                        <Paragraph style={styles.text}>Sentence: {item.example_sentence}</Paragraph>
+                        </Card.Content>
+                        <Card.Actions>
+                    
+                        </Card.Actions>
+                    </Card>
+                </View>
                 </TouchableOpacity>
               );
             }
@@ -72,6 +91,24 @@ export const Feed = () => {
     }
     
     const styles = StyleSheet.create({
+            item: {
+                marginBottom: 20
+            },
+            user: {
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                marginBottom: 10
+            },
+            userLeft: {
+                marginRight: 10
+            },
+            userRight: {
+                alignItems: 'flex-start'
+            },
+            username: {
+
+            },
             button: {
                 alignItems: 'center',
             },
