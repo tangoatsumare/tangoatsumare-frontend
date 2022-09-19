@@ -72,7 +72,8 @@ export const Home = () => {
         ]}
         style={styles.segment}
       />
-      <Collection />
+      {/* <Collection /> */}
+      {handleCollection()}
     </View>
 
   )

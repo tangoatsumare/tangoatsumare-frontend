@@ -7,8 +7,8 @@ import {Button, Card, Paragraph, Title} from "react-native-paper";
 import React, { useEffect, useState } from "react";
 import {View, Text, StyleSheet, FlatList, TouchableOpacity} from 'react-native'
 import axios from "axios";
-
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { HTTPRequest } from "../utils/httpRequest";
+import { getAuth } from 'firebase/auth';
 
 export const Collection = () => {
 
@@ -22,23 +22,16 @@ export const Collection = () => {
   useEffect(() => {
     // why using "isFocused"
     // https://stackoverflow.com/questions/60182942/useeffect-not-called-in-react-native-when-back-to-screen
-    if (isFocused) {
-      console.log(userId);
-      // axios
-        // .get
-        fetch(`https://tangoatsumare-api.herokuapp.com/api/flashcardsby/${userId}`)
-        .then((response: any) => response.json())
-        .then((response: any) => {
-          console.log('hihi');
-          const flashcards = response;
-          const reverseFlashcards = flashcards.reverse();
-          // console.log(reverseFlashcards);
-          setFlashcards(reverseFlashcards);
-        })
-        .catch((err) => {
-          console.log(err)
-        });
-    }
+    (async () => {
+      if (isFocused) {
+        try {
+          const flashcards = await HTTPRequest.getFlashcardsByUser(userId);
+          setFlashcards(flashcards.reverse());
+        } catch (err) {
+          console.log(err);
+        }
+      }
+    })();
   }, [isFocused]);
 
   const handleShowFlashcard = (flashcardID: string) => {
@@ -50,6 +43,7 @@ export const Collection = () => {
       return (
           <FlatList
             // inverted
+            contentContainerStyle={{}}
             ItemSeparatorComponent={() => <View style={styles.separator} />}
             data={flashcards}
             keyExtractor={(flashcard, index) => index.toString()}

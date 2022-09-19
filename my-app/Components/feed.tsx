@@ -1,34 +1,102 @@
 import { useNavigation} from "@react-navigation/core";
 import { StackNavigationProp} from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
-
-import React from "react";
-import {View, Text, StyleSheet} from 'react-native'
-import {Button} from "react-native-paper";
+import { useIsFocused } from "@react-navigation/native";
+import React, {useState, useEffect} from "react";
+import {Button, Card, Paragraph, Title} from "react-native-paper";
+import {View, Text, StyleSheet, FlatList, TouchableOpacity} from 'react-native'
+import { HTTPRequest } from "../utils/httpRequest";
 
 export const Feed = () => {
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
+    const [flashcards, setFlashcards] = useState([]);
+    const isFocused = useIsFocused();
 
-    return (
-        <View style={styles.container}>
-            <Button icon="eye" mode="contained" style={styles.button}
-                        onPress={()=>{
-                            navigation.navigate("Settings")
-                        }}>
-                    <Text>Feed</Text>
-                </Button>
-        </View>
-    )
-}
+    useEffect(() => {
+        // why using "isFocused"
+        // https://stackoverflow.com/questions/60182942/useeffect-not-called-in-react-native-when-back-to-screen
+        (async () => {
+          if (isFocused) {
+            try {
+              const flashcards = await HTTPRequest.getFlashcards();
+              setFlashcards(flashcards.reverse());
+            } catch (err) {
+              console.log(err);
+            }
+          }
+        })();
+      }, [isFocused]);
 
-const styles = StyleSheet.create({
-        button: {
-            alignItems: 'center',
-        },
-        container: {
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center',
+      const handleShowFlashcard = (flashcardID: string) => {
+        navigation.navigate("Card", {id: flashcardID})
+        console.log(flashcardID)
+      }
+    
+      const displayFlashcard = (flashcards: readonly any[] | null | undefined) => {
+          return (
+              <FlatList
+                // inverted
+                contentContainerStyle={{}}
+                ItemSeparatorComponent={() => <View style={styles.separator} />}
+                data={flashcards}
+                keyExtractor={(flashcard, index) => index.toString()}
+                renderItem={({item}) => {
+                  return (
+                    <TouchableOpacity onPress={() => {
+                      handleShowFlashcard(item._id)
+                    }}
+              >
+                <Card key={item.target_word} style={styles.card}>
+                      <Card.Content>
+                      <Card.Cover   source={{uri: item.picture_url ? item.picture_url : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}} />
+                      <Title style={styles.textVocab}>{item.target_word}</Title>
+                      <Paragraph style={styles.text}>Sentence: {item.example_sentence}</Paragraph>
+                      </Card.Content>
+                      <Card.Actions>
+                
+                  </Card.Actions>
+                  </Card>
+                </TouchableOpacity>
+              );
+            }
+          }
+          />
+          );
         }
+    
+      return (
+        <View style={styles.container}>
+          {displayFlashcard(flashcards)}
+        </View>
+      )
     }
-);
+    
+    const styles = StyleSheet.create({
+            button: {
+                alignItems: 'center',
+            },
+            container: {
+                alignItems: 'center',
+                justifyContent: 'center',
+            },
+            segment: {
+    
+            },
+              separator: {
+                height: 0,
+                backgroundColor: "grey"
+              },
+              text: {
+                textAlign: 'center',
+              },
+              textVocab: {
+                textAlign: 'center',
+                fontWeight: "bold"
+              },
+              card: {
+                borderRadius: 10,
+                margin: 10,
+                marginTop: 2, 
+              },
+        }
+    );
