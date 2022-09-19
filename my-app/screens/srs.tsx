@@ -1,98 +1,54 @@
 import { useNavigation} from "@react-navigation/core";
 import { StackNavigationProp} from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
-import axios from "axios";
 import React, { useEffect, useState } from "react";
 import {ScrollView, View, StyleSheet} from 'react-native'
 import {TextInput, Text, Button, Modal, Portal} from "react-native-paper";
 import { useIsFocused } from "@react-navigation/native";
-// import dayjs from 'dayjs';
-// import utc from 'dayjs/plugin/utc';
-// import tz from 'dayjs/plugin/timezone';
 import { useTheme } from 'react-native-paper';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { 
     SRSTangoFlashcard,
-    initializeSRSFlashcards,
     getReviewableSRSFlashcards,
     SRSProperties
  } from "../utils/supermemo";
+import { HTTPRequest, UserId } from "../utils/httpRequest";
 
 export const SRS = ({route}) => {
     const auth = getAuth();
-    const userId = auth.currentUser?.uid;
+    const userId: UserId = auth.currentUser?.uid;
     const theme = useTheme();
+    const isFocused = useIsFocused();
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
     
-    // all the SRS flashcards
-    // const [ flashcardsAll, setFlashcardsAll ] = useState<SRSTangoFlashcard[]>([]); 
-    // a rolling state for reviewable flashcards
     const [ flashcardsReviewable, setFlashcardsReviewable ] = useState<SRSTangoFlashcard[]>([]);
-
-    const isFocused = useIsFocused();
     const [ metrics, setMetrics ] = useState({
         new: 0,
-        learning: 0,
+        // learning: 0,
         due: 0
     });
-
     const [ modalVisible, setModalVisible ] = useState(false);
 
     useEffect(() => {
-        if (route.params?.flashcardsAllModified) {
-            console.log(route.params?.flashcardsAllModified);
-        }
-    },[route.params]);
-
-    useEffect(() => {
-        if (isFocused && !route.params?.flashcardsAllModified) {
-            // console.log(userId);
-            axios
-            // .get("https://tangoatsumare-api.herokuapp.com/api/flashcards")
-            .get(`https://tangoatsumare-api.herokuapp.com/api/cardflashjoinuid/${userId}`)
-            .then((response: any) => {
-            //   const flashcards = response.data.slice(0, 3); // TO CHANGE
-                const flashcards = response.data; // TO CHANGE
-                // console.log(flashcards);
-              // TO CHANGE
-              // Right now, assume the cards for initialize here.
-              // But instead, they gotta be initialized beforehand. 
-              // because each represents the state of SRS review progress for each card
-
-              // So, it is more appropriate to implement getReviewableSRSFlashcards here
-              // once the backend is working
-            //   setFlashcardsAll(initializeSRSFlashcards(flashcards));
-                console.log(getReviewableSRSFlashcards(flashcards));
-              setFlashcardsReviewable(getReviewableSRSFlashcards(flashcards));
-            });
-        } 
-        // else if (isFocused && route.params?.flashcardsAllModified) {
-        //     console.log(route.params.flashcardsAllModified);
-        //     setFlashcardsAll(route.params.flashcardsAllModified); // update the UI with the modified flashcard data
-        //     // setFlashcardsReviewable(getReviewableSRSFlashcards(flashcards));
-        //     // TODO: do a PATCH request to the backend API user-to-flashcards table to update the flashcard scheduling data
-        // }
-    },[isFocused, route.params?.flashcardsAllModified]);
-
-    // useEffect(() => {
-    //     if (flashcardsAll) {
-    //         // if flashcards state is updated, adjust the pool of reviewable cards
-    //         setFlashcardsReviewable(getReviewableSRSFlashcards(flashcardsAll));
-    //     }
-    // }, [flashcardsAll]);
+        (async () => {
+            if (isFocused && userId) {
+                const flashcards: SRSTangoFlashcard[] = await HTTPRequest.getSRSFlashcardsByUser(userId);
+                setFlashcardsReviewable(getReviewableSRSFlashcards(flashcards));
+            } 
+        })();
+    },[isFocused]);
 
     useEffect(() => {
         if (flashcardsReviewable) {
             const newCards = flashcardsReviewable.filter(card => card.counter === 0).length;
             // learning cards involve the concept of a learning queue.. that involves "steps"
             // const learningCards = flashcardsAll.filter(card => card.counter !== 0 && card.repetition === 0).length;
-            const learningCards = 0; // TO CHANGE
+            // const learningCards = 0; // TO CHANGE
             const dueCards = flashcardsReviewable.filter(card => card.counter !== 0).length;
-            // flashcardsAll.filter(card => card.counter !== 0 && card.repetition !== 0).length;
             
             setMetrics({
                 new: newCards,
-                learning: learningCards,
+                // learning: learningCards,
                 due: dueCards
             });
 
