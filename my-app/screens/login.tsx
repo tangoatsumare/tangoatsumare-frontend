@@ -3,15 +3,18 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 //import { getFirebaseAuth } from '../firebase';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import LoginLoader from './LoginLoader';
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native'
 import { Button } from "react-native-paper";
+
 
 export const Login = () => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
   const auth = getAuth();
+
 
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -32,53 +35,56 @@ export const Login = () => {
         navigation.navigate('TabHome');
       }, 1000);
 
-    } catch(error: any) {
+    } catch (error: any) {
       setValidationMessage(error.message);
     }
   }
 
   return (
-    <View style={styles.container}>
-      <ActivityIndicator
-        size='large'
-        color="#333"
-        animating={renderingIndicator}
-      />
-      <View>
-        <Text>Hello user! Welcome back!</Text>
+    <>
+      <View style={styles.container}>
+        {/* <ActivityIndicator
+          size='large'
+          color="#333"
+          animating={renderingIndicator}
+        /> */}
+        <View>
+          <Text>Hello user! Welcome back!</Text>
+        </View>
+        <View style={styles.wrapperInput}>
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            value={email}
+            onChangeText={(text: string) => setEmail(text)}
+          />
+        </View>
+        <View style={styles.wrapperInput}>
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            value={password}
+            onChangeText={(text: string) => setPassword(text)}
+            secureTextEntry={true}
+          />
+        </View>
+        <View style={styles.btnContainer}>
+          <Button icon="login" mode="contained" style={styles.button}
+            onPress={handleLogin}>
+            <Text>Login</Text>
+          </Button>
+          <Text>Don't have an account?</Text>
+          <Button icon="clipboard" mode="contained" style={styles.button}
+            onPress={() => {
+              navigation.navigate("Register")
+              // navigation.navigate("ProfileSetup")
+            }}>
+            <Text>Register</Text>
+          </Button>
+        </View>
       </View>
-      <View style={styles.wrapperInput}>
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={(text: string) => setEmail(text)}
-        />
-      </View>
-      <View style={styles.wrapperInput}>
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          value={password}
-          onChangeText={(text: string) => setPassword(text)}
-          secureTextEntry={true}
-        />
-      </View>
-      <View style={styles.btnContainer}>
-        <Button icon="login" mode="contained" style={styles.button}
-          onPress={handleLogin}>
-          <Text>Login</Text>
-        </Button>
-        <Text>Don't have an account?</Text>
-        <Button icon="clipboard" mode="contained" style={styles.button}
-          onPress={() => {
-            navigation.navigate("Register")
-            // navigation.navigate("ProfileSetup")
-          }}>
-          <Text>Register</Text>
-        </Button>
-      </View>
-    </View>
+      {renderingIndicator ? <LoginLoader /> : null}
+    </>
   )
 }
 
