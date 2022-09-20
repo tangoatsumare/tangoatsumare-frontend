@@ -7,8 +7,8 @@ import {Button, Card, Paragraph, Title} from "react-native-paper";
 import React, { useEffect, useState } from "react";
 import {View, Text, StyleSheet, FlatList, TouchableOpacity} from 'react-native'
 import axios from "axios";
-
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { HTTPRequest } from "../utils/httpRequest";
+import { getAuth } from 'firebase/auth';
 
 export const Collection = () => {
 
@@ -22,23 +22,16 @@ export const Collection = () => {
   useEffect(() => {
     // why using "isFocused"
     // https://stackoverflow.com/questions/60182942/useeffect-not-called-in-react-native-when-back-to-screen
-    if (isFocused) {
-      console.log(userId);
-      // axios
-        // .get
-        fetch(`https://tangoatsumare-api.herokuapp.com/api/flashcardsby/${userId}`)
-        .then((response: any) => response.json())
-        .then((response: any) => {
-          console.log('hihi');
-          const flashcards = response;
-          const reverseFlashcards = flashcards.reverse();
-          // console.log(reverseFlashcards);
-          setFlashcards(reverseFlashcards);
-        })
-        .catch((err) => {
-          console.log(err)
-        });
-    }
+    (async () => {
+      if (isFocused) {
+        try {
+          const flashcards = await HTTPRequest.getFlashcardsByUser(userId);
+          setFlashcards(flashcards.reverse());
+        } catch (err) {
+          console.log(err);
+        }
+      }
+    })();
   }, [isFocused]);
 
   const handleShowFlashcard = (flashcardID: string) => {
@@ -50,26 +43,28 @@ export const Collection = () => {
       return (
           <FlatList
             // inverted
-            ItemSeparatorComponent={() => <View style={styles.separator} />}
-            data={flashcards}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{}}
+            // ItemSeparatorComponent={() => <View style={styles.separator} />}
+            data={flashcards ? flashcards: null}
             keyExtractor={(flashcard, index) => index.toString()}
             renderItem={({item}) => {
               return (
-                <TouchableOpacity onPress={() => {
-                  handleShowFlashcard(item._id)
-                }}
-          >
-            <Card key={item.target_word} style={styles.card}>
-                  <Card.Content>
-                  <Card.Cover   source={{uri: item.picture_url ? item.picture_url : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}} />
-                  <Title style={styles.textVocab}>{item.target_word}</Title>
-                  <Paragraph style={styles.text}>Sentence: {item.example_sentence}</Paragraph>
-                  </Card.Content>
-                  <Card.Actions>
-            
-              </Card.Actions>
-              </Card>
-            </TouchableOpacity>
+                <TouchableOpacity 
+                  onPress={() => { handleShowFlashcard(item._id) }}
+                  style={styles.item}
+                >
+                  <Card key={item.target_word} style={styles.card}>
+                        <Card.Content>
+                        <Card.Cover   source={{uri: item.picture_url ? item.picture_url : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}} />
+                        <Title style={styles.textVocab}>{item.target_word}</Title>
+                        <Paragraph style={styles.text}>Sentence: {item.example_sentence}</Paragraph>
+                        </Card.Content>
+                        <Card.Actions>
+                  
+                    </Card.Actions>
+                    </Card>
+                </TouchableOpacity>
           );
         }
       }
@@ -85,18 +80,23 @@ export const Collection = () => {
 }
 
 const styles = StyleSheet.create({
+        item: {
+          borderBottomWidth: 0.2,
+          borderBottomColor: 'grey'
+        },
         button: {
             alignItems: 'center',
         },
         container: {
-            alignItems: 'center',
-            justifyContent: 'center',
+            // margin: 10
+            // alignItems: 'center',
+            // justifyContent: 'center',
         },
         segment: {
 
         },
           separator: {
-            height: 0,
+            height: 0.2,
             backgroundColor: "grey"
           },
           text: {
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
           card: {
             borderRadius: 10,
             margin: 10,
-            marginTop: 2, 
+            // marginTop: 2, 
           },
     }
 );
