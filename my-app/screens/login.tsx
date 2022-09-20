@@ -6,7 +6,7 @@ import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import LoginLoader from '../Components/LoginLoader';
 
 import React, { useState, useRef, useEffect } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native'
+import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native'
 import { Button } from "react-native-paper";
 
 
@@ -41,13 +41,8 @@ export const Login = () => {
   }
 
   return (
-    <View>
+    <>
       <View style={styles.container}>
-        {/* <ActivityIndicator
-          size='large'
-          color="#333"
-          animating={renderingIndicator}
-        /> */}
         <View>
           <Text>Hello user! Welcome back!</Text>
         </View>
@@ -77,14 +72,13 @@ export const Login = () => {
           <Button icon="clipboard" mode="contained" style={styles.button}
             onPress={() => {
               navigation.navigate("Register")
-              // navigation.navigate("ProfileSetup")
             }}>
             <Text>Register</Text>
           </Button>
         </View>
       </View>
       {renderingIndicator ? <LoginLoader /> : null}
-    </View>
+    </>
   )
 }
 

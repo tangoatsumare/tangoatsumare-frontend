@@ -4,20 +4,6 @@ import LottieView from 'lottie-react-native';
 
 const LoginLoader = () => {
 
-  // const animation = useRef<LottieView>();
-  // const startAnimation = () => {
-  //   if (animation.current) {
-  //     animation.current.reset()
-  //     animation.current.play()
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   if (animation.current) {
-  //     animation.current.play();
-  //   }
-  // }, [animation]);
-
   return (
     <View style={[StyleSheet.absoluteFillObject, styles.container]}>
       <LottieView 

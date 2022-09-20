@@ -53,7 +53,7 @@ export const Register = () => {
 
 
   return (
-    <View>
+    <>
       <View style={styles.container}>
         <View>
           <Text>Hello user! Wanna learn something new?</Text>
@@ -89,7 +89,6 @@ export const Register = () => {
           <Button icon="clipboard" mode="contained" style={styles.button}
             onPress={() => {
               createUserAccount();
-              // navigation.navigate("ProfileSetup");
             }}>
             <Text>Register</Text>
           </Button>
@@ -103,7 +102,7 @@ export const Register = () => {
         </View>
       </View>
       {renderingIndicator ? <SignInLoader /> : null}
-    </View>
+    </>
   )
 }
 
