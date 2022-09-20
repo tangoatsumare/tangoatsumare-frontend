@@ -5,6 +5,7 @@ import { ParamListBase } from '@react-navigation/native'
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TextInput, ViewComponent } from 'react-native'
 import { Button } from "react-native-paper";
+import SignInLoader from '../Components/SignInLoader';
 
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 
@@ -17,6 +18,7 @@ export const Register = () => {
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [validationMessage, setValidationMessage] = useState<string>('');
+  const [renderingIndicator, setRenderingIndicator] = useState<boolean>(false);
 
   const checkPassword = (firstPassword: string, secoundPassword: string) => {
     if (firstPassword !== secoundPassword) {
@@ -32,12 +34,12 @@ export const Register = () => {
     }
     try {
       await createUserWithEmailAndPassword(auth, email, password)
-        .then(result => {
-          console.log(result);
-          // navigation.navigate('Home');
-          navigation.navigate("ProfileSetup");
-        })
-    } catch (error: any) {
+      await setRenderingIndicator(true);
+      await setTimeout(() => {
+        setRenderingIndicator(false);
+        navigation.navigate("ProfileSetup");
+      }, 5000);
+    } catch(error: any) {
       console.log(error);
       if (error.code.include('auth/weak-password')) {
         setValidationMessage('Please enter a strong password.')
@@ -51,53 +53,56 @@ export const Register = () => {
 
 
   return (
-    <View style={styles.container}>
-      <View>
-        <Text>Hello user! Wanna learn something new?</Text>
+    <View>
+      <View style={styles.container}>
+        <View>
+          <Text>Hello user! Wanna learn something new?</Text>
+        </View>
+        <View style={styles.wrapperInput}>
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            value={email}
+            onChangeText={(text: string) => setEmail(text)}
+          />
+        </View>
+        <View style={styles.wrapperInput}>
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            value={password}
+            onChangeText={(text: string) => setPassword(text)}
+            secureTextEntry={true}
+          />
+        </View>
+        <View style={styles.wrapperInput}>
+          <TextInput
+            style={styles.input}
+            placeholder="Confirm password"
+            value={confirmPassword}
+            onChangeText={(text: string) => setConfirmPassword(text)}
+            secureTextEntry={true}
+            onBlur={() => checkPassword(password, confirmPassword)}
+          />
+        </View>
+        <View style={styles.btnContainer}>
+          <Button icon="clipboard" mode="contained" style={styles.button}
+            onPress={() => {
+              createUserAccount();
+              // navigation.navigate("ProfileSetup");
+            }}>
+            <Text>Register</Text>
+          </Button>
+          <Text>Already have an account?</Text>
+          <Button icon="login" mode="contained" style={styles.button}
+            onPress={() => {
+              navigation.navigate("Login")
+            }}>
+            <Text>Login</Text>
+          </Button>
+        </View>
       </View>
-      <View style={styles.wrapperInput}>
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={(text: string) => setEmail(text)}
-        />
-      </View>
-      <View style={styles.wrapperInput}>
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          value={password}
-          onChangeText={(text: string) => setPassword(text)}
-          secureTextEntry={true}
-        />
-      </View>
-      <View style={styles.wrapperInput}>
-        <TextInput
-          style={styles.input}
-          placeholder="Confirm password"
-          value={confirmPassword}
-          onChangeText={(text: string) => setConfirmPassword(text)}
-          secureTextEntry={true}
-          onBlur={() => checkPassword(password, confirmPassword)}
-        />
-      </View>
-      <View style={styles.btnContainer}>
-        <Button icon="clipboard" mode="contained" style={styles.button}
-          onPress={() => {
-            createUserAccount();
-            // navigation.navigate("ProfileSetup");
-          }}>
-          <Text>Register</Text>
-        </Button>
-        <Text>Already have an account?</Text>
-        <Button icon="login" mode="contained" style={styles.button}
-          onPress={() => {
-            navigation.navigate("Login")
-          }}>
-          <Text>Login</Text>
-        </Button>
-      </View>
+      {renderingIndicator ? <SignInLoader /> : null}
     </View>
   )
 }

@@ -3,7 +3,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 //import { getFirebaseAuth } from '../firebase';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import LoginLoader from './LoginLoader';
+import LoginLoader from '../Components/LoginLoader';
 
 import React, { useState, useRef, useEffect } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native'
@@ -41,7 +41,7 @@ export const Login = () => {
   }
 
   return (
-    <>
+    <View>
       <View style={styles.container}>
         {/* <ActivityIndicator
           size='large'
@@ -84,7 +84,7 @@ export const Login = () => {
         </View>
       </View>
       {renderingIndicator ? <LoginLoader /> : null}
-    </>
+    </View>
   )
 }
 
