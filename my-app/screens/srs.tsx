@@ -3,7 +3,7 @@ import { StackNavigationProp} from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 import React, { useEffect, useState } from "react";
 import {ScrollView, View, StyleSheet, FlatList} from 'react-native'
-import {TextInput, Text, Button, Modal, Portal, Card, Title, Paragraph} from "react-native-paper";
+import {TextInput, Text, Button, Modal, Portal, Card, Title, Paragraph, SegmentedButtons} from "react-native-paper";
 import { useIsFocused } from "@react-navigation/native";
 import { useTheme } from 'react-native-paper';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
@@ -32,6 +32,7 @@ export const SRS = ({route}) => {
     });
     const [ modalContent, setModalContent ] = useState('');
     const [ modalVisible, setModalVisible ] = useState(false);
+    const [ modalSegmentButtonValue, setModalSegmentButtonValue ] = useState('all'); // all & due
 
     useEffect(() => {
         (async () => {
@@ -118,48 +119,64 @@ export const SRS = ({route}) => {
 
     const SRSFlashcardsModalContent = () => {
         return (
-            <FlatList
-            //   showsVerticalScrollIndicator={false}
-              contentContainerStyle={{}}
-              // ItemSeparatorComponent={() => <View style={styles.separator} />}
-              data={flashcardsAll}
-              keyExtractor={(item) => item._id}
-              renderItem={({item}) => {
-                return (
-                    <Card>
-                        <Card.Content
-                            style={styles.cardContent}
-                        >
-                            <Card.Cover 
-                                source={{uri: item.Flashcard[0].picture_url ? item.Flashcard[0].picture_url : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}} 
-                                style={styles.cardCover}
-                                resizeMode="contain"
-                            />
-                            <View style={styles.cardMain}>
-                                <Title style={styles.textVocab}>{item.Flashcard[0].target_word}</Title>
-                                <Paragraph style={styles.text}>Sentence: {item.Flashcard[0].example_sentence}</Paragraph>
-                                {/* <Paragraph>Counter: {item.counter}</Paragraph> */}
-                                {/* <Paragraph>Interval: {item.interval}</Paragraph> */}
-                                {/* <Paragraph>Repetition: {item.repetition}</Paragraph> */}
-                                {/* <Paragraph>Efactor: {item.efactor}</Paragraph> */}
-                                <Paragraph>next review: {dayjs(item.due_date).fromNow()}</Paragraph>
-                            </View>
-                        </Card.Content>
-                        <Card.Actions>
-                        </Card.Actions>
-                    </Card>
-                  );
-              }
-          }
-        />
+            <>
+                <SegmentedButtons 
+                    value={modalSegmentButtonValue}
+                    onValueChange={setModalSegmentButtonValue}
+                    buttons={[
+                    {
+                        value: 'all',
+                        label: 'All',
+                    },
+                    {
+                        value: 'due',
+                        label: 'Due',
+                    },
+                    ]}
+                />
+                <FlatList
+                    contentContainerStyle={{}}
+                    data={modalSegmentButtonValue === 'all' ? 
+                            flashcardsAll :
+                        modalSegmentButtonValue === 'due' ? 
+                            flashcardsReviewable : null}
+                    keyExtractor={(item) => item._id}
+                    renderItem={({item}) => {
+                        return (
+                            <Card>
+                                <Card.Content
+                                    style={styles.cardContent}
+                                >
+                                    <Card.Cover 
+                                        source={{uri: item.Flashcard[0].picture_url ? item.Flashcard[0].picture_url : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}} 
+                                        style={styles.cardCover}
+                                        resizeMode="contain"
+                                    />
+                                    <View style={styles.cardMain}>
+                                        <Title style={styles.textVocab}>{item.Flashcard[0].target_word}</Title>
+                                        <Paragraph style={styles.text}>Sentence: {item.Flashcard[0].example_sentence}</Paragraph>
+                                        {/* <Paragraph>Counter: {item.counter}</Paragraph> */}
+                                        {/* <Paragraph>Interval: {item.interval}</Paragraph> */}
+                                        {/* <Paragraph>Repetition: {item.repetition}</Paragraph> */}
+                                        {/* <Paragraph>Efactor: {item.efactor}</Paragraph> */}
+                                        <Paragraph>due: {dayjs(item.due_date).fromNow()}</Paragraph>
+                                    </View>
+                                </Card.Content>
+                                <Card.Actions>
+                                </Card.Actions>
+                            </Card>
+                        );
+                    }}
+                />
+            </>
         );
     }
 
-    useEffect(() => {
-        if (flashcardsAll) {
-            console.log(flashcardsAll);
-        }
-    }, [flashcardsAll]);
+    // useEffect(() => {
+    //     if (flashcardsAll) {
+    //         console.log(flashcardsAll);
+    //     }
+    // }, [flashcardsAll]);
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
@@ -169,6 +186,7 @@ export const SRS = ({route}) => {
                     onDismiss={hideModal}
                     contentContainerStyle={styles.modal}
                 >
+                    <Button icon="close" onPress={hideModal}>close</Button>
                     {modalContent === 'setting' ? 
                         <SettingModalContent /> :
                         modalContent === 'srsFlashcards' ?
