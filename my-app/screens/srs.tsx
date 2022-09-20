@@ -1,7 +1,7 @@
 import { useNavigation} from "@react-navigation/core";
 import { StackNavigationProp} from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useLayoutEffect } from "react";
 import {ScrollView, View, StyleSheet, FlatList} from 'react-native'
 import {TextInput, Text, Button, Modal, Portal, Card, Title, Paragraph, SegmentedButtons} from "react-native-paper";
 import { useIsFocused } from "@react-navigation/native";
@@ -60,6 +60,28 @@ export const SRS = ({route}) => {
 
         }
     }, [flashcardsReviewable]);
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => {
+                    return (
+                        <Button 
+                            icon="cog-outline" 
+                            onPress={() => {
+                                if (modalContent === 'setting') showModal();
+                                else setModalContent('setting');
+                            }}
+                            labelStyle={{
+                                color: 'black',
+                                fontSize: 20
+                            }}
+                            
+                        >
+                        </Button>
+                    );
+            }
+        })
+    })
 
     // https://callstack.github.io/react-native-paper/modal.html
     const showModal = () => setModalVisible(true);
@@ -127,10 +149,14 @@ export const SRS = ({route}) => {
                     {
                         value: 'all',
                         label: 'All',
+                        icon: 'newspaper-variant-multiple-outline',
+                        style: styles.segmentButton
                     },
                     {
                         value: 'due',
                         label: 'Due',
+                        icon: 'newspaper-variant-outline',
+                        style: styles.segmentButton
                     },
                     ]}
                 />
@@ -143,7 +169,7 @@ export const SRS = ({route}) => {
                     keyExtractor={(item) => item._id}
                     renderItem={({item}) => {
                         return (
-                            <Card>
+                            <Card style={styles.card} mode="contained" theme={theme}>
                                 <Card.Content
                                     style={styles.cardContent}
                                 >
@@ -154,12 +180,13 @@ export const SRS = ({route}) => {
                                     />
                                     <View style={styles.cardMain}>
                                         <Title style={styles.textVocab}>{item.Flashcard[0].target_word}</Title>
-                                        <Paragraph style={styles.text}>Sentence: {item.Flashcard[0].example_sentence}</Paragraph>
+                                        <Paragraph style={styles.text}>{item.Flashcard[0].example_sentence}</Paragraph>
                                         {/* <Paragraph>Counter: {item.counter}</Paragraph> */}
                                         {/* <Paragraph>Interval: {item.interval}</Paragraph> */}
                                         {/* <Paragraph>Repetition: {item.repetition}</Paragraph> */}
                                         {/* <Paragraph>Efactor: {item.efactor}</Paragraph> */}
-                                        <Paragraph>due: {dayjs(item.due_date).fromNow()}</Paragraph>
+                                        <Paragraph>{item.counter} attempt{item.counter === 0 ? '': 's'}</Paragraph>
+                                        <Paragraph>due {dayjs(item.due_date).fromNow()}</Paragraph>
                                     </View>
                                 </Card.Content>
                                 <Card.Actions>
@@ -171,12 +198,6 @@ export const SRS = ({route}) => {
             </>
         );
     }
-
-    // useEffect(() => {
-    //     if (flashcardsAll) {
-    //         console.log(flashcardsAll);
-    //     }
-    // }, [flashcardsAll]);
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
@@ -196,44 +217,48 @@ export const SRS = ({route}) => {
             </Portal>
 
             <View style={styles.container}>
-                <View style={styles.metrics}>
-                    <Text style={styles.metricText}>New: {metrics.new} </Text>
-                    <Text style={styles.metricText}>Due: {metrics.due} </Text>
+                <View style={styles.main}>
+                    <Text variant="headlineMedium">Review flashcards</Text>
+                    <Text variant="bodyLarge">New: {metrics.new}</Text>
+                    <Text variant="bodyLarge">Due: {metrics.due}</Text>
+                    <Button 
+                        mode="contained" 
+                        style={styles.button}
+                        buttonColor={theme.colors.secondary}
+                        disabled={flashcardsReviewable.length === 0 ? true: false}
+                        onPress={()=>{
+                            navigation.navigate("Review", {
+                                flashcardsAll: flashcardsReviewable
+                            });
+                        }}>
+                        <Text variant="headlineSmall">Study</Text>
+                    </Button>
                 </View>
                 <Button 
-                    mode="contained" 
-                    style={styles.button}
-                    buttonColor={theme.colors.secondary}
-                    disabled={flashcardsReviewable.length === 0 ? true: false}
-                    onPress={()=>{
-                        navigation.navigate("Review", {
-                            flashcardsAll: flashcardsReviewable
-                        });
-                    }}>
-                    <Text>Study</Text>
-                </Button>
-                <Button 
+                    style={styles.flashcardBtn}
+                    mode="contained"
+                    labelStyle={{
+                        fontSize: 40
+                    }}
+                    icon="cards-outline"
                     onPress={() => {
                         if (modalContent === 'srsFlashcards') showModal();
                         else setModalContent('srsFlashcards');
                     }}
-                >Show my SRS flashcards</Button>
-                <Button 
-                    onPress={() => {
-                        if (modalContent === 'setting') showModal();
-                        else setModalContent('setting');
-                    }}
-                >Setting</Button>
+                ></Button>
             </View>
         </ScrollView>
     )
 }
 
 const styles = StyleSheet.create({
+        card: {
+            margin: 5
+        },
         cardContent: {
             flexDirection: 'row',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
         },
         cardCover: {
             flex: 1,
@@ -241,20 +266,34 @@ const styles = StyleSheet.create({
             backgroundColor: 'transparent'
         },
         cardMain: {
-            width: 200
+            width: 200,
+            marginLeft: 10
+        },
+        textVocab: {
+
+        },
+        text: {},
+        segmentButton: {
+            borderRadius: 30,
+            borderWidth: 0.5,
         },
         button: {
             alignItems: 'center',
-            margin: 20
+            marginTop: 20,
+            width: 200,
+            borderRadius: 40,
+            padding: 5
         },
         container: {
             padding: 10,
             flex: 1,
+            alignItems: "stretch",
+            // justifyContent: 'center',
+        },
+        main: {
+            flex: 1,
             alignItems: 'center',
             justifyContent: 'center',
-        },
-        metrics: {
-            alignItems: 'flex-start'
         },
         flashcard: {
             margin: 10,
@@ -269,10 +308,16 @@ const styles = StyleSheet.create({
         modal: {
             backgroundColor: 'white',
             padding: 20,
-            margin: 20
+            margin: 20,
+            height: 500,
+            borderRadius: 20
         },
-        metricText: {
-            fontSize: 30
+        flashcardBtn: {
+            alignSelf: 'flex-end',
+            borderRadius: 100,
+            width: 70,
+            height: 70,
+            justifyContent: 'center',
         }
     }
 );
