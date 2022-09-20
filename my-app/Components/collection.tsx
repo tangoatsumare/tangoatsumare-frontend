@@ -43,27 +43,28 @@ export const Collection = () => {
       return (
           <FlatList
             // inverted
+            showsVerticalScrollIndicator={false}
             contentContainerStyle={{}}
-            ItemSeparatorComponent={() => <View style={styles.separator} />}
-            data={flashcards}
+            // ItemSeparatorComponent={() => <View style={styles.separator} />}
+            data={flashcards ? flashcards: null}
             keyExtractor={(flashcard, index) => index.toString()}
             renderItem={({item}) => {
               return (
-                <TouchableOpacity onPress={() => {
-                  handleShowFlashcard(item._id)
-                }}
-          >
-            <Card key={item.target_word} style={styles.card}>
-                  <Card.Content>
-                  <Card.Cover   source={{uri: item.picture_url ? item.picture_url : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}} />
-                  <Title style={styles.textVocab}>{item.target_word}</Title>
-                  <Paragraph style={styles.text}>Sentence: {item.example_sentence}</Paragraph>
-                  </Card.Content>
-                  <Card.Actions>
-            
-              </Card.Actions>
-              </Card>
-            </TouchableOpacity>
+                <TouchableOpacity 
+                  onPress={() => { handleShowFlashcard(item._id) }}
+                  style={styles.item}
+                >
+                  <Card key={item.target_word} style={styles.card}>
+                        <Card.Content>
+                        <Card.Cover   source={{uri: item.picture_url ? item.picture_url : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}} />
+                        <Title style={styles.textVocab}>{item.target_word}</Title>
+                        <Paragraph style={styles.text}>Sentence: {item.example_sentence}</Paragraph>
+                        </Card.Content>
+                        <Card.Actions>
+                  
+                    </Card.Actions>
+                    </Card>
+                </TouchableOpacity>
           );
         }
       }
@@ -79,18 +80,23 @@ export const Collection = () => {
 }
 
 const styles = StyleSheet.create({
+        item: {
+          borderBottomWidth: 0.2,
+          borderBottomColor: 'grey'
+        },
         button: {
             alignItems: 'center',
         },
         container: {
-            alignItems: 'center',
-            justifyContent: 'center',
+            // margin: 10
+            // alignItems: 'center',
+            // justifyContent: 'center',
         },
         segment: {
 
         },
           separator: {
-            height: 0,
+            height: 0.2,
             backgroundColor: "grey"
           },
           text: {
@@ -103,7 +109,7 @@ const styles = StyleSheet.create({
           card: {
             borderRadius: 10,
             margin: 10,
-            marginTop: 2, 
+            // marginTop: 2, 
           },
     }
 );

@@ -37,7 +37,11 @@ export const SingleCard = () => {
         return (
             <Card key={card.target_word} style={styles.card}>
                     <Card.Content>
-                    <Card.Cover  source={{uri: card.picture_url ? card.picture_url :  'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}}style={styles.photo} />
+                    <Card.Cover 
+                      source={{uri: card.picture_url ? card.picture_url :  'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}}
+                      style={styles.photo} 
+                      resizeMode="contain"
+                    />
                     <Paragraph style={styles.text}>{card.reading}</Paragraph>
                     <Title style={styles.textVocab}>{card.target_word}</Title>
                     <Paragraph style={styles.text}> Meaning: {engDef}</Paragraph>
@@ -82,6 +86,7 @@ const styles = StyleSheet.create({
             minHeight: '50%',
             maxHeight: '95%',
             maxWidth: '95%',
+            backgroundColor: "transparent"
           }
       
   })

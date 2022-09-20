@@ -16,14 +16,14 @@ import { Feed } from "../Components/feed";
 
 export const Home = () => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
-  const [value, setValue] = React.useState('collection');
+  const [value, setValue] = React.useState('feed');
   const [userUid, setUserUid] = React.useState<string>('');
   const [userProfileInfo, setUserProfileInfo] = React.useState<any>();
 
   const handleCollection: any = () => {
     if (value === 'collection') {
       return <Collection />
-    } else {
+    } else if (value === 'feed') {
       return <Feed />
     }
   }
@@ -84,12 +84,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   container: {
-    marginTop: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
+    marginTop: 20,
+    // alignItems: 'center',
+    // justifyContent: 'center',
   },
   segment: {
-    marginBottom: 5
+    marginBottom: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 }
 );
