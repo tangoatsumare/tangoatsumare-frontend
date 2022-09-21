@@ -15,6 +15,7 @@ import {
     SRSProperties
  } from "../utils/supermemo";
 import { HTTPRequest, UserId } from "../utils/httpRequest";
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export const SRS = ({route}) => {
     const auth = getAuth();
@@ -43,6 +44,10 @@ export const SRS = ({route}) => {
             } 
         })();
     },[isFocused]);
+    
+    // useEffect(() => {
+    //     if (flashcardsAll) console.log(flashcardsAll);
+    // }, [flashcardsAll]);
 
     useEffect(() => {
         if (flashcardsReviewable) {
@@ -66,17 +71,12 @@ export const SRS = ({route}) => {
             headerRight: () => {
                     return (
                         <Button 
-                            icon="cog-outline" 
                             onPress={() => {
                                 if (modalContent === 'setting') showModal();
                                 else setModalContent('setting');
                             }}
-                            labelStyle={{
-                                color: 'black',
-                                fontSize: 20
-                            }}
-                            
                         >
+                            <Icon name="cog" color="black" size={20} />
                         </Button>
                     );
             }
@@ -234,18 +234,17 @@ export const SRS = ({route}) => {
                         <Text variant="headlineSmall">Study</Text>
                     </Button>
                 </View>
-                <Button 
-                    style={styles.flashcardBtn}
-                    mode="contained"
-                    labelStyle={{
-                        fontSize: 40
-                    }}
-                    icon="cards-outline"
-                    onPress={() => {
-                        if (modalContent === 'srsFlashcards') showModal();
-                        else setModalContent('srsFlashcards');
-                    }}
-                ></Button>
+                <View style={styles.bottom}>
+                    <Button 
+                        labelStyle={styles.flashcardBtn}
+                        onPress={() => {
+                            if (modalContent === 'srsFlashcards') showModal();
+                            else setModalContent('srsFlashcards');
+                        }}
+                    >
+                        <Icon name="cards" size={30} color="white" />
+                    </Button>
+                </View>
             </View>
         </ScrollView>
     )
@@ -288,12 +287,6 @@ const styles = StyleSheet.create({
             padding: 10,
             flex: 1,
             alignItems: "stretch",
-            // justifyContent: 'center',
-        },
-        main: {
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center',
         },
         flashcard: {
             margin: 10,
@@ -312,12 +305,28 @@ const styles = StyleSheet.create({
             height: 500,
             borderRadius: 20
         },
-        flashcardBtn: {
+        main: {
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+            // backgroundColor: 'white',
+        },
+        bottom: {
+            // flexDirection: 'row',
+            justifyContent: 'flex-end',
             alignSelf: 'flex-end',
-            borderRadius: 100,
             width: 70,
             height: 70,
-            justifyContent: 'center',
+            borderRadius: 100,
+            shadowColor: 'rgba(0,0,0,0.1)',
+            shadowOffset: { width: 3, height: 20 },
+            shadowOpacity: 0.8,
+            shadowRadius: 15,
+            backgroundColor: "rgba(0,0,0,0.5)"
+        },
+        flashcardBtn: {
+            color: 'black',
+            padding: 10
         }
     }
 );
