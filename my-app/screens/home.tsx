@@ -63,6 +63,12 @@ export const Home = () => {
   });
 
   useEffect(() => {
+    if (isFocused) {
+      setValue('feed');
+    }
+  }, [isFocused]);
+
+  useEffect(() => {
       (async () => {
         if (isFocused) {
           try {

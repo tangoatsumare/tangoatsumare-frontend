@@ -15,8 +15,7 @@ import { Collection } from "./collection";
 import { SingleCard } from "./card";
 import { Front } from "../screens/front";
 import { Back } from "../screens/back";
-import { Search } from "../screens/Search";
-
+// import { Search } from "../screens/Search";
 
 
 const Tab = createMaterialBottomTabNavigator();
@@ -83,7 +82,7 @@ export const StackNav = () => {
             <RootStack.Screen name="Front" component={Front}/>
             <RootStack.Screen name="Back" component={Back}/>
             <RootStack.Screen name="Review" component={Review}/>
-            <RootStack.Screen name="Search" component={Search}/>
+            {/* <RootStack.Screen name="Search" component={Search}/> */}
         </RootStack.Navigator>
     )
 }
