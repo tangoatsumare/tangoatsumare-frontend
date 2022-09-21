@@ -1,6 +1,6 @@
 // import { useNavigation} from "@react-navigation/core";
-import { Image, StyleSheet, Text, TextInput, View, ScrollView, TouchableOpacity } from 'react-native';
-import { Button } from 'react-native-paper';
+import { Image, StyleSheet, TextInput, View, ScrollView, TouchableOpacity, ImageBackground } from 'react-native';
+import { Button, Text, Chip } from 'react-native-paper';
 import React, { useState, useEffect } from 'react';
 import { sendImageToCloudVisionApi } from '../utils/flashcard';
 import app from '../firebase';
@@ -19,6 +19,7 @@ import axios from 'axios';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import dayjs from 'dayjs';
 import { initializeSRSFlashcard, TangoFlashcard } from '../utils/supermemo';
+import Icon from 'react-native-vector-icons/Feather';
 
 interface OCRProps {
     route: any;
@@ -220,9 +221,10 @@ export const OCR = ({ route, navigation }: OCRProps) => {
                 if (!cardSubmissionBtnIsClick) {
                     return (
                         <Button 
-                            icon="send" 
                             onPress={submitFlashCard}
-                        >Send</Button>
+                        >
+                            <Icon name="send" size={20} color="black"></Icon>
+                        </Button>
                     );
                 }
             }
@@ -231,81 +233,103 @@ export const OCR = ({ route, navigation }: OCRProps) => {
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
-            { !cardSubmissionBtnIsClick ? 
-            <>
-                <Image 
-                    source={{ uri: image ? image : ""}} 
-                    style={styles.image}
-                    resizeMode="contain"
-                />
-                <View 
-                    style={styles.responseContainer}
-                >
-                    <View style={styles.responseTitleContainer}>
-                        <Text style={styles.responseTitle}>Select a word to learn</Text>
-                        <Button 
-                            icon={sentenceEditMode ? "check-bold" : "cog"}
-                            textColor={sentenceEditMode ? "green" : "purple"}
-                            onPress={() => setSentenceEditMode((prev) => !prev)}
-                        >
-                            {sentenceEditMode ? "done" : "edit"}
-                        </Button>
-                    </View>
-                    <TextInput
-                        style={sentenceEditMode ? styles.responseTextEditMode : styles.responseText}
-                        onSelectionChange={handleSelectionChange}
-                        onChangeText={(text) => setResponseText(text)}
-                        editable={sentenceEditMode ? true : false}
-                        multiline={true}
+            <ImageBackground
+                source={require("../assets/wallpaper1.png")}
+                style={{
+                    flex: 1,
+                    backgroundColor: "white",
+                    alignItems: 'center',
+                    // justifyContent: 'center',
+                }}
+                resizeMode="contain"
+            >
+                { !cardSubmissionBtnIsClick ? 
+                <>
+                    <Image 
+                        source={{ uri: image ? image : ""}} 
+                        style={styles.image}
+                        resizeMode="contain"
+                    />
+                    <View 
+                        style={styles.responseContainer}
                     >
-                        {responseText}
-                    </TextInput>
-                </View>
-                <View style={styles.userTextSelection}>
-                    <Text>You've selected</Text>
-                    <Text style={styles.responseText}>{selectedText}</Text>
-                </View>
-                <Text>Here is the dictionary lookup result:</Text>
-                <Text style={styles.lookupText}>{resultFromDictionaryLookup}</Text>
-            </>
-                :
-            !cardIsSubmitted && !cardSubmissionError ? 
-                <Text>executing card submission</Text> : 
-                cardIsSubmitted && !cardSubmissionError ?
-                <View style={styles.submissionContainer}>
-                    <Text>Submit successfully!</Text>
-                    <Button
-                        icon="check-circle-outline" 
-                        labelStyle={{fontSize: 150}}
-                        textColor="green"
-                    >{null}</Button>
-                    <Button 
-                        mode="outlined"
-                        textColor="black"
-                        style={styles.button}
-                            onPress={()=>{
-                                navigation.navigate("Home")
-                            }}
-                    >Return Home</Button>
-                </View> :
-                <View>
-                    <Text>Oh no.. something went wrong!</Text>
-                    <Text>Try again or contact the dev team 🙇 </Text>
-                    <Button
-                        icon="close-circle-outline" 
-                        labelStyle={{fontSize: 150}}
-                        textColor="red"
-                    >{null}</Button>
-                    <Button 
-                        mode="outlined"
-                        textColor="black"
-                        style={styles.button}
-                            onPress={()=>{
-                                navigation.navigate("Home")
-                            }}
-                    >Return Home</Button>
-                </View>
-            }
+                        <View style={styles.responseTitleContainer}>
+                            <Text 
+                                // style={styles.responseTitle}
+                                variant="labelMedium"
+                            >Select a word to learn</Text>
+                            <Chip 
+                                icon={sentenceEditMode ? "check-bold" : "cog"}
+                                // textColor={sentenceEditMode ? "green" : "purple"}
+                                mode="flat"
+                                style={styles.editButton}
+                                onPress={() => setSentenceEditMode((prev) => !prev)}
+                            >
+                                {sentenceEditMode ? "done" : "edit"}
+                            </Chip>
+                        </View>
+                        <TextInput
+                            style={sentenceEditMode ? styles.responseTextEditMode : styles.responseText}
+                            onSelectionChange={handleSelectionChange}
+                            onChangeText={(text) => setResponseText(text)}
+                            editable={sentenceEditMode ? true : false}
+                            multiline={true}
+                        >
+                            {responseText}
+                        </TextInput>
+                    </View>
+                    <View style={styles.userTextSelection}>
+                        <Text variant="labelMedium">You've selected</Text>
+                        <Text 
+                            style={styles.responseText}
+                            variant="displayMedium"
+                        >{selectedText}</Text>
+                    </View>
+                    <Text variant="labelMedium">Defintion</Text>
+                    <Text 
+                        style={styles.lookupText}
+                        variant="displayMedium"
+                    >{resultFromDictionaryLookup}</Text>
+                </>
+                    :
+                !cardIsSubmitted && !cardSubmissionError ? 
+                    <Text>executing card submission</Text> : 
+                    cardIsSubmitted && !cardSubmissionError ?
+                    <View style={styles.submissionContainer}>
+                        <Text>Submit successfully!</Text>
+                        <Button
+                            icon="check-circle-outline" 
+                            labelStyle={{fontSize: 150}}
+                            textColor="green"
+                        >{null}</Button>
+                        <Button 
+                            mode="outlined"
+                            textColor="black"
+                            style={styles.button}
+                                onPress={()=>{
+                                    navigation.navigate("Home")
+                                }}
+                        >Return Home</Button>
+                    </View> :
+                    <View>
+                        <Text>Oh no.. something went wrong!</Text>
+                        <Text>Try again or contact the dev team 🙇 </Text>
+                        <Button
+                            icon="close-circle-outline" 
+                            labelStyle={{fontSize: 150}}
+                            textColor="red"
+                        >{null}</Button>
+                        <Button 
+                            mode="outlined"
+                            textColor="black"
+                            style={styles.button}
+                                onPress={()=>{
+                                    navigation.navigate("Home")
+                                }}
+                        >Return Home</Button>
+                    </View>
+                }
+            </ImageBackground>
         </ScrollView>
     );
 };
@@ -343,6 +367,10 @@ const styles = StyleSheet.create({
         borderStyle: 'solid',
         borderRadius: 10,
         overflow: 'hidden'
+    },
+    editButton: {
+        color: 'black',
+        marginLeft: 20
     },
     responseText: {
         fontSize: 50,
