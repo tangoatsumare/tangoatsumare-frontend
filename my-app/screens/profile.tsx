@@ -167,8 +167,8 @@ console.log("🍗🍗🍗🍗🍗🍗user info check: ", userProfileInfo);
                   source={{
                       uri:
                         //   'https://avatars.githubusercontent.com/u/68458897?v=4',
-                        // `${userProfileInfo && userProfileInfo[0].avatar_url}`
-                        "http://spiralcute.com/characters/img/same_01.png"
+                        `${userProfileInfo && userProfileInfo[0].avatar_url}`
+                        // "http://spiralcute.com/characters/img/same_01.png"
                   }}
                   size={125}
               />
