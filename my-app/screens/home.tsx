@@ -78,7 +78,9 @@ export const Home = () => {
                   card.created_timestamp = dayjs(card.created_timestamp).fromNow(); // https://day.js.org/docs/en/plugin/relative-time
               }
   
-              setFlashcards(flashcardsAll.reverse());
+              const result = flashcardsAll.reverse();
+              setFlashcards(result);
+              setFlashcardsOnView(result);
           } catch (err) {
               console.log(err);
           }
@@ -87,12 +89,14 @@ export const Home = () => {
   }, [isFocused]);
 
   useEffect(() => {
-    if (value === 'feed') {
-      setFlashcardsOnView(flashcards);
-    } else if (value === 'collection') {
-      const result = flashcards.filter(flashcard => flashcard["created_by"] === userId);
-      if (result) {
-        setFlashcardsOnView(result);
+    if (flashcards) {
+      if (value === 'feed') {
+        setFlashcardsOnView(flashcards);
+      } else if (value === 'collection') {
+        const result = flashcards.filter(flashcard => flashcard["created_by"] === userId);
+        if (result) {
+          setFlashcardsOnView(result);
+        }
       }
     }
   }, [value]);
@@ -199,7 +203,7 @@ export const Home = () => {
 
   return (
     <>
-      { !textInputOnFocus ? 
+      { !textInputOnFocus && flashcardsOnView ? 
       <FlatList style={styles.container}
         ListHeaderComponent={
           <>
