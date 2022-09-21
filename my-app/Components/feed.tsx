@@ -29,7 +29,7 @@ export const Feed = () => {
                     if (result) {
                         // console.log(result.user_name);
                         card.created_by = result.user_name; // replace uid with username
-                        card.avatar = result.avatar_url; // add field
+                        card.avatar_url = result.avatar_url; // add field
                     }
                     // https://day.js.org/docs/en/plugin/relative-time
                     card.created_timestamp = dayjs(card.created_timestamp).fromNow();
@@ -64,7 +64,12 @@ export const Feed = () => {
                         >
                             <View style={styles.header}>
                                 <View style={styles.user}>
-                                    <Avatar.Image size={35} source={item.avatar} style={styles.userLeft}/>
+                                    <Avatar.Image 
+                                    size={35} 
+                                    source={{ 
+                                        uri: item.avatar_url? item.avatar_url: 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png' 
+                                    }} 
+                                    style={styles.userLeft}/>
                                     <View style={styles.userRight}>
                                         <Text variant="bodyLarge">{item.created_by}</Text>
                                         <Text variant="bodySmall">{item.created_timestamp}</Text>
@@ -73,7 +78,9 @@ export const Feed = () => {
                                 <Card style={styles.card}>
                                     <Card.Content>
                                         <Card.Cover 
-                                            source={{uri: item.picture_url ? item.picture_url : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}} 
+                                            source={{
+                                                uri: item.picture_url ? item.picture_url : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'
+                                            }} 
                                             style={styles.image}
                                             resizeMode="contain"
                                         />
