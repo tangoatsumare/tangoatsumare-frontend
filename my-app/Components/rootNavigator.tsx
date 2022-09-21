@@ -4,6 +4,7 @@ import { DrawerContent } from './drawerContents';
 import {Home} from "../screens/home";
 import {SRS} from "../screens/srs";
 import {Camera} from "../screens/camera";
+import { Search } from '../screens/Search';
 
 
 const Drawer = createDrawerNavigator();
@@ -14,6 +15,13 @@ export const HomeNavigator = () => {
             <Drawer.Screen name="Home Screen" options={{headerTitle:"Home"}} component={Home} />
         </Drawer.Navigator>
             );
+};
+export const SearchNavigator = () => {
+    return (
+        <Drawer.Navigator useLegacyImplementation={true} drawerContent={props => <DrawerContent {...props} />}>
+            <Drawer.Screen name="Search Screen" options={{headerTitle:"Search"}} component={Search} />
+        </Drawer.Navigator>
+    );
 };
 export const SRSNavigator = () => {
     return (

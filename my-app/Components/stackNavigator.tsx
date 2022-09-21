@@ -1,5 +1,5 @@
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
-import {HomeNav, SRSNav, CamNav} from "./main";
+import {HomeNav, SRSNav, CamNav, SearchNav} from "./main";
 import {Settings} from "../screens/settings";
 import {Profile} from "../screens/profile";
 import {Login} from "../screens/login";
@@ -15,6 +15,7 @@ import { Collection } from "./collection";
 import { SingleCard } from "./card";
 import { Front } from "../screens/front";
 import { Back } from "../screens/back";
+import { Search } from "../screens/Search";
 
 
 
@@ -33,6 +34,13 @@ export const TabHome = () => {
                 component={HomeNav}
                 options={{
                     tabBarIcon: 'home-account',
+                }}
+            />
+            <Tab.Screen
+                name="Search"
+                component={SearchNav}
+                options={{
+                    tabBarIcon: 'magnify',
                 }}
             />
             <Tab.Screen
@@ -75,6 +83,7 @@ export const StackNav = () => {
             <RootStack.Screen name="Front" component={Front}/>
             <RootStack.Screen name="Back" component={Back}/>
             <RootStack.Screen name="Review" component={Review}/>
+            <RootStack.Screen name="Search" component={Search}/>
         </RootStack.Navigator>
     )
 }
