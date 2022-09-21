@@ -9,10 +9,12 @@ import { HTTPRequest } from "../utils/httpRequest";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
-export const Feed = () => {
+export const Feed = (props) => {
     dayjs.extend(relativeTime);
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
-    const [flashcards, setFlashcards] = useState([]);
+    const { flashcards, setFlashcards } = props;
+    
+    // const [flashcards, setFlashcards] = useState([]);
     const isFocused = useIsFocused();
 
     useEffect(() => {
@@ -28,7 +30,7 @@ export const Feed = () => {
                     const result = usersAll.find((user: any) => user.uuid === card.created_by);
                     if (result) {
                         // console.log(result.user_name);
-                        card.created_by = result.user_name; // replace uid with username
+                        card.created_by_username = result.user_name; // replace uid with username
                         card.avatar_url = result.avatar_url; // add field
                     }
                     // https://day.js.org/docs/en/plugin/relative-time
@@ -71,7 +73,7 @@ export const Feed = () => {
                                     }} 
                                     style={styles.userLeft}/>
                                     <View style={styles.userRight}>
-                                        <Text variant="bodyLarge">{item.created_by}</Text>
+                                        <Text variant="bodyLarge">{item.created_by_username}</Text>
                                         <Text variant="bodySmall">{item.created_timestamp}</Text>
                                     </View>
                                 </View>

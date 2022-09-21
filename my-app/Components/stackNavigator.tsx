@@ -36,13 +36,13 @@ export const TabHome = () => {
                     tabBarIcon: 'home-account',
                 }}
             />
-            <Tab.Screen
+            {/* <Tab.Screen
                 name="Search"
                 component={SearchNav}
                 options={{
                     tabBarIcon: 'magnify',
                 }}
-            />
+            /> */}
             <Tab.Screen
                 name="SRS"
                 component={SRSNav}
