@@ -3,8 +3,18 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+//testing
+import app from '../firebase';
+import { 
+  getStorage,
+  ref, 
+  uploadBytesResumable,
+  getDownloadURL
+} from 'firebase/storage';
+//testing
 
 import React, { useState, useEffect } from "react";
+import uuid from 'react-native-uuid';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Keyboard, Platform } from 'react-native'
 import { Button } from "react-native-paper";
 import * as ImagePicker from 'expo-image-picker';
@@ -35,6 +45,9 @@ export const ProfileSetup = () => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
   const auth = getAuth();
+  //testing
+  const storage = getStorage(app);
+  //testing
 
   // change to full name✅
   // target language (currently learning?) ✅
@@ -59,36 +72,60 @@ export const ProfileSetup = () => {
   const [validationMessage, setValidationMessage] = useState<string>('');
   // const [userProfileInfo, setUserProfileInfo] = useState<string>('');
   const [userUid, setUserUid] = useState<string>('');
-  const [submitted, setSubmitted] = useState<boolean>(false);
+  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+  const [ cloudStoragePath, setCloudStoragePath ] = useState<string>('');
 
   useEffect(() => {
     handleUID();
     // getProfileInfoById(userUid)
   }, []);
 
-  // useEffect(() => {
-  //   if (submitted) {
-  //     (async () => {
-  //       try {
-  //         const response = await fetch(`https://tangoatsumare-api.herokuapp.com/api/users`, {
-  //           method: 'GET',
-  //           headers: {
-  //             'Content-Type': 'application/json',
-  //           }
-  //         })
-  //         const resposeToJSON = await response.json();
+  //testing
 
-  //         console.log('response -------------------------->', resposeToJSON);
-  //         console.log("🍕🍕🍕🍕🍕🍕🍕🍕",Object.keys(resposeToJSON));
-  //         setGetUserinfo(resposeToJSON);
+  async function uploadImageAsync(uri: string): Promise<string> {
+    // Why are we using XMLHttpRequest? See:
+    // https://github.com/expo/expo/issues/2402#issuecomment-443726662
 
+    const auth = getAuth();
+    const userId = auth.currentUser?.uid;
 
-  //       } catch (err) {
-  //         console.log(err);
-  //       }
-  //     })();
-  //   }
-  // }, [submitted]);
+    const blob: Blob = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function (e) {
+        console.log(e);
+        reject(new TypeError("Network request failed"));
+      };
+      xhr.responseType = "blob";
+      xhr.open("GET", uri, true);
+      xhr.send(null);
+    });
+  
+    // ********** CHANGE FLASHCARDS FOLDER TO PROFILEPIC FOLDER (MAKE IN FIREBASE CONSOLE) *****************
+    const fileRef = ref(storage, `profilepic/${userId}/${uuid.v4()}`); // uuid for the photo object's name
+    const result = await uploadBytesResumable(fileRef, blob);
+  
+    // We're done with the blob, close and release it
+    // blob.close();
+  
+    return await getDownloadURL(fileRef);
+  }
+
+  const uploadToFirebaseCloudStorage = async (): Promise<void> => {
+    if (profilePic) {
+        try {
+            const uploadURL = await uploadImageAsync(profilePic);
+            setCloudStoragePath(uploadURL);
+        } catch (err) {
+            console.log(err);
+        }
+    }
+};
+
+  //testing
+
   useEffect(() => {
     (async () => {
       try {
@@ -109,39 +146,50 @@ export const ProfileSetup = () => {
         console.log(err);
       }
     })()
-  }, [submitted]);
+  }, []); // was [submitted]
 
-  // useEffect(() => {
-  //   (async () => {
-  //     const userinfo: UserInfo = {
-  //       uuid: userUid,
-  //       real_name: '',
-  //       user_name: username,
-  //       avatar_url: profilePic,
-  //       about_me: aboutMe,
-  //       nationality: '',
-  //       target_language: currentlyLearning,
-  //       cards: {
-  //         user_cards: [],
-  //         user_favorite: [],
-  //       },
-  //       save_new_card_to_deck: true,
-  //       ui_language: 'en',
-  //     }
-  //     try {
-  //       await fetch(`https://tangoatsumare-api.herokuapp.com/api/users`, {
-  //         method: 'POST',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //         },
-  //         body: JSON.stringify(userinfo)
-  //       });
-  //       console.log("Userinfo POSTed to heroku backend");
-  //     } catch(err) {
-  //       console.log(err);
-  //     }
-  //   })();
-  // }, [submitted])
+  // change effect to if profilePic exists ?
+  useEffect(() => {
+    (async () => { 
+        if (isSubmitted) { // if userinfo submission button is clicked, execute photo upload
+            await uploadToFirebaseCloudStorage();
+        }
+    })();
+  }, [isSubmitted])
+
+  useEffect(() => {
+    (async () => {
+      if (cloudStoragePath) {
+        const userinfo: UserInfo = {
+          uuid: userUid,
+          real_name: '',
+          user_name: username,
+          avatar_url: cloudStoragePath, //formerly profilePic
+          about_me: aboutMe,
+          nationality: '',
+          target_language: currentlyLearning,
+          cards: {
+            user_cards: [],
+            user_favorite: [],
+          },
+          save_new_card_to_deck: true,
+          ui_language: 'en',
+        }
+        try {
+          await fetch(`https://tangoatsumare-api.herokuapp.com/api/users`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userinfo)
+          });
+          console.log("Userinfo POSTed to heroku backend");
+        } catch (err) {
+          console.log(err);
+        }
+      }
+    })();
+  }, [cloudStoragePath])
 
   const tempDbObj = [
     {
@@ -196,74 +244,41 @@ export const ProfileSetup = () => {
     // post user information to heroku db VV
 
     // post user information to heroku db ^^
-
-    // console.log("submit pushed");
-    // const test = {
-    //   profilePic,
-    //   username,
-    //   currentlyLearning,
-    //   aboutMe
-    // }
-    // console.log("test usestate info: ", test)
     navigation.navigate("TabHome");
   }
 
-  // const sendInfoToDb = async () => {
-  //   const userInfo: UserInfo = {
-  //     uuid: userUid,
-  //     real_name: '',
-  //     username: username,
-  //     avatar_url: profilePic,
-  //     about_me: aboutMe,
-  //     nationality: '',
-  //     target_language: currentlyLearning,
-  //     cards: {
-  //       user_cards: [],
-  //       user_favorite: [],
-  //     },
-  //     save_new_card_to_deck: true,
-  //     ui_language: 'en',
-  //   }
-  //   try {
-  //     // const api = `https://tangoatsumare-api.herokuapp.com/api/users`;
-  //     const postInfo = await axios.post(`https://tangoatsumare-api.herokuapp.com/api/users`, userInfo);
-  //     console.log("postInfo.data: ", postInfo.data);
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
+  // need to get profilepic info from firebase and put into avatar_url... i think?
+  // const handleSendInfoToDb = () => {
+  //   (async () => {
+  //     const userinfo: UserInfo = {
+  //       uuid: userUid,
+  //       real_name: '',
+  //       user_name: username,
+  //       avatar_url: cloudStoragePath, //formerly profilePic
+  //       about_me: aboutMe,
+  //       nationality: '',
+  //       target_language: currentlyLearning,
+  //       cards: {
+  //         user_cards: [],
+  //         user_favorite: [],
+  //       },
+  //       save_new_card_to_deck: true,
+  //       ui_language: 'en',
+  //     }
+  //     try {
+  //       await fetch(`https://tangoatsumare-api.herokuapp.com/api/users`, {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //         body: JSON.stringify(userinfo)
+  //       });
+  //       console.log("Userinfo POSTed to heroku backend");
+  //     } catch (err) {
+  //       console.log(err);
+  //     }
+  //   })();
   // }
-
-  const handleSendInfoToDb = () => {
-    (async () => {
-      const userinfo: UserInfo = {
-        uuid: userUid,
-        real_name: '',
-        user_name: username,
-        avatar_url: profilePic,
-        about_me: aboutMe,
-        nationality: '',
-        target_language: currentlyLearning,
-        cards: {
-          user_cards: [],
-          user_favorite: [],
-        },
-        save_new_card_to_deck: true,
-        ui_language: 'en',
-      }
-      try {
-        await fetch(`https://tangoatsumare-api.herokuapp.com/api/users`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(userinfo)
-        });
-        console.log("Userinfo POSTed to heroku backend");
-      } catch (err) {
-        console.log(err);
-      }
-    })();
-  }
 
   const selectProfilePic = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -348,8 +363,8 @@ export const ProfileSetup = () => {
             <Button mode="contained" style={{ marginTop: 25 }}
               onPress={() => {
                 submitProfileInfo();
-                setSubmitted(true);
-                handleSendInfoToDb();
+                setIsSubmitted(true);
+                // handleSendInfoToDb();
                 // navigation.navigate("Home");
               }}
             >

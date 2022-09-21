@@ -65,9 +65,10 @@ function supermemo(
   
   export type SuperMemoGrade = 0 | 1 | 2 | 3 | 4 | 5;
 
-  export interface SRSTangoFlashcard extends TangoFlashcard, SuperMemoItem {
+  export interface SRSTangoFlashcard extends SuperMemoItem {
     counter: number;
     due_date: string;
+    Flashcard: [TangoFlashcard]
   }
 
   export const initializeSRSFlashcard = (flashcard: TangoFlashcard): SRSTangoFlashcard => {
