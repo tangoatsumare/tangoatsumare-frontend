@@ -1,14 +1,11 @@
 import { useEffect, useState } from 'react';
 import {ScrollView, View, StyleSheet} from 'react-native';
-import { Button, Divider, Text, TextInput, Searchbar } from "react-native-paper";
+import { Button, Divider, Text, TextInput, Searchbar, Card, Avatar } from "react-native-paper";
 import { Keyboard } from 'react-native';
 
 export const Search = () => {
     const [text, setText] = useState('');
     const [textInputOnFocus, setTextInputOnFocus] = useState(false);
-
-    // const [searchQuery, setSearchQuery] = useState('');
-    // const onChangeSearch = (query) => setSearchQuery(query);
 
     return (
         <ScrollView style={styles.container}>
@@ -29,23 +26,52 @@ export const Search = () => {
                 />
                 {textInputOnFocus && 
                 <Button 
-                    mode="contained" 
+                    mode="contained-tonal" 
                     onPress={() => {
                         Keyboard.dismiss();
                         setTextInputOnFocus(false);
                     }}
+                    style={{marginLeft: 10}}
                 >Cancel</Button>}
             </View>
             <Divider bold={true} />
-            <Text>Categories (checkable)</Text>
+            <Text variant="headlineSmall">Tags</Text>
+            <Text>when clicked, the result list is updated</Text>
+            <Text>multiple clicks possible?</Text>
             <View style={{alignItems: 'flex-start'}}>
-                <Button style={styles.categoryButton} mode="contained-tonal">cat1</Button>
-                <Button style={styles.categoryButton} mode="contained-tonal">cat2</Button>
-                <Button style={styles.categoryButton} mode="contained-tonal">cat3</Button>
+                <Button style={styles.categoryButton} mode="contained-tonal">
+                    <Text variant='bodyMedium'>#cat1 
+                        <Text variant='labelSmall'> {"(0)"}</Text>
+                    </Text>
+                </Button>
+                <Button style={styles.categoryButton} mode="contained-tonal">
+                <Text variant='bodyMedium'>#cat2 
+                        <Text variant='labelSmall'> {"(0)"}</Text>
+                    </Text>
+                </Button>
+                <Button style={styles.categoryButton} mode="contained-tonal">
+                    <Text variant='bodyMedium'>#cat3 
+                        <Text variant='labelSmall'> {"(0)"}</Text>
+                    </Text>
+                </Button>
             </View>
             <Divider bold={true} />
-            <Text>Results (clickable)</Text>
-            <Text>{text}</Text>
+            <Text variant="headlineSmall">Results</Text>
+            <Text>queried list with brief info</Text>
+            <Text>when clicked, navigate to a page with verbose info</Text>
+            {text && 
+            <Card
+                onPress={() => console.log(`${text} card clicked`)}
+            >
+                <Card.Title 
+                    title={text} 
+                    subtitle="the sentence"
+                    left={(props) => <Avatar.Icon {...props} icon="folder" />}
+                />
+                <Card.Content>
+                </Card.Content>
+            </Card>
+            }
         </ScrollView>
     );
 }
@@ -56,6 +82,6 @@ const styles = StyleSheet.create({
     },
     categoryButton: {
         marginBottom: 5,
-        borderRadius: 30
+        borderRadius: 30,
     }
 });
