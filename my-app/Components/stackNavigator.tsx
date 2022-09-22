@@ -15,6 +15,8 @@ import { Collection } from "./collection";
 import { SingleCard } from "./card";
 import { Front } from "../screens/front";
 import { Back } from "../screens/back";
+import { FeedCard } from "../screens/feedCard";
+
 // import { Search } from "../screens/Search";
 
 
@@ -79,6 +81,7 @@ export const StackNav = () => {
             <RootStack.Screen name="OCR" component={OCR}/>
             <RootStack.Screen name="Collection" component={Collection}/>
             <RootStack.Screen name="Card" component={SingleCard}/>
+            <RootStack.Screen name="FeedCard" component={FeedCard}/>
             <RootStack.Screen name="Front" component={Front}/>
             <RootStack.Screen name="Back" component={Back}/>
             <RootStack.Screen name="Review" component={Review}/>

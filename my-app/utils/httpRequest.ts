@@ -54,6 +54,11 @@ const HTTPRequest = (() => {
         .then(res => console.log("success"))
         .catch(err => console.log(err));
     };
+    const addSRSCard = async (body: any) => {
+        await axios.post(USERSTOCARDS_URL, body)
+        .then(res => console.log("success"))
+        .catch(err => console.log(err));
+    };
 
     return {
         getUsers,
@@ -61,6 +66,7 @@ const HTTPRequest = (() => {
         getFlashcardsByUser,
         getSRSFlashcardsByUser,
         updateFlashcardsSRSProperties,
+        addSRSCard,
     }
 })();
 
