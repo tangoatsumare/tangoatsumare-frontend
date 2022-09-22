@@ -38,8 +38,10 @@ export const FeedCard = () => {
   const [imageUrl, setImageUrl] = useState("");
   const [engDef, setEngDef] = useState("");
   const [hasSRSCard, setHasSRSCard] = useState(false);
-  const [userSRSCards, setUserSRSCards] = useState<any[]>([]);
+//   const [userSRSCards, setUserSRSCards] = useState<any[]>([]);
+//make a variable and just check once on load
   const [flaggingUsers, setFlaggingUsers] = useState<any[]>([]);
+  //make a variable and just check once on load
   const [likers, setLikers] = useState<any[]>([]);
   // const [ haters, setHaters ] = useState<any[]>([]);
   const [liked, setLiked] = useState(false);
@@ -70,16 +72,19 @@ export const FeedCard = () => {
                 checkIfLiked();
                 //fetch all of the users SRS To Cards data, to see if the card already exists in the users deck
           const userToSRSCards = await axios.get(`https://tangoatsumare-api.herokuapp.com/api/cardflashjoinuid/${userId}`)
-              setUserSRSCards(userToSRSCards.data);
-              console.log("flashcards:", userToSRSCards.data);
-              setHasSRSCard(false);
-              console.log("before check:", hasSRSCard);
-              checkIfInDeck();
+            const SRSArray =   userToSRSCards.data; // keith
+            // setUserSRSCards(userToSRSCards.data);
+              console.log("srs cards:", userToSRSCards.data);
+            //   setHasSRSCard(false);
+              
+             checkIfInDeck(SRSArray); // keith
+                
+            // checkIfInDeck();
               //fetch the users data for username and avatar display
              const user = await axios
               .get(`https://tangoatsumare-api.herokuapp.com/api/usersuid/${userId}`)
-                  setUserName(user.data.user_name);
-                  setUserAvatar(user.data.avatar_url);
+                  setUserName(user.data[0].user_name);
+                  setUserAvatar(user.data[0].avatar_url);
             } catch (err) {
                 console.log(err);
             }
@@ -103,41 +108,27 @@ export const FeedCard = () => {
     alert("liked");
     const likersArray = likers;
     likersArray.push(userId);
-    await HTTPRequest.updateFlashCardProperties({ likers: likersArray });
+    // await HTTPRequest.updateFlashCardProperties({ likers: likersArray });
+    await axios.patch(`https://tangoatsumare-api.herokuapp.com/api/flashcards/${flashcardId}`, { 
+        likers: likersArray
+     })
+        .then(res => alert("liked"))
+        .catch(err => console.log(err));
     setLiked(true);
   };
-//the button which loads either a clickable or non-clickable version, depening on whether the user has liked the card or not
-  const likeButton = () => {
-    if (liked === true) {
-      return <Button icon="star">{likers.length} likes</Button>;
-    } else {
-      return (
-        <Button
-          icon="star"
-          onPress={() => {
-            {
-              like();
-            }
-          }}
-        >
-          {likers.length} likes
-        </Button>
-      );
-    }
-  };
+
 //Adding to users SRS DECK
 //run on load, check to see if this user has already added the card their SRS deck
-  const checkIfInDeck = () => {
+  const checkIfInDeck = (arrayOfSRSCards: any[]) => {
     //user users_to_cards_ joined with flashcards, loop through each entry checking the flashcard_id, if exists set state to true;
-    if (userSRSCards) {
-      for (let card of userSRSCards) {
+      for (let card of arrayOfSRSCards) {
         if (card.flashcard_id === flashcardId) {
-          // console.log(card.flashcard_id)
+          console.log(card.flashcard_id)
           console.log("card", card);
           // console.log(flashcardId)
           setHasSRSCard(true);
         }
-      }
+
     }
   };
 
@@ -152,25 +143,7 @@ export const FeedCard = () => {
       efactor: 2.5,
       due_date: dayjs(Date.now()).toISOString(),
     });
-  };
-  //the button which loads either a clickable or non-clickable version, depening on whether the user has added the deck to their SRS or not
-  const addToDeckButton = () => {
-    if (hasSRSCard === true) {
-      return <Button icon="bookshelf">In deck</Button>;
-    } else {
-      return (
-        <Button
-          icon="bookshelf"
-          onPress={() => {
-            {
-              addCardToDeck();
-            }
-          }}
-        >
-          Add to deck
-        </Button>
-      );
-    }
+    setHasSRSCard(true)
   };
 
 //Reporting inappropriate cards
@@ -184,32 +157,16 @@ const checkIfReported = () => {
   };
  //a function to report  the card if the user has not reported it already
  const report = async () => {
-    alert("reported");
     const reporters = flaggingUsers;
     reporters.push(userId);
-    await HTTPRequest.updateFlashCardProperties({ flagging_users: reporters });
+    await axios.patch(`https://tangoatsumare-api.herokuapp.com/api/flashcards/${flashcardId}`, { 
+        flagging_users: reporters
+     })
+        .then(res => alert("reported"))
+        .catch(err => console.log(err));
     setReported(true);
   };
-  //the button which loads either a clickable or non-clickable version, depening on whether the user has reported the card
-  const reportButton = () => {
-    if (reported === true) {
-      return <Button icon="emoticon-angry-outline">reported</Button>;
-    } else {
-      return (
-        <Button
-          icon="emoticon-angry-outline"
-          onPress={() => {
-            {
-              report();
-            }
-          }}
-        >
-          report
-        </Button>
-      );
-    }
-  };
-
+ 
   const displayCard = (card: any) => {
     return (
       <View>
@@ -246,9 +203,48 @@ const checkIfReported = () => {
           </Card>
         </View>
         <View style={styles.buttonGroup}>
-          {likeButton()}
-          {addToDeckButton()}
-          {reportButton()}
+          {liked === true?　
+          <Button icon="star">{likers.length} likes</Button>:
+          <Button
+          icon="star"
+          onPress={() => {
+            {
+              like();
+            }
+          }}
+        >
+          {likers.length} likes
+        </Button>
+          }
+          {hasSRSCard ? 
+          <Button icon="bookshelf">
+            In deck
+            </Button> : 
+             <Button
+          icon="bookshelf"
+          onPress={() => {
+            {
+              addCardToDeck();
+            }
+          }}
+        >
+          Add to deck
+        </Button>
+        }
+        {reported === true ?
+         <Button icon="emoticon-angry-outline">reported</Button>
+        :
+        <Button
+        icon="emoticon-angry-outline"
+        onPress={() => {
+          {
+            report();
+          }
+        }}
+      >
+        report
+      </Button>
+        }
         </View>
       </View>
     );

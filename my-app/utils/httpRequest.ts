@@ -54,12 +54,6 @@ const HTTPRequest = (() => {
         .then(res => console.log("success"))
         .catch(err => console.log(err));
     };
-
-    const updateFlashCardProperties = async (body: any) => {
-        await axios.patch(FLASHCARDS_URL, body)
-        .then(res => console.log("success"))
-        .catch(err => console.log(err));
-    };
     const addSRSCard = async (body: any) => {
         await axios.post(USERSTOCARDS_URL, body)
         .then(res => console.log("success"))
@@ -72,7 +66,6 @@ const HTTPRequest = (() => {
         getFlashcardsByUser,
         getSRSFlashcardsByUser,
         updateFlashcardsSRSProperties,
-        updateFlashCardProperties,
         addSRSCard,
     }
 })();
