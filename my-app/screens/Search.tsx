@@ -73,7 +73,7 @@ export const SearchBar = (props: SearchBarProps) => {
     };
 
     const handleEditSubmit = () => {
-        console.log("edit submit is hit");
+        // console.log("edit submit is hit");
         setSubmitIsClick(true);
         // change the screen back to the feed/collection
         setTextInputOnFocus(false);
@@ -113,7 +113,7 @@ export const SearchBar = (props: SearchBarProps) => {
                 }}
                 onSubmitEditing={handleEditSubmit}
                 onFocus={() => setTextInputOnFocus(true)}
-                onBlur={() => console.log('byebye')} // trigger during blur event
+                // onBlur={() => console.log('byebye')} // trigger during blur event
                 left={<TextInput.Icon icon="magnify" />}
                 right={textInputOnFocus? 
                     <TextInput.Icon 
@@ -136,7 +136,7 @@ export const SearchBody = (props: SearchBodyProps) => {
     
     const handleShowFlashcard = (flashcardID: string) => {
         navigation.navigate("Card", {id: flashcardID})
-        console.log(flashcardID);
+        // console.log(flashcardID);
       }
 
     return (

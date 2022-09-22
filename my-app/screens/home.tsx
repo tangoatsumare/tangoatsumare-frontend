@@ -27,19 +27,19 @@ const { width } = Dimensions.get('window');
 export const Home = () => {
   dayjs.extend(relativeTime);
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
-  const [value, setValue] = React.useState('feed');
-  const [userUid, setUserUid] = React.useState<string>('');
-  const [userProfileInfo, setUserProfileInfo] = React.useState<any>();
+  const [value, setValue] = useState('feed');
+  const [userUid, setUserUid] = useState<string>('');
+  const [userProfileInfo, setUserProfileInfo] = useState<any>();
 
-  const [text, setText] = useState('');
-  const [textInputOnFocus, setTextInputOnFocus] = useState(false);
-  const [flashcardsMaster, setFlashcardsMaster] = useState([]);
-  const [flashcardsCurated, setFlashcardsCurated] = useState<[]>([]);
-  const [flashcardsCollection, setFlashcardsCollection] = useState([]);
-  const [flashcardsFeed, setFlashcardsFeed] = useState([]);
-  const [resetIsClick, setResetIsClick] = useState(false);
+  const [text, setText] = useState<string>('');
+  const [textInputOnFocus, setTextInputOnFocus] = useState<boolean>(false);
+  const [flashcardsMaster, setFlashcardsMaster] = useState<object[]>([]);
+  const [flashcardsCurated, setFlashcardsCurated] = useState<object[]>([]);
+  const [flashcardsCollection, setFlashcardsCollection] = useState<object[]>([]);
+  const [flashcardsFeed, setFlashcardsFeed] = useState<object[]>([]);
+  const [resetIsClick, setResetIsClick] = useState<boolean>(false);
 
-  const [submitIsClick, setSubmitIsClick] = useState(false);
+  const [submitIsClick, setSubmitIsClick] = useState<boolean>(false);
 
   const isFocused = useIsFocused();
   const auth = getAuth();
@@ -73,10 +73,7 @@ export const Home = () => {
           return (
             <Button 
                 mode="text" 
-                onPress={() => {
-                    Keyboard.dismiss();
-                    setTextInputOnFocus(false);
-                }}
+                onPress={cancelSearch}
                 style={{marginLeft: 5}}
             >
               <Text variant="labelLarge" style={{color: 'white'}}>cancel</Text>
@@ -86,12 +83,7 @@ export const Home = () => {
           return (
             <Button 
                 mode="text" 
-                onPress={() => {
-                  setResetIsClick(true);
-                  setSubmitIsClick(false);
-                  setFlashcardsFeed(flashcardsMaster);
-                  setFlashcardsCollection(flashcardsMaster.filter(flashcard => flashcard["created_by"] === userId));
-                }}
+                onPress={resetHomeScreen}
                 style={{marginLeft: 5}}
             >
               <Text variant="labelLarge" style={{color: 'white'}}>reset</Text>
@@ -102,15 +94,23 @@ export const Home = () => {
     })
   });
 
+  const cancelSearch = () => {
+    Keyboard.dismiss();
+    setTextInputOnFocus(false);
+  };
+  
+  const resetHomeScreen = () => {
+    setResetIsClick(true);
+    setSubmitIsClick(false);
+    setFlashcardsFeed(flashcardsMaster);
+    setFlashcardsCollection(flashcardsMaster.filter(flashcard => flashcard["created_by"] === userId));
+  };
+
   useEffect(() => {
     if (resetIsClick) {
       setResetIsClick(false); // reset it
     }
   }, [resetIsClick]);
-
-  useEffect(() => {
-    if (flashcardsCurated) console.log(flashcardsCurated)
-  }, [flashcardsCurated]);
 
   const scrollToLeft = () => {
     scrollRef.current?.scrollTo({y:0, animated: true})
@@ -120,11 +120,11 @@ export const Home = () => {
     scrollRef.current?.scrollToEnd({ animated: true});
   };
 
-  useEffect(() => {
-    if (isFocused && !textInputOnFocus) {
-      console.log('Hello')
-    }
-  }, [isFocused, textInputOnFocus]);
+  // useEffect(() => {
+  //   if (isFocused && !textInputOnFocus) {
+  //     console.log('Hello')
+  //   }
+  // }, [isFocused, textInputOnFocus]);
 
   useEffect(() => {
       (async () => {
@@ -310,17 +310,21 @@ export const Home = () => {
               onScrollEndDrag={handleScroll}
               scrollEventThrottle={16}
           >
-            <FlatList style={styles.container}
-                data={flashcardsCollection}
-                keyExtractor={(item) => item._id}
-                renderItem={({item}) => (
-                    <Collection item={item} />
-                  )
-                }
-                // workaround for the last item of flatlist not showing properly
-                // https://thewebdev.info/2022/02/19/how-to-fix-the-react-native-flatlist-last-item-not-visible-issue/
-                contentContainerStyle={{paddingBottom: 200}}
-              />
+            {flashcardsCollection.length > 0 ? 
+              <FlatList style={styles.container}
+                  data={flashcardsCollection}
+                  keyExtractor={(item) => item._id}
+                  renderItem={({item}) => (
+                      <Collection item={item} />
+                    )
+                  }
+                  // workaround for the last item of flatlist not showing properly
+                  // https://thewebdev.info/2022/02/19/how-to-fix-the-react-native-flatlist-last-item-not-visible-issue/
+                  contentContainerStyle={{paddingBottom: 200}}
+                />
+            : <Text style={styles.container}>result not found.</Text>
+          }
+          {flashcardsFeed.length > 0 ?
             <FlatList style={styles.container}
               data={flashcardsFeed}
               keyExtractor={(item) => item._id}
@@ -330,6 +334,8 @@ export const Home = () => {
               }
               contentContainerStyle={{paddingBottom: 200}}
             />
+            : <Text style={styles.container}>result not found.</Text>
+          }
         </ScrollView>
     </View>
         :
