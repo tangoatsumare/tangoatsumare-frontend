@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import {ScrollView, View, StyleSheet} from 'react-native';
 import { Button, Divider, Text, TextInput, Searchbar, Card, Avatar } from "react-native-paper";
-import { Keyboard } from 'react-native';
+import { Keyboard, Dimensions } from 'react-native';
 
 interface SearchBarProps {
     text: string,
@@ -10,23 +10,34 @@ interface SearchBarProps {
     setTextInputOnFocus: any
 }
 
+const { width } = Dimensions.get('window');
+
 export const SearchBar = (props: SearchBarProps) => {
     const { text, setText, textInputOnFocus, setTextInputOnFocus } = props;
+
+    const handleEditSubmit = () => {
+        console.log('Hi');
+    }
 
     return (
         <View style={{
             flex: 1,
-            // alignItems: 'center',
+            marginTop: 5,
+            marginBottom: 5
         }}>
             <TextInput 
                 style={{
                     flex: 1, 
-                    alignItems: 'center', 
-                    justifyContent: 'center'
+                    // alignItems: 'center', 
+                    justifyContent: 'center',
+                    maxWidth: width / 2,
+                    width: width / 2
+                    // fontSize: 20
                 }}
                 mode="outlined"
                 value={text}
-                placeholder="word, categories, hashtags"
+                placeholder="search"
+                onSubmitEditing={handleEditSubmit}
                 onChangeText={text => setText(text)}
                 onFocus={() => setTextInputOnFocus(true)}
                 onBlur={() => console.log('byebye')} // trigger during blur event

@@ -5,7 +5,7 @@ import { useIsFocused } from "@react-navigation/native";
 import React, { useEffect, useLayoutEffect, useState, useRef } from "react";
 import { Keyboard, Dimensions } from 'react-native';
 import { View, StyleSheet, FlatList, TouchableOpacity, ScrollView } from 'react-native'
-import { SegmentedButtons, Text, Button, Card, Paragraph, Title, Avatar } from "react-native-paper";
+import { SegmentedButtons, Text, Button, Card, Paragraph, Title, Avatar, Divider } from "react-native-paper";
 // import { Collection } from "../Components/collection";
 // import { Feed } from "../Components/feed";
 import { HTTPRequest } from "../utils/httpRequest";
@@ -27,7 +27,7 @@ const { width } = Dimensions.get('window');
 export const Home = () => {
   dayjs.extend(relativeTime);
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
-  const [value, setValue] = React.useState('feed');
+  const [value, setValue] = React.useState('');
   const [userUid, setUserUid] = React.useState<string>('');
   const [userProfileInfo, setUserProfileInfo] = React.useState<any>();
 
@@ -48,6 +48,9 @@ export const Home = () => {
   // setting the header section
   useLayoutEffect(() => {
     navigation.setOptions({
+      headerStyle: {
+        backgroundColor: 'black'
+      },
       headerTitle: () => (
         <SearchBar 
           text={text} 
@@ -60,13 +63,15 @@ export const Home = () => {
         if (textInputOnFocus) {
           return (
             <Button 
-                mode="contained-tonal" 
+                mode="text" 
                 onPress={() => {
                     Keyboard.dismiss();
                     setTextInputOnFocus(false);
                 }}
-                style={{marginLeft: 10}}
-            >Cancel</Button>
+                style={{marginLeft: 5}}
+            >
+              <Text variant="labelLarge" style={{color: 'white'}}>cancel</Text>
+              </Button>
           );
         }
       }
@@ -74,10 +79,10 @@ export const Home = () => {
   });
 
   useEffect(() => {
-    if (isFocused) {
-      setValue('feed');
+    if (isFocused || !textInputOnFocus) {
+      setValue('collection');
     }
-  }, [isFocused]);
+  }, [isFocused, textInputOnFocus]);
 
   useEffect(() => {
       (async () => {
@@ -236,7 +241,7 @@ export const Home = () => {
   return (
     <View style={styles.master}>
       { !textInputOnFocus && flashcardsOnView ? 
-        <View style={{alignItems: 'center', justifyContent: 'center'}}>
+        <View>
           <SegmentedButtons
             value={value}
             onValueChange={setValue}
@@ -246,7 +251,7 @@ export const Home = () => {
                 label: 'Collection',
                 onPress: () => {
                   scrollRef.current?.scrollTo({y:0, animated: true})
-                }
+               }
               },
               {
                 value: 'feed',
@@ -257,7 +262,8 @@ export const Home = () => {
               },
             ]}
             style={styles.segment}
-          />
+          /> 
+          <Divider />
           <ScrollView 
               horizontal 
               snapToInterval={width} 
@@ -276,6 +282,9 @@ export const Home = () => {
                     <Collection item={item} />
                   )
                 }
+                // workaround for the last item of flatlist not showing properly
+                // https://thewebdev.info/2022/02/19/how-to-fix-the-react-native-flatlist-last-item-not-visible-issue/
+                contentContainerStyle={{paddingBottom: 200}}
               />
             <FlatList style={styles.container}
               data={flashcardsFeed}
@@ -284,6 +293,7 @@ export const Home = () => {
                   <Feed item={item} />
                 )
               }
+              contentContainerStyle={{paddingBottom: 200}}
             />
         </ScrollView>
     </View>
@@ -300,18 +310,22 @@ export const Home = () => {
 };
 
 const styles = StyleSheet.create({
-  master: {},
+  master: {
+  },
   button: {
     alignItems: 'center',
   },
   container: {
-    marginTop: 20,
-    width: width
+    // marginTop: 20,
+    width: width,
+    flex: 1
   },
   segment: {
-    marginBottom: 5,
+    paddingTop: 10,
+    paddingBottom: 10,
     alignItems: 'center',
     justifyContent: 'center',
+    // backgroundColor: 'white'
   },
   item: {
     padding: 10,
