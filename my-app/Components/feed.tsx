@@ -44,7 +44,7 @@ export const Feed = () => {
       }, [isFocused]);
 
       const handleShowFlashcard = (flashcardID: string) => {
-        navigation.navigate("Card", {id: flashcardID})
+        navigation.navigate("FeedCard", {id: flashcardID})
         console.log(flashcardID)
       }
     
