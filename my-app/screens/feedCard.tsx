@@ -43,52 +43,53 @@ export const FeedCard = () => {
   const [likers, setLikers] = useState<any[]>([]);
   // const [ haters, setHaters ] = useState<any[]>([]);
   const [liked, setLiked] = useState(false);
-  const [hated, setHated] = useState(false);
+  const [userAvatar, setUserAvatar] = useState("");
+  const [userName, setUserName] = useState("");
   const [flashcardId, setFlashcardId] = useState("");
   const [reported, setReported] = useState(false);
 
   // const route = useRoute<RouteProp<Record<string, StackParamsList>, string>>();
   const route = useRoute<RouteProp<StackParamsList, "Card">>();
   const auth = getAuth();
-  const userId: UserId = auth.currentUser?.uid;
+  const userId = auth.currentUser?.uid;
   const isFocused = useIsFocused();
 
   useEffect(() => {
-    axios
-      .get(
-        `https://tangoatsumare-api.herokuapp.com/api/flashcards/${route.params?.id}`
-      )
-      .then((response) => {
-        setFlashcard(response.data[0]);
-        setEngDef(response.data[0].Eng_meaning[0]);
-        setFlashcardId(response.data[0]._id);
-        setFlaggingUsers(response.data[0].flagging_users);
-        checkIfReported();
-        checkIfLiked();
-      });
-  }, []);
 
-  useEffect(() => {
-    if (isFocused && userId) {
-      HTTPRequest.getSRSFlashcardsByUser(userId).then((flashcards) => {
-        setUserSRSCards(flashcards);
-        console.log("flashcards:", flashcards);
-        setHasSRSCard(false);
-        console.log("before check:", hasSRSCard);
-        checkIfInDeck();
-        // console.log("after check:", hasSRSCard)
-      });
-    }
-  }, [isFocused]);
+    (async () => {
+        try{
+            //fetch the selected flashcard data
+            const response = await axios.get(
+                `https://tangoatsumare-api.herokuapp.com/api/flashcards/${route.params?.id}`
+              )
+                setFlashcard(response.data[0]);
+                setEngDef(response.data[0].Eng_meaning[0]);
+                setFlashcardId(response.data[0]._id);
+                setFlaggingUsers(response.data[0].flagging_users);
+                checkIfReported();
+                checkIfLiked();
+                //fetch all of the users SRS To Cards data, to see if the card already exists in the users deck
+          const userToSRSCards = await axios.get(`https://tangoatsumare-api.herokuapp.com/api/cardflashjoinuid/${userId}`)
+              setUserSRSCards(userToSRSCards.data);
+              console.log("flashcards:", userToSRSCards.data);
+              setHasSRSCard(false);
+              console.log("before check:", hasSRSCard);
+              checkIfInDeck();
+              //fetch the users data for username and avatar display
+             const user = await axios
+              .get(`https://tangoatsumare-api.herokuapp.com/api/usersuid/${userId}`)
+                  setUserName(user.data.user_name);
+                  setUserAvatar(user.data.avatar_url);
+            } catch (err) {
+                console.log(err);
+            }
+            
+        }
+   
+  )();}, []);
 
-  const checkIfReported = () => {
-    for (let user of flaggingUsers) {
-      if (user === userId) {
-        setReported(true);
-      }
-    }
-  };
-
+  //Liking the card
+//run on load, check to see if this user has already liked the card
   const checkIfLiked = () => {
     for (let user of likers) {
       if (user === userId) {
@@ -97,20 +98,15 @@ export const FeedCard = () => {
     }
   };
 
-  const checkIfInDeck = () => {
-    //user users_to_cards_ joined with flashcards, loop through each entry checking the flashcard_id, if exists set state to true;
-    if (userSRSCards) {
-      for (let card of userSRSCards) {
-        if (card.flashcard_id === flashcardId) {
-          // console.log(card.flashcard_id)
-          console.log("card", card);
-          // console.log(flashcardId)
-          setHasSRSCard(true);
-        }
-      }
-    }
+ //a function to like the card if the user has not liked it already
+  const like = async () => {
+    alert("liked");
+    const likersArray = likers;
+    likersArray.push(userId);
+    await HTTPRequest.updateFlashCardProperties({ likers: likersArray });
+    setLiked(true);
   };
-
+//the button which loads either a clickable or non-clickable version, depening on whether the user has liked the card or not
   const likeButton = () => {
     if (liked === true) {
       return <Button icon="star">{likers.length} likes</Button>;
@@ -129,8 +125,24 @@ export const FeedCard = () => {
       );
     }
   };
+//Adding to users SRS DECK
+//run on load, check to see if this user has already added the card their SRS deck
+  const checkIfInDeck = () => {
+    //user users_to_cards_ joined with flashcards, loop through each entry checking the flashcard_id, if exists set state to true;
+    if (userSRSCards) {
+      for (let card of userSRSCards) {
+        if (card.flashcard_id === flashcardId) {
+          // console.log(card.flashcard_id)
+          console.log("card", card);
+          // console.log(flashcardId)
+          setHasSRSCard(true);
+        }
+      }
+    }
+  };
 
-  const addCardToDeck = async () => {
+   //a function to add the card to the users SRS deck if the user has not already added it
+   const addCardToDeck = async () => {
     alert("add to deck");
     await HTTPRequest.addSRSCard({
       flashcard_id: flashcardId,
@@ -141,7 +153,7 @@ export const FeedCard = () => {
       due_date: dayjs(Date.now()).toISOString(),
     });
   };
-
+  //the button which loads either a clickable or non-clickable version, depening on whether the user has added the deck to their SRS or not
   const addToDeckButton = () => {
     if (hasSRSCard === true) {
       return <Button icon="bookshelf">In deck</Button>;
@@ -161,22 +173,24 @@ export const FeedCard = () => {
     }
   };
 
-  const report = async () => {
+//Reporting inappropriate cards
+//run on load, check to see if this user has already reported the card
+const checkIfReported = () => {
+    for (let user of flaggingUsers) {
+      if (user === userId) {
+        setReported(true);
+      }
+    }
+  };
+ //a function to report  the card if the user has not reported it already
+ const report = async () => {
     alert("reported");
     const reporters = flaggingUsers;
     reporters.push(userId);
-    await HTTPRequest.updateFlashCardProperties({ flaggingUsers: reporters });
+    await HTTPRequest.updateFlashCardProperties({ flagging_users: reporters });
     setReported(true);
   };
-
-  const like = async () => {
-    alert("liked");
-    const likersArray = likers;
-    likersArray.push(userId);
-    await HTTPRequest.updateFlashCardProperties({ likers: likersArray });
-    setReported(true);
-  };
-
+  //the button which loads either a clickable or non-clickable version, depening on whether the user has reported the card
   const reportButton = () => {
     if (reported === true) {
       return <Button icon="emoticon-angry-outline">reported</Button>;
@@ -203,11 +217,13 @@ export const FeedCard = () => {
           <View style={styles.user}>
             <Avatar.Image
               size={35}
-              source={card.avatar}
-              style={styles.userLeft}
+              source={{ 
+                uri: userAvatar? userAvatar: 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png' 
+            }}               
+            style={styles.userLeft}
             />
             <View style={styles.userRight}>
-              <Text variant="bodyLarge">{card.created_by}</Text>
+              <Text variant="bodyLarge">{userName}</Text>
               <Text variant="bodySmall">{card.created_timestamp}</Text>
             </View>
           </View>
