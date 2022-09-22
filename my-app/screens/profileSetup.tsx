@@ -39,6 +39,7 @@ interface UserInfo {
   },
   save_new_card_to_deck: boolean,
   ui_language: string,
+  dark_mode: boolean
 }
 
 export const ProfileSetup = () => {
@@ -174,6 +175,7 @@ export const ProfileSetup = () => {
           },
           save_new_card_to_deck: true,
           ui_language: 'en',
+          dark_mode: false
         }
         try {
           await fetch(`https://tangoatsumare-api.herokuapp.com/api/users`, {

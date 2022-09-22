@@ -10,13 +10,14 @@ import axios from "axios";
 import { HTTPRequest } from "../utils/httpRequest";
 import { getAuth } from 'firebase/auth';
 
-export const Collection = () => {
+export const Collection = (props: any) => {
 
   const auth = getAuth();
   const userId = auth.currentUser?.uid;
 
   const navigation = useNavigation<StackNavigationProp<StackParamsList>>();
-  const [flashcards, setFlashcards] = useState([]);
+  // const [flashcards, setFlashcards] = useState([]);
+  const { flashcards, setFlashcards } = props;
   const isFocused = useIsFocused();
 
   useEffect(() => {

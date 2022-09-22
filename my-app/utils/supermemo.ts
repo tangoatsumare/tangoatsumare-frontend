@@ -39,12 +39,6 @@ function supermemo(
 }
 
   export interface TangoFlashcard { // before initialization
-    // targetWord: string,
-    // context: string,
-    // reading: string,
-    // englishDefinition: [],
-    // image: string,
-    // partsOfSpeech: string,
     target_word: string,
     example_sentence: string,
     reading: string,
@@ -53,8 +47,12 @@ function supermemo(
     created_by: string | undefined,
     created_timestamp: string,
     picture_url: string,
-    // parts_of_speech: string,
-    flagged_inappropriate: boolean
+    public: boolean,
+    likers: string[],
+    haters: string[],
+    tags: string[],
+    flagged_inappropriate: boolean,
+    flagging_users: string[]
   }
 
   export interface SuperMemoItem {
@@ -77,7 +75,7 @@ function supermemo(
     const repetition = 0;
     const efactor = 2.5;
     const due_date = dayjs(Date.now()).toISOString();
-    return { ...flashcard, counter, interval, repetition, efactor, due_date };
+    return { Flashcard:[{...flashcard}], counter, interval, repetition, efactor, due_date };
   };
 
   export const initializeSRSFlashcards = (flashcards: TangoFlashcard[]): SRSTangoFlashcard[] => {

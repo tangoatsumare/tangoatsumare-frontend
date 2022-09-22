@@ -3,7 +3,7 @@ import {
     MD3LightTheme as DefaultTheme, Provider as PaperProvider,
 } from 'react-native-paper';
 
-import {CamNavigator, HomeNavigator, SRSNavigator} from './rootNavigator';
+import {CamNavigator, HomeNavigator, SRSNavigator, SearchNavigator} from './rootNavigator';
 
 const theme = {
     ...DefaultTheme,
@@ -25,14 +25,17 @@ export const HomeNav = () => {
             </PaperProvider>
     );
 };
-export const SRSNav = ({route}) => {
+export const SearchNav = () => {
     //handle themes and languages here
+    return (
+        <PaperProvider theme={theme}>
+            <SearchNavigator />
+        </PaperProvider>
+    );
+};
 
-    useEffect(() => {
-        if (route.params) {
-            console.log(route.params);
-        }
-    }, [route.params]);
+export const SRSNav = () => {
+    //handle themes and languages here
     return (
         <PaperProvider theme={theme}>
             <SRSNavigator />

@@ -150,17 +150,12 @@ export const OCR = ({ route, navigation }: OCRProps) => {
                     picture_url: 
                     // 'https://1.bp.blogspot.com/-YIfQT6q8ZM4/Vzyq5z1B8HI/AAAAAAAAAAc/UmWSSMLKtKgtH7CACElUp12zXkrPK5UoACLcB/s1600/image00.png',
                     cloudStoragePath,
-                    flagged_inappropriate: false
-
-                    // target_word: String,
-                    // example_sentence: String,
-                    // reading: String,
-                    // card_language: String,
-                    // Eng_meaning: [],
-                    // created_by: String,
-                    // created_timestamp: String,
-                    // picture_url: String,
-                    // flagged_inappropriate: Boolean,
+                    public: true,
+                    likers: [],
+                    haters: [],
+                    tags: [],
+                    flagged_inappropriate: false,
+                    flagging_users: []
                 };
                 try {
                     console.log(cloudStoragePath);
