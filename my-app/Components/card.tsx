@@ -51,7 +51,10 @@ export const SingleCard = () => {
         const id = flashcardId;
         const body = { created_by: 'delete_' + userUid }
         await axios.patch(`https://tangoatsumare-api.herokuapp.com/api/flashcards/${id}`, body)
-          .then(res => console.log("success"))
+          .then(res => {
+            console.log("success");
+            navigation.navigate("TabHome");
+          })
           .catch(err => console.log(err));
       }
     })();
@@ -76,7 +79,9 @@ export const SingleCard = () => {
     );
   };
 
-  const handleDelete = () => {
+  const [visible, setVisible] = React.useState(false);
+
+  const HandleDelete = () => {
     // Alert.alert(
     //   'Do you really want to delete your flashcard?',
     //   [
@@ -85,7 +90,7 @@ export const SingleCard = () => {
     //   ],
     //   { cancelable: true }
     // );
-    const [visible, setVisible] = React.useState(false);
+
     const hideDialog = () => setVisible(false);
 
     return (
@@ -107,9 +112,10 @@ export const SingleCard = () => {
       {displayCard(flashcard)}
       {usersFlashcard ?
         <>
+          {visible ? <HandleDelete /> : null}
           <View>
             <Button icon="login" mode="contained" style={styles.button}
-              onPress={handleDelete}>
+              onPress={() => setVisible(true)}>
               <Text>Delete this flashcard</Text>
             </Button>
           </View>
