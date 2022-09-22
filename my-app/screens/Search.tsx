@@ -1,3 +1,5 @@
+import { useNavigation } from "@react-navigation/core";
+import { StackNavigationProp } from '@react-navigation/stack';
 import { useEffect, useRef, useState } from 'react';
 import {ScrollView, View, StyleSheet} from 'react-native';
 import { Button, Divider, Text, TextInput, Searchbar, Card, Avatar } from "react-native-paper";
@@ -10,7 +12,11 @@ interface SearchBarProps {
     setTextInputOnFocus: any,
     flashcardsCurated: [],
     setFlashcardsCurated: any,
-    flashcardsFeed: []
+    flashcardsFeed: [],
+    submitIsClick: boolean,
+    setSubmitIsClick: any,
+    resetIsClick: boolean,
+    flashcardsMaster: []
 }
 
 interface SearchBodyProps {
@@ -32,24 +38,45 @@ export const SearchBar = (props: SearchBarProps) => {
         setTextInputOnFocus, 
         flashcardsCurated, 
         setFlashcardsCurated,
-        flashcardsFeed
+        flashcardsFeed,
+        submitIsClick,
+        setSubmitIsClick,
+        resetIsClick,
+        flashcardsMaster
     } = props;
 
     const [pressed, setPressed] = useState(false);
 
     const resetFlashcardsCurated = () => {
-        setFlashcardsCurated(flashcardsFeed);
-    }
+        setFlashcardsCurated(flashcardsMaster);
+    };
+
+    useEffect(() => {
+        if (textInputOnFocus) {
+            setFlashcardsCurated(flashcardsFeed); // TO CHANGE
+        } else if (!textInputOnFocus && !text) {
+            setFlashcardsCurated(''); // TO CHANGE
+        }
+    }, [textInputOnFocus]);
+
+    useEffect(() => {
+        if (text) {
+            updateFlashcardsCurated(flashcardsFeed);
+        } else if (text === "") {
+            resetFlashcardsCurated();
+        }
+    }, [text]);
+
+    const updateFlashcardsCurated = (flashcards: object[]) => {
+        flashcards = flashcards.filter(card => card.target_word.includes(text));
+        setFlashcardsCurated(flashcards);
+    };
 
     const handleEditSubmit = () => {
-        if (text === '') {
-            resetFlashcardsCurated();
-            return;
-        }
-        console.log(text);
-        flashcardsCurated.forEach(card => console.log(card));
-        const result = flashcardsCurated.filter(card => card.target_word.includes(text));
-        setFlashcardsCurated(result);
+        console.log("edit submit is hit");
+        setSubmitIsClick(true);
+        // change the screen back to the feed/collection
+        setTextInputOnFocus(false);
     };
 
     return (
@@ -77,7 +104,7 @@ export const SearchBar = (props: SearchBarProps) => {
                 // value={text}
                 // onChangeText={text => setText(text)}
                 placeholder="search"
-                value={pressed? '': null}
+                value={pressed || resetIsClick ? '': null}
                 onChangeText={(text) => {
                     setText(text); // save it in a state
                     if (pressed) {
@@ -92,9 +119,9 @@ export const SearchBar = (props: SearchBarProps) => {
                     <TextInput.Icon 
                         icon="close-circle" 
                         onPress={() => {
-                            // setText('');
+                            setText('');
                             setPressed(true);
-                            resetFlashcardsCurated();
+                            // resetFlashcardsCurated();
                         }}
                     />: null}
             />
@@ -104,8 +131,14 @@ export const SearchBar = (props: SearchBarProps) => {
 };
 
 export const SearchBody = (props: SearchBodyProps) => {
+    const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
     const { text, setText, textInputOnFocus, setTextInputOnFocus, flashcardsCurated } = props;
     
+    const handleShowFlashcard = (flashcardID: string) => {
+        navigation.navigate("Card", {id: flashcardID})
+        console.log(flashcardID);
+      }
+
     return (
         <ScrollView>
             <Text variant="headlineSmall">Tags</Text>
@@ -133,14 +166,14 @@ export const SearchBody = (props: SearchBodyProps) => {
             {flashcardsCurated && flashcardsCurated.length > 0 &&
                 flashcardsCurated.map(card => {
                     return (
-                        <View key={card._id}>
+                        <View style={{marginBottom: 5}} key={card._id}>
                             <Card
-                                onPress={() => console.log(`${card.target_word} card clicked`)}
+                                onPress={() => handleShowFlashcard(card._id)}
                             >
                                 <Card.Title 
                                     title={card.target_word} 
                                     subtitle={card.example_sentence}
-                                    left={(props) => <Avatar.Image {...props} source={card.picture_url} />}
+                                    left={(props) => <Avatar.Image {...props} source={{uri:card.picture_url}} />}
                                 />
                                 <Card.Content>
                                 </Card.Content>
@@ -149,9 +182,6 @@ export const SearchBody = (props: SearchBodyProps) => {
                     );
                 })
             }
-
-            <Text>queried list with brief info</Text>
-            <Text>when clicked, navigate to a page with verbose info</Text>
         </ScrollView>
 
     );

@@ -27,16 +27,19 @@ const { width } = Dimensions.get('window');
 export const Home = () => {
   dayjs.extend(relativeTime);
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
-  const [value, setValue] = React.useState('');
+  const [value, setValue] = React.useState('feed');
   const [userUid, setUserUid] = React.useState<string>('');
   const [userProfileInfo, setUserProfileInfo] = React.useState<any>();
 
   const [text, setText] = useState('');
   const [textInputOnFocus, setTextInputOnFocus] = useState(false);
-  // const [flashcards, setFlashcards] = useState([]);
+  const [flashcardsMaster, setFlashcardsMaster] = useState([]);
   const [flashcardsCurated, setFlashcardsCurated] = useState<[]>([]);
   const [flashcardsCollection, setFlashcardsCollection] = useState([]);
   const [flashcardsFeed, setFlashcardsFeed] = useState([]);
+  const [resetIsClick, setResetIsClick] = useState(false);
+
+  const [submitIsClick, setSubmitIsClick] = useState(false);
 
   const isFocused = useIsFocused();
   const auth = getAuth();
@@ -59,6 +62,10 @@ export const Home = () => {
           flashcardsCurated={flashcardsCurated}
           setFlashcardsCurated={setFlashcardsCurated}
           flashcardsFeed={flashcardsFeed}
+          submitIsClick={submitIsClick}
+          setSubmitIsClick={setSubmitIsClick}
+          resetIsClick={resetIsClick}
+          flashcardsMaster={flashcardsMaster}
         />
       ),
       headerRight: () => {
@@ -75,14 +82,47 @@ export const Home = () => {
               <Text variant="labelLarge" style={{color: 'white'}}>cancel</Text>
               </Button>
           );
+        } else if (!textInputOnFocus && submitIsClick) {
+          return (
+            <Button 
+                mode="text" 
+                onPress={() => {
+                  setResetIsClick(true);
+                  setSubmitIsClick(false);
+                  setFlashcardsFeed(flashcardsMaster);
+                  setFlashcardsCollection(flashcardsMaster.filter(flashcard => flashcard["created_by"] === userId));
+                }}
+                style={{marginLeft: 5}}
+            >
+              <Text variant="labelLarge" style={{color: 'white'}}>reset</Text>
+              </Button>
+          );
         }
       }
     })
   });
 
   useEffect(() => {
-    if (isFocused || !textInputOnFocus) {
-      setValue('collection');
+    if (resetIsClick) {
+      setResetIsClick(false); // reset it
+    }
+  }, [resetIsClick]);
+
+  useEffect(() => {
+    if (flashcardsCurated) console.log(flashcardsCurated)
+  }, [flashcardsCurated]);
+
+  const scrollToLeft = () => {
+    scrollRef.current?.scrollTo({y:0, animated: true})
+  };
+
+  const scrollToRight = () => {
+    scrollRef.current?.scrollToEnd({ animated: true});
+  };
+
+  useEffect(() => {
+    if (isFocused && !textInputOnFocus) {
+      console.log('Hello')
     }
   }, [isFocused, textInputOnFocus]);
 
@@ -91,9 +131,13 @@ export const Home = () => {
         if (isFocused) {
           try {
               console.log("it is focused now. HTTP request will be sent to backend");
-              const flashcardsAll = await HTTPRequest.getFlashcards();
+              let flashcardsAll = await HTTPRequest.getFlashcards();
               const usersAll = await HTTPRequest.getUsers();
               
+              // remove the deleted cards from the flashcards
+              // cards with delete keyword in its created_by field are cards that deleted by their owners
+              flashcardsAll = flashcardsAll.filter((card: any) => !card.created_by.includes("delete"));
+
               for (const card of flashcardsAll) {
                   const result = usersAll.find((user: any) => user.uuid === card.created_by);
                   if (result) {
@@ -104,10 +148,8 @@ export const Home = () => {
               }
   
               const result: [] = flashcardsAll.reverse();
-              // setFlashcards(result);
-              // setFlashcardsOnView(result);
 
-              setFlashcardsCurated(result); // TO CHANGE
+              setFlashcardsMaster(result);
               setFlashcardsFeed(result);
               setFlashcardsCollection(result.filter(flashcard => flashcard["created_by"] === userId));
           } catch (err) {
@@ -117,23 +159,14 @@ export const Home = () => {
       })();
   }, [isFocused]);
 
-  // useEffect(() => {
-  //   if (flashcards) {
-
-  //     // if (value === 'feed') {
-  //     //   setFlashcardsOnView(flashcards);
-  //     // } else if (value === 'collection') {
-  //     //   const result = flashcards.filter(flashcard => flashcard["created_by"] === userId);
-  //     //   if (result) {
-  //     //     setFlashcardsOnView(result);
-  //     //   }
-  //     // }
-  //   }
-  // }, [value]);
-
-  // useEffect(() => {
-  //   if (flashcardsOnView) console.log(flashcardsOnView);
-  // }, [flashcardsOnView]);
+  // update the home collection/feed states when the search is submitted
+  useEffect(() => {
+    if (flashcardsCurated && !textInputOnFocus) {
+      // update the states for flashcardsFeed and flashcardsCollection
+      setFlashcardsFeed(flashcardsCurated);
+      setFlashcardsCollection(flashcardsCurated.filter(flashcard => flashcard["created_by"] === userId));
+    }
+  },[ flashcardsCurated, textInputOnFocus ]);
 
   // should be in utils maybe?
   const handleUID = () => {
@@ -253,16 +286,12 @@ export const Home = () => {
               {
                 value: 'collection',
                 label: 'Collection',
-                onPress: () => {
-                  scrollRef.current?.scrollTo({y:0, animated: true})
-               }
+                onPress: scrollToLeft
               },
               {
                 value: 'feed',
                 label: 'Feed',
-                onPress: () => {
-                  scrollRef.current?.scrollToEnd({ animated: true})
-                }
+                onPress: scrollToRight
               },
             ]}
             style={styles.segment}
@@ -272,8 +301,10 @@ export const Home = () => {
               horizontal 
               snapToInterval={width} 
               decelerationRate="fast" 
-              showsHorizontalScrollIndicator={false}
+              showsHorizontalScrollIndicator={false}              
               ref={scrollRef}
+              // https://stackoverflow.com/questions/29310553/is-it-possible-to-keep-a-scrollview-scrolled-to-the-bottom
+              onContentSizeChange={scrollToRight}
               // https://stackoverflow.com/questions/29503252/get-current-scroll-position-of-scrollview-in-react-native
               onScroll={handleScroll}
               onScrollEndDrag={handleScroll}
