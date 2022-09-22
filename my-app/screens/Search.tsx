@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {ScrollView, View, StyleSheet} from 'react-native';
 import { Button, Divider, Text, TextInput, Searchbar, Card, Avatar } from "react-native-paper";
 import { Keyboard, Dimensions } from 'react-native';
@@ -7,17 +7,50 @@ interface SearchBarProps {
     text: string,
     setText: any,
     textInputOnFocus: boolean,
-    setTextInputOnFocus: any
+    setTextInputOnFocus: any,
+    flashcardsCurated: [],
+    setFlashcardsCurated: any,
+    flashcardsFeed: []
+}
+
+interface SearchBodyProps {
+    text: string,
+    setText: any,
+    textInputOnFocus: boolean,
+    setTextInputOnFocus: any,
+    flashcardsCurated: []
 }
 
 const { width } = Dimensions.get('window');
 
 export const SearchBar = (props: SearchBarProps) => {
-    const { text, setText, textInputOnFocus, setTextInputOnFocus } = props;
+    const inputRef = useRef();
+    const { 
+        text, 
+        setText, 
+        textInputOnFocus, 
+        setTextInputOnFocus, 
+        flashcardsCurated, 
+        setFlashcardsCurated,
+        flashcardsFeed
+    } = props;
+
+    const [pressed, setPressed] = useState(false);
+
+    const resetFlashcardsCurated = () => {
+        setFlashcardsCurated(flashcardsFeed);
+    }
 
     const handleEditSubmit = () => {
-        console.log('Hi');
-    }
+        if (text === '') {
+            resetFlashcardsCurated();
+            return;
+        }
+        console.log(text);
+        flashcardsCurated.forEach(card => console.log(card));
+        const result = flashcardsCurated.filter(card => card.target_word.includes(text));
+        setFlashcardsCurated(result);
+    };
 
     return (
         <View style={{
@@ -26,6 +59,7 @@ export const SearchBar = (props: SearchBarProps) => {
             marginBottom: 5
         }}>
             <TextInput 
+                ref={inputRef}
                 style={{
                     flex: 1, 
                     // alignItems: 'center', 
@@ -35,24 +69,42 @@ export const SearchBar = (props: SearchBarProps) => {
                     // fontSize: 20
                 }}
                 mode="outlined"
-                value={text}
+                // TO FIX
+                // issue with japanese typing getting messed up due to the state changes
+                // https://github.com/facebook/react-native/issues/19339
+
+                // the following reactive code works except for Language such as Japanese
+                // value={text}
+                // onChangeText={text => setText(text)}
                 placeholder="search"
+                value={pressed? '': null}
+                onChangeText={(text) => {
+                    setText(text); // save it in a state
+                    if (pressed) {
+                        setPressed(false);
+                    }
+                }}
                 onSubmitEditing={handleEditSubmit}
-                onChangeText={text => setText(text)}
                 onFocus={() => setTextInputOnFocus(true)}
                 onBlur={() => console.log('byebye')} // trigger during blur event
                 left={<TextInput.Icon icon="magnify" />}
-                right={textInputOnFocus? <TextInput.Icon icon="close-circle" onPress={() => {
-                    setText('');
-                }}/>: null}
+                right={textInputOnFocus? 
+                    <TextInput.Icon 
+                        icon="close-circle" 
+                        onPress={() => {
+                            // setText('');
+                            setPressed(true);
+                            resetFlashcardsCurated();
+                        }}
+                    />: null}
             />
 
         </View>
     );
 };
 
-export const SearchBody = (props: SearchBarProps) => {
-    const { text, setText, textInputOnFocus, setTextInputOnFocus } = props;
+export const SearchBody = (props: SearchBodyProps) => {
+    const { text, setText, textInputOnFocus, setTextInputOnFocus, flashcardsCurated } = props;
     
     return (
         <ScrollView>
@@ -78,97 +130,32 @@ export const SearchBody = (props: SearchBarProps) => {
             </View>
             <Divider bold={true} />
             <Text variant="headlineSmall">Results</Text>
+            {flashcardsCurated && flashcardsCurated.length > 0 &&
+                flashcardsCurated.map(card => {
+                    return (
+                        <View key={card._id}>
+                            <Card
+                                onPress={() => console.log(`${card.target_word} card clicked`)}
+                            >
+                                <Card.Title 
+                                    title={card.target_word} 
+                                    subtitle={card.example_sentence}
+                                    left={(props) => <Avatar.Image {...props} source={card.picture_url} />}
+                                />
+                                <Card.Content>
+                                </Card.Content>
+                            </Card>
+                        </View>
+                    );
+                })
+            }
+
             <Text>queried list with brief info</Text>
             <Text>when clicked, navigate to a page with verbose info</Text>
-            {text && 
-            <Card
-                onPress={() => console.log(`${text} card clicked`)}
-            >
-                <Card.Title 
-                    title={text} 
-                    subtitle="the sentence"
-                    left={(props) => <Avatar.Icon {...props} icon="folder" />}
-                />
-                <Card.Content>
-                </Card.Content>
-            </Card>
-            }
         </ScrollView>
 
     );
 }
-
-// export const Search = () => {
-//     const [text, setText] = useState('');
-//     const [textInputOnFocus, setTextInputOnFocus] = useState(false);
-
-//     return (
-//         <ScrollView style={styles.container}>
-//             <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
-//                 <TextInput 
-//                     style={{flex: 1}}
-//                     mode="outlined"
-//                     value={text}
-//                     placeholder="word, categories, hashtags"
-//                     onChangeText={text => setText(text)}
-//                     onFocus={() => setTextInputOnFocus(true)}
-//                     onBlur={() => console.log('byebye')} // trigger during blur event
-//                     left={<TextInput.Icon icon="magnify" />}
-//                     right={textInputOnFocus? <TextInput.Icon icon="close-circle" onPress={() => {
-//                         setText('');
-//                     }}/>: null}
-//                 />
-//                 {textInputOnFocus && 
-//                 <Button 
-//                     mode="contained-tonal" 
-//                     onPress={() => {
-//                         Keyboard.dismiss();
-//                         setTextInputOnFocus(false);
-//                     }}
-//                     style={{marginLeft: 10}}
-//                 >Cancel</Button>}
-//             </View>
-//             <Divider bold={true} />
-//             <Text variant="headlineSmall">Tags</Text>
-//             <Text>when clicked, the result list is updated</Text>
-//             <Text>multiple clicks possible?</Text>
-//             <View style={{alignItems: 'flex-start'}}>
-//                 <Button style={styles.categoryButton} mode="contained-tonal">
-//                     <Text variant='bodyMedium'>#cat1 
-//                         <Text variant='labelSmall'> {"(0)"}</Text>
-//                     </Text>
-//                 </Button>
-//                 <Button style={styles.categoryButton} mode="contained-tonal">
-//                 <Text variant='bodyMedium'>#cat2 
-//                         <Text variant='labelSmall'> {"(0)"}</Text>
-//                     </Text>
-//                 </Button>
-//                 <Button style={styles.categoryButton} mode="contained-tonal">
-//                     <Text variant='bodyMedium'>#cat3 
-//                         <Text variant='labelSmall'> {"(0)"}</Text>
-//                     </Text>
-//                 </Button>
-//             </View>
-//             <Divider bold={true} />
-//             <Text variant="headlineSmall">Results</Text>
-//             <Text>queried list with brief info</Text>
-//             <Text>when clicked, navigate to a page with verbose info</Text>
-//             {text && 
-//             <Card
-//                 onPress={() => console.log(`${text} card clicked`)}
-//             >
-//                 <Card.Title 
-//                     title={text} 
-//                     subtitle="the sentence"
-//                     left={(props) => <Avatar.Icon {...props} icon="folder" />}
-//                 />
-//                 <Card.Content>
-//                 </Card.Content>
-//             </Card>
-//             }
-//         </ScrollView>
-//     );
-// }
 
 const styles = StyleSheet.create({
     container: {

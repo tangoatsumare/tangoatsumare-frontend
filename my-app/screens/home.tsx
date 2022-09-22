@@ -34,8 +34,7 @@ export const Home = () => {
   const [text, setText] = useState('');
   const [textInputOnFocus, setTextInputOnFocus] = useState(false);
   // const [flashcards, setFlashcards] = useState([]);
-  const [flashcardsOnView, setFlashcardsOnView] = useState([]);
-
+  const [flashcardsCurated, setFlashcardsCurated] = useState<[]>([]);
   const [flashcardsCollection, setFlashcardsCollection] = useState([]);
   const [flashcardsFeed, setFlashcardsFeed] = useState([]);
 
@@ -57,6 +56,9 @@ export const Home = () => {
           setText={setText} 
           textInputOnFocus={textInputOnFocus}
           setTextInputOnFocus={setTextInputOnFocus}
+          flashcardsCurated={flashcardsCurated}
+          setFlashcardsCurated={setFlashcardsCurated}
+          flashcardsFeed={flashcardsFeed}
         />
       ),
       headerRight: () => {
@@ -104,6 +106,8 @@ export const Home = () => {
               const result: [] = flashcardsAll.reverse();
               // setFlashcards(result);
               // setFlashcardsOnView(result);
+
+              setFlashcardsCurated(result); // TO CHANGE
               setFlashcardsFeed(result);
               setFlashcardsCollection(result.filter(flashcard => flashcard["created_by"] === userId));
           } catch (err) {
@@ -240,7 +244,7 @@ export const Home = () => {
 
   return (
     <View style={styles.master}>
-      { !textInputOnFocus && flashcardsOnView ? 
+      { !textInputOnFocus && flashcardsFeed && flashcardsCollection ? 
         <View>
           <SegmentedButtons
             value={value}
@@ -303,6 +307,7 @@ export const Home = () => {
           setText={setText} 
           textInputOnFocus={textInputOnFocus}
           setTextInputOnFocus={setTextInputOnFocus}
+          flashcardsCurated={flashcardsCurated}
         /> 
       }
   </View>
