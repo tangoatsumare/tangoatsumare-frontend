@@ -2,8 +2,8 @@ import { useNavigation } from "@react-navigation/core";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 import { useIsFocused } from "@react-navigation/native";
-import React, { useEffect, useLayoutEffect, useState } from "react";
-import { Keyboard } from 'react-native';
+import React, { useEffect, useLayoutEffect, useState, useRef } from "react";
+import { Keyboard, Dimensions } from 'react-native';
 import { View, StyleSheet, FlatList, TouchableOpacity, ScrollView } from 'react-native'
 import { SegmentedButtons, Text, Button, Card, Paragraph, Title, Avatar } from "react-native-paper";
 // import { Collection } from "../Components/collection";
@@ -15,9 +15,14 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { getAuth } from 'firebase/auth';
 import { SearchBar, SearchBody } from '../screens/Search';
 
+import Swipeable from 'react-native-gesture-handler/Swipeable';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
 //test
   import { getProfileInfoById } from "../utils/profileInfo";
 //test
+
+const { width } = Dimensions.get('window');
 
 export const Home = () => {
   dayjs.extend(relativeTime);
@@ -28,11 +33,17 @@ export const Home = () => {
 
   const [text, setText] = useState('');
   const [textInputOnFocus, setTextInputOnFocus] = useState(false);
-  const [flashcards, setFlashcards] = useState([]);
+  // const [flashcards, setFlashcards] = useState([]);
   const [flashcardsOnView, setFlashcardsOnView] = useState([]);
+
+  const [flashcardsCollection, setFlashcardsCollection] = useState([]);
+  const [flashcardsFeed, setFlashcardsFeed] = useState([]);
+
   const isFocused = useIsFocused();
   const auth = getAuth();
   const userId = auth.currentUser?.uid;
+
+  const scrollRef = useRef();
 
   // setting the header section
   useLayoutEffect(() => {
@@ -72,6 +83,7 @@ export const Home = () => {
       (async () => {
         if (isFocused) {
           try {
+              console.log("it is focused now. HTTP request will be sent to backend");
               const flashcardsAll = await HTTPRequest.getFlashcards();
               const usersAll = await HTTPRequest.getUsers();
               
@@ -84,9 +96,11 @@ export const Home = () => {
                   card.created_timestamp = dayjs(card.created_timestamp).fromNow(); // https://day.js.org/docs/en/plugin/relative-time
               }
   
-              const result = flashcardsAll.reverse();
-              setFlashcards(result);
-              setFlashcardsOnView(result);
+              const result: [] = flashcardsAll.reverse();
+              // setFlashcards(result);
+              // setFlashcardsOnView(result);
+              setFlashcardsFeed(result);
+              setFlashcardsCollection(result.filter(flashcard => flashcard["created_by"] === userId));
           } catch (err) {
               console.log(err);
           }
@@ -94,22 +108,23 @@ export const Home = () => {
       })();
   }, [isFocused]);
 
-  useEffect(() => {
-    if (flashcards) {
-      if (value === 'feed') {
-        setFlashcardsOnView(flashcards);
-      } else if (value === 'collection') {
-        const result = flashcards.filter(flashcard => flashcard["created_by"] === userId);
-        if (result) {
-          setFlashcardsOnView(result);
-        }
-      }
-    }
-  }, [value]);
+  // useEffect(() => {
+  //   if (flashcards) {
 
-  useEffect(() => {
-    if (flashcardsOnView) console.log(flashcardsOnView);
-  }, [flashcardsOnView]);
+  //     // if (value === 'feed') {
+  //     //   setFlashcardsOnView(flashcards);
+  //     // } else if (value === 'collection') {
+  //     //   const result = flashcards.filter(flashcard => flashcard["created_by"] === userId);
+  //     //   if (result) {
+  //     //     setFlashcardsOnView(result);
+  //     //   }
+  //     // }
+  //   }
+  // }, [value]);
+
+  // useEffect(() => {
+  //   if (flashcardsOnView) console.log(flashcardsOnView);
+  // }, [flashcardsOnView]);
 
   // should be in utils maybe?
   const handleUID = () => {
@@ -131,6 +146,17 @@ export const Home = () => {
   const handleShowFlashcard = (flashcardID: string) => {
     navigation.navigate("Card", {id: flashcardID})
     console.log(flashcardID);
+  }
+
+
+  const handleScroll = (e: object) => {
+    const currentScrollPosition = e.nativeEvent.contentOffset.x;
+    // console.log(currentScrollPosition);
+    if (currentScrollPosition === 0) {
+      setValue('collection')
+    } else if (currentScrollPosition === width) {
+      setValue('feed');
+    }
   }
 
   const Feed = ({item}) => {
@@ -208,38 +234,59 @@ export const Home = () => {
   };
 
   return (
-    <>
+    <View style={styles.master}>
       { !textInputOnFocus && flashcardsOnView ? 
-      <FlatList style={styles.container}
-        ListHeaderComponent={
-          <>
-            <SegmentedButtons
-              value={value}
-              onValueChange={setValue}
-              buttons={[
-                {
-                  value: 'collection',
-                  label: 'Collection',
-                },
-                {
-                  value: 'feed',
-                  label: 'Feed',
-                },
-              ]}
-              style={styles.segment}
+        <View style={{alignItems: 'center', justifyContent: 'center'}}>
+          <SegmentedButtons
+            value={value}
+            onValueChange={setValue}
+            buttons={[
+              {
+                value: 'collection',
+                label: 'Collection',
+                onPress: () => {
+                  scrollRef.current?.scrollTo({y:0, animated: true})
+                }
+              },
+              {
+                value: 'feed',
+                label: 'Feed',
+                onPress: () => {
+                  scrollRef.current?.scrollToEnd({ animated: true})
+                }
+              },
+            ]}
+            style={styles.segment}
+          />
+          <ScrollView 
+              horizontal 
+              snapToInterval={width} 
+              decelerationRate="fast" 
+              showsHorizontalScrollIndicator={false}
+              ref={scrollRef}
+              // https://stackoverflow.com/questions/29503252/get-current-scroll-position-of-scrollview-in-react-native
+              onScroll={handleScroll}
+              onScrollEndDrag={handleScroll}
+              scrollEventThrottle={16}
+          >
+            <FlatList style={styles.container}
+                data={flashcardsCollection}
+                keyExtractor={(item) => item._id}
+                renderItem={({item}) => (
+                    <Collection item={item} />
+                  )
+                }
+              />
+            <FlatList style={styles.container}
+              data={flashcardsFeed}
+              keyExtractor={(item) => item._id}
+              renderItem={({item}) => (       
+                  <Feed item={item} />
+                )
+              }
             />
-          </>
-        }
-        data={flashcardsOnView}
-        keyExtractor={(item) => item._id}
-        renderItem={({item}) => (
-          value === 'feed' ?            
-            <Feed item={item} />
-          : value === 'collection' ?
-            <Collection item={item} />
-          : null)
-        }
-      />
+        </ScrollView>
+    </View>
         :
         <SearchBody 
           text={text} 
@@ -248,17 +295,18 @@ export const Home = () => {
           setTextInputOnFocus={setTextInputOnFocus}
         /> 
       }
-    </>
+  </View>
   );
 };
 
 const styles = StyleSheet.create({
+  master: {},
   button: {
     alignItems: 'center',
   },
   container: {
     marginTop: 20,
-    // flex: 1
+    width: width
   },
   segment: {
     marginBottom: 5,
@@ -303,8 +351,6 @@ const styles = StyleSheet.create({
       borderRadius: 10,
       marginLeft: 20,
       marginRight: 20
-      // marginTop: 2, 
-      // padding: 10
   },
   image: {
       backgroundColor: 'transparent'
