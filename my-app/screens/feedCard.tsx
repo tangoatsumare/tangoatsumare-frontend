@@ -57,6 +57,7 @@ export const FeedCard = () => {
   const userId = auth.currentUser?.uid;
   const isFocused = useIsFocused();
 
+
   useEffect(() => {
 
     (async () => {
@@ -68,8 +69,9 @@ export const FeedCard = () => {
                 setFlashcard(response.data[0]);
                 setEngDef(response.data[0].Eng_meaning[0]);
                 setFlashcardId(response.data[0]._id);
-                setFlaggingUsers(response.data[0].flagging_users);
-                checkIfReported();
+                setLikers(response.data[0].likers)
+                const flaggersArray = response.data[0].flagging_users
+                checkIfReported(flaggersArray);
                 const likersArray = response.data[0].likers
                 checkIfLiked(likersArray);
                 //fetch all of the users SRS To Cards data, to see if the card already exists in the users deck
@@ -119,8 +121,8 @@ export const FeedCard = () => {
   };
 
   //run on load, check to see if this user has already reported the card
-function checkIfReported () {
-    for (let user of flaggingUsers) {
+function checkIfReported (array: any) {
+    for (let user of array) {
       if (user === userId) {
         setReported(true);
       }
