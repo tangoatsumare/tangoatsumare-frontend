@@ -94,9 +94,9 @@ export const SingleCard = () => {
           <Dialog.Icon icon="alert" />
           <Dialog.Title style={styles.title}>Do you really want to delete your flashcard?</Dialog.Title>
           <Dialog.Actions>
-          <Button onPress={() => hideDialog}>Cancel</Button>
-          <Button onPress={() => setPressDelete(true)}>Yes</Button>
-        </Dialog.Actions>
+            <Button onPress={() => hideDialog()}>Cancel</Button>
+            <Button onPress={() => setPressDelete(true)}>Yes</Button>
+          </Dialog.Actions>
         </Dialog>
       </Portal>
     );
