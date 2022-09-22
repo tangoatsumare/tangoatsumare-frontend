@@ -31,6 +31,7 @@ import { HTTPRequest, UserId } from "../utils/httpRequest";
 import { useIsFocused } from "@react-navigation/native";
 import { report } from "process";
 import dayjs from "dayjs";
+import { mdiCardsPlayingSpadeMultiple } from "@mdi/js";
 
 export const FeedCard = () => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
@@ -69,15 +70,16 @@ export const FeedCard = () => {
                 setFlashcardId(response.data[0]._id);
                 setFlaggingUsers(response.data[0].flagging_users);
                 checkIfReported();
-                checkIfLiked();
+                const likersArray = response.data[0].likers
+                checkIfLiked(likersArray);
                 //fetch all of the users SRS To Cards data, to see if the card already exists in the users deck
           const userToSRSCards = await axios.get(`https://tangoatsumare-api.herokuapp.com/api/cardflashjoinuid/${userId}`)
             const SRSArray =   userToSRSCards.data; // keith
             // setUserSRSCards(userToSRSCards.data);
               console.log("srs cards:", userToSRSCards.data);
             //   setHasSRSCard(false);
-              
-             checkIfInDeck(SRSArray); // keith
+              const FCId = response.data[0]._id;
+             checkIfInDeck(SRSArray, FCId); // keith
                 
             // checkIfInDeck();
               //fetch the users data for username and avatar display
@@ -95,10 +97,32 @@ export const FeedCard = () => {
 
   //Liking the card
 //run on load, check to see if this user has already liked the card
-  const checkIfLiked = () => {
-    for (let user of likers) {
+  function checkIfLiked (array: any) {
+    for (let user of array) {
+        console.log("user:", user)
+        console.log("userID:", userId)
       if (user === userId) {
         setLiked(true);
+      }
+    }
+  };
+
+  //run on load, check to see if this user has already added the card their SRS deck
+  function checkIfInDeck(arrayOfSRSCards: any, id: any) {
+    //user users_to_cards_ joined with flashcards, loop through each entry checking the flashcard_id, if exists set state to true;
+      for (let card of arrayOfSRSCards) {
+        if (card.flashcard_id === id) {
+          // console.log(flashcardId)
+          setHasSRSCard(true);
+        }
+    }
+  };
+
+  //run on load, check to see if this user has already reported the card
+function checkIfReported () {
+    for (let user of flaggingUsers) {
+      if (user === userId) {
+        setReported(true);
       }
     }
   };
@@ -118,26 +142,14 @@ export const FeedCard = () => {
   };
 
 //Adding to users SRS DECK
-//run on load, check to see if this user has already added the card their SRS deck
-  const checkIfInDeck = (arrayOfSRSCards: any[]) => {
-    //user users_to_cards_ joined with flashcards, loop through each entry checking the flashcard_id, if exists set state to true;
-      for (let card of arrayOfSRSCards) {
-        if (card.flashcard_id === flashcardId) {
-          console.log(card.flashcard_id)
-          console.log("card", card);
-          // console.log(flashcardId)
-          setHasSRSCard(true);
-        }
 
-    }
-  };
 
    //a function to add the card to the users SRS deck if the user has not already added it
    const addCardToDeck = async () => {
     alert("add to deck");
     await HTTPRequest.addSRSCard({
       flashcard_id: flashcardId,
-      user_id: userId,
+      uid: userId,
       interval: 0,
       repetition: 0,
       efactor: 2.5,
@@ -147,14 +159,7 @@ export const FeedCard = () => {
   };
 
 //Reporting inappropriate cards
-//run on load, check to see if this user has already reported the card
-const checkIfReported = () => {
-    for (let user of flaggingUsers) {
-      if (user === userId) {
-        setReported(true);
-      }
-    }
-  };
+
  //a function to report  the card if the user has not reported it already
  const report = async () => {
     const reporters = flaggingUsers;
