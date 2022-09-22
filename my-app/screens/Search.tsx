@@ -77,13 +77,6 @@ export const SearchBar = (props: SearchBarProps) => {
         setSubmitIsClick(true);
         // change the screen back to the feed/collection
         setTextInputOnFocus(false);
-
-        // showing only the matching results.
-        // that means use a separate state, say "flashcardsCurated", to serve as the main screen flashcards state
-        
-        // if cancel is hit,
-        // reset the original state to all flashcards
-
     };
 
     return (

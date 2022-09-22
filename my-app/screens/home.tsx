@@ -131,16 +131,14 @@ export const Home = () => {
         if (isFocused) {
           try {
               console.log("it is focused now. HTTP request will be sent to backend");
-              const flashcardsAll = await HTTPRequest.getFlashcards();
+              let flashcardsAll = await HTTPRequest.getFlashcards();
               const usersAll = await HTTPRequest.getUsers();
               
-              // TODO
-              // if .created_by contains some keyword "delete_by"
-              // a big filter card.created_by not contain "delete_by"
-              // reassign the flashcardsAll
+              // remove the deleted cards from the flashcards
+              // cards with delete keyword in its created_by field are cards that deleted by their owners
+              flashcardsAll = flashcardsAll.filter((card: any) => !card.created_by.includes("delete"));
 
               for (const card of flashcardsAll) {
-                // remove card from flashcardsAll
                   const result = usersAll.find((user: any) => user.uuid === card.created_by);
                   if (result) {
                       card.created_by_username = result.user_name; // replace uid with username
@@ -150,8 +148,6 @@ export const Home = () => {
               }
   
               const result: [] = flashcardsAll.reverse();
-              // setFlashcards(result);
-              // setFlashcardsOnView(result);
 
               setFlashcardsMaster(result);
               setFlashcardsFeed(result);
