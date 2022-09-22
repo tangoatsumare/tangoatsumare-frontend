@@ -47,9 +47,9 @@ export const SingleCard = () => {
 
   useEffect(() => {
     (async () => {
-      if (pressDelete) {
+      if (pressDelete && flashcardId) {
         const id = flashcardId;
-        const body = { created_by: 'delete_' + id }
+        const body = { created_by: 'delete_' + userUid }
         await axios.patch(`https://tangoatsumare-api.herokuapp.com/api/flashcards/${id}`, body)
           .then(res => console.log("success"))
           .catch(err => console.log(err));
