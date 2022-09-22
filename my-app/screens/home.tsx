@@ -195,9 +195,9 @@ export const Home = () => {
     const currentScrollPosition = e.nativeEvent.contentOffset.x;
     // console.log(currentScrollPosition);
     if (currentScrollPosition === 0) {
-      setValue('collection')
-    } else if (currentScrollPosition === width) {
       setValue('feed');
+    } else if (currentScrollPosition === width) {
+      setValue('collection')
     }
   }
 
@@ -284,13 +284,13 @@ export const Home = () => {
             onValueChange={setValue}
             buttons={[
               {
-                value: 'collection',
-                label: 'Collection',
+                value: 'feed',
+                label: 'Feed',
                 onPress: scrollToLeft
               },
               {
-                value: 'feed',
-                label: 'Feed',
+                value: 'collection',
+                label: 'Collection',
                 onPress: scrollToRight
               },
             ]}
@@ -304,12 +304,24 @@ export const Home = () => {
               showsHorizontalScrollIndicator={false}              
               ref={scrollRef}
               // https://stackoverflow.com/questions/29310553/is-it-possible-to-keep-a-scrollview-scrolled-to-the-bottom
-              onContentSizeChange={scrollToRight}
+              // onContentSizeChange={scrollToRight}
               // https://stackoverflow.com/questions/29503252/get-current-scroll-position-of-scrollview-in-react-native
               onScroll={handleScroll}
               onScrollEndDrag={handleScroll}
               scrollEventThrottle={16}
           >
+          {flashcardsFeed.length > 0 ?
+            <FlatList style={styles.container}
+              data={flashcardsFeed}
+              keyExtractor={(item) => item._id}
+              renderItem={({item}) => (       
+                  <Feed item={item} />
+                )
+              }
+              contentContainerStyle={{paddingBottom: 200}}
+            />
+            : <Text style={styles.container}>result not found.</Text>
+          }
             {flashcardsCollection.length > 0 ? 
               <FlatList style={styles.container}
                   data={flashcardsCollection}
@@ -322,18 +334,6 @@ export const Home = () => {
                   // https://thewebdev.info/2022/02/19/how-to-fix-the-react-native-flatlist-last-item-not-visible-issue/
                   contentContainerStyle={{paddingBottom: 200}}
                 />
-            : <Text style={styles.container}>result not found.</Text>
-          }
-          {flashcardsFeed.length > 0 ?
-            <FlatList style={styles.container}
-              data={flashcardsFeed}
-              keyExtractor={(item) => item._id}
-              renderItem={({item}) => (       
-                  <Feed item={item} />
-                )
-              }
-              contentContainerStyle={{paddingBottom: 200}}
-            />
             : <Text style={styles.container}>result not found.</Text>
           }
         </ScrollView>
