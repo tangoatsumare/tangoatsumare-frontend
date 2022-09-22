@@ -94,7 +94,12 @@ export const Home = () => {
               const flashcardsAll = await HTTPRequest.getFlashcards();
               const usersAll = await HTTPRequest.getUsers();
               
+              // TODO
+              // or a big filter card.created_by not contain "delete_by"
+
               for (const card of flashcardsAll) {
+                // if .created_by contains some keyword "delete_by"
+                // remove card from flashcardsAll
                   const result = usersAll.find((user: any) => user.uuid === card.created_by);
                   if (result) {
                       card.created_by_username = result.user_name; // replace uid with username

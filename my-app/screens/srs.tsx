@@ -38,8 +38,11 @@ export const SRS = ({route}) => {
     useEffect(() => {
         (async () => {
             if (isFocused && userId) {
-                const flashcards: SRSTangoFlashcard[] = await HTTPRequest.getSRSFlashcardsByUser(userId);
+                let flashcards: SRSTangoFlashcard[] = await HTTPRequest.getSRSFlashcardsByUser(userId);
                 setFlashcardsAll(flashcards);
+
+                // Updated to accomolate for deletion
+                flashcards = flashcards.filter(card => !card.Flashcard[0].created_by?.includes("delete"));
                 setFlashcardsReviewable(getReviewableSRSFlashcards(flashcards));
             } 
         })();
@@ -172,22 +175,26 @@ export const SRS = ({route}) => {
                             <Card style={styles.card} mode="contained" theme={theme}>
                                 <Card.Content
                                     style={styles.cardContent}
-                                >
-                                    <Card.Cover 
-                                        source={{uri: item.Flashcard[0].picture_url ? item.Flashcard[0].picture_url : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}} 
-                                        style={styles.cardCover}
-                                        resizeMode="contain"
-                                    />
-                                    <View style={styles.cardMain}>
-                                        <Title style={styles.textVocab}>{item.Flashcard[0].target_word}</Title>
-                                        <Paragraph style={styles.text}>{item.Flashcard[0].example_sentence}</Paragraph>
-                                        {/* <Paragraph>Counter: {item.counter}</Paragraph> */}
-                                        {/* <Paragraph>Interval: {item.interval}</Paragraph> */}
-                                        {/* <Paragraph>Repetition: {item.repetition}</Paragraph> */}
-                                        {/* <Paragraph>Efactor: {item.efactor}</Paragraph> */}
-                                        <Paragraph>{item.counter} attempt{item.counter === 0 ? '': 's'}</Paragraph>
-                                        <Paragraph>due {dayjs(item.due_date).fromNow()}</Paragraph>
+                                    >
+                                    {!item.Flashcard[0].created_by?.includes("delete") ? // check whether this card has been deleted
+                                    <>
+                                        <Card.Cover 
+                                            source={{uri: item.Flashcard[0].picture_url ? item.Flashcard[0].picture_url : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}} 
+                                            style={styles.cardCover}
+                                            resizeMode="contain"
+                                        />
+                                        <View style={styles.cardMain}>
+                                            <Title style={styles.textVocab}>{item.Flashcard[0].target_word}</Title>
+                                            <Paragraph style={styles.text}>{item.Flashcard[0].example_sentence}</Paragraph>
+                                            <Paragraph>{item.counter} attempt{item.counter === 0 ? '': 's'}</Paragraph>
+                                            <Paragraph>due {dayjs(item.due_date).fromNow()}</Paragraph>
+                                        </View>
+                                    </>
+                                    : 
+                                    <View>
+                                        <Text>This card has been deleted by the card owner.</Text>
                                     </View>
+                                    }
                                 </Card.Content>
                                 <Card.Actions>
                                 </Card.Actions>
