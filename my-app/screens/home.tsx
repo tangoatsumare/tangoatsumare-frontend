@@ -23,7 +23,7 @@ import { useTheme } from 'react-native-paper';
 
 const { width } = Dimensions.get('window');
 
-interface Tag {
+export interface Tag {
   _id: string,
   tag: string,
   flashcards: string[]
@@ -46,6 +46,7 @@ export const Home = () => {
   const [resetIsClick, setResetIsClick] = useState<boolean>(false);
   const [submitIsClick, setSubmitIsClick] = useState<boolean>(false);
 
+  const [tags, setTags] = useState<Tag[]>([]);
   const [tagsToFlashcards, setTagsToFlashcards] = useState<object>({});
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [hashTagSearchMode, setHashTagSearchMode] = useState<boolean>(false);
@@ -81,6 +82,8 @@ export const Home = () => {
           selectedTags={selectedTags}
           setSelectedTags={setSelectedTags}
           tagsToFlashcards={tagsToFlashcards}
+          tags={tags}
+          setTags={setTags}
         />
       ),
       headerRight: () => {
@@ -176,6 +179,48 @@ export const Home = () => {
               // cards with delete keyword in its created_by field are cards that deleted by their owners
               flashcardsAll = flashcardsAll.filter((card: any) => !card.created_by.includes("delete"));
 
+              // fetching hashtag data
+              const tagsData = await HTTPRequest.getTags();
+
+              // <---- TO TEST AND DEBUG ---->
+              // mock data for testing the hashtags
+              // per Schema,
+              // each tag from the tagsData has a flashcards array field, containing flashcard_id 
+              
+              // Uncomment the code to test them
+
+              // Test 1: pick the first flashcard from the pool, pick the first hashtag from the pool
+              // seed that flashcard id into the tag's flashcard array
+              // const testFlashcard = flashcardsAll[0];
+              // console.log(testFlashcard._id)
+              // tagsData[0].flashcards.push(testFlashcard._id);
+              // End of Test 1
+
+              // // Test 2: pick 1 card. Seed 2 tags into it
+              // const testFlashcard = flashcardsAll[0];
+              // tagsData[0].flashcards.push(testFlashcard._id);
+              // tagsData[1].flashcards.push(testFlashcard._id);
+              // // End of Test 2
+
+              // // Test 3: pick 2 cards. Seed the same tag into them
+              // const testFlashcard1 = flashcardsAll[0];
+              // const testFlashcard2 = flashcardsAll[1];
+              // tagsData[0].flashcards.push(testFlashcard1._id);
+              // tagsData[0].flashcards.push(testFlashcard2._id);
+              // // End of Test 3
+
+              // Test 4: pick 2 cards. Seed 2 different tags into them
+              // const testFlashcard1 = flashcardsAll[2];
+              // const testFlashcard2 = flashcardsAll[3];
+              // tagsData[2].flashcards.push(testFlashcard1._id);
+              // tagsData[2].flashcards.push(testFlashcard2._id);
+              // tagsData[3].flashcards.push(testFlashcard1._id);
+              // tagsData[3].flashcards.push(testFlashcard2._id);
+              // End of Test 4
+
+              setTags(tagsData);
+              setTagsToFlashcards(getTagsToFlashcardsIdObject(tagsData));
+
               for (const card of flashcardsAll) {
                   const result = usersAll.find((user: any) => user.uuid === card.created_by);
                   if (result) {
@@ -191,10 +236,6 @@ export const Home = () => {
               setFlashcardsFeed(result);
               setFlashcardsCollection(result.filter(flashcard => flashcard["created_by"] === userId));
               
-              // fetching hashtag data
-              const tags = await HTTPRequest.getTags();            
-              setTagsToFlashcards(getTagsToFlashcardsIdObject(tags));
-
           } catch (err) {
               console.log(err);
           }
@@ -207,7 +248,7 @@ export const Home = () => {
     if (flashcardsCurated && !textInputOnFocus) {
       // update the states for flashcardsFeed and flashcardsCollection
       setFlashcardsFeed(flashcardsCurated);
-      setFlashcardsCollection(flashcardsCurated.filter(flashcard => flashcard["created_by"] === userId));
+      setFlashcardsCollection(flashcardsCurated.filter(flashcard => flashcard.created_by === userId));
     }
   },[ flashcardsCurated, textInputOnFocus ]);
 
@@ -366,7 +407,7 @@ export const Home = () => {
               selectedTags.map(item => {
                 return (
                   <Chip key={item} style={{...styles.tag, backgroundColor: theme.colors.secondary}}>
-                    <Text variant="labelMedium">{item}</Text>
+                    <Text style={{fontSize: 10}}>{item}</Text>
                   </Chip>
                 );
               })
@@ -425,6 +466,8 @@ export const Home = () => {
           handleEditSubmit={handleEditSubmit}
           selectedTags={selectedTags}
           setSelectedTags={setSelectedTags}
+          tags={tags}
+          setTags={setTags}
         /> 
       }
   </View>

@@ -9,6 +9,7 @@ import { HTTPRequest } from '../utils/httpRequest';
 import { useTheme } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { TouchableOpacity } from "react-native-gesture-handler";
+import { Tag } from './home';
 
 interface SearchBarProps {
     text: string,
@@ -27,7 +28,9 @@ interface SearchBarProps {
     handleEditSubmit: any,
     selectedTags: string[],
     setSelectedTags: any,
-    tagsToFlashcards: object
+    tagsToFlashcards: object,
+    tags: Tag[],
+    setTags: any
 }
 
 interface SearchBodyProps {
@@ -40,7 +43,9 @@ interface SearchBodyProps {
     setHashTagSearchMode: any,
     handleEditSubmit: any,
     selectedTags: string[],
-    setSelectedTags: any 
+    setSelectedTags: any,
+    tags: Tag[],
+    setTags: any
 }
 
 const { width } = Dimensions.get('window');
@@ -64,7 +69,9 @@ export const SearchBar = (props: SearchBarProps) => {
         handleEditSubmit,
         selectedTags,
         setSelectedTags,
-        tagsToFlashcards
+        tagsToFlashcards,
+        tags,
+        setTags
     } = props;
 
     const [pressed, setPressed] = useState(false);
@@ -126,14 +133,15 @@ export const SearchBar = (props: SearchBarProps) => {
         for (const item of flashcards) {
             flashcardIdsFromUI.push(item._id);
         }
-        console.log("hi:", flashcardIdsFromUI);
+        console.log("current cards that fulfill the search text", flashcardIdsFromUI);
         // the data would be like [1,2,3,4,5,6,7,8]
         // which is representing the flashcardIds that are stored in the flashcards variable
 
         // grab the intersected match between the flashcardIds and the flashcardIntersectionArrFromSelectedTags
-        const matchingFlashcards = flashcardIntersectionArrFromSelectedTags.filter(item => {
+        const matchingFlashcardIds = flashcardIntersectionArrFromSelectedTags.filter(item => {
             return flashcardIdsFromUI.includes(item);
         });
+        console.log("the intersected cards:", matchingFlashcardIds);
         // for example
         // flashcardIntersectionArrFromSelectedTags is [3]
         // flashcardIdsFromUI is [1,2,3,4,5,6,7,8]
@@ -142,7 +150,7 @@ export const SearchBar = (props: SearchBarProps) => {
         // set flashcardsCurated with the search text and/or the search hashtags
         // if no selectedTags, return the flashcards that are filtered by the text
         // else, return the result with both text and hashtag(s) filtering
-        setFlashcardsCurated(selectedTags.length > 0 ? matchingFlashcards: flashcards);
+        setFlashcardsCurated(selectedTags.length > 0 ? flashcards.filter(item => matchingFlashcardIds.includes(item._id)): flashcards);
         
         // <----- TO TEST AND DEBUG -----> END
 
@@ -177,12 +185,12 @@ export const SearchBar = (props: SearchBarProps) => {
 
 
         // TODO: curate the flashcardsCurated by hashtags
-        console.log(selectedTags);
-        console.log(flashcards);
+        // console.log(selectedTags);
+        // console.log(flashcards);
 
         // get the tags array in the flashcard
-        const flashcardsTag = flashcards.map(card => card.tags);
-        console.log("tags in the matching flashcards:", flashcardsTag);
+        // const flashcardsTag = flashcards.map(card => card.tags);
+        // console.log("tags in the matching flashcards:", flashcardsTag);
     };
 
     return (
@@ -236,7 +244,7 @@ export const SearchBar = (props: SearchBarProps) => {
     );
 };
 
-interface Tag {
+interface modifiedTag extends Tag {
     _id: string,
     tag: string,
     flashcards: string[],
@@ -256,31 +264,33 @@ export const SearchBody = (props: SearchBodyProps) => {
         setHashTagSearchMode,
         handleEditSubmit,
         selectedTags,
-        setSelectedTags
+        setSelectedTags,
+        tags,
+        setTags
     } = props;
-    const [tags, setTags ] = useState<Tag[]>([]);
+    const [tagsModified, setTagsModified ] = useState<modifiedTag[]>([]);
 
 
     useEffect(() => {
         (async () => {
-            if (textInputOnFocus) {
-                let result = await HTTPRequest.getTags();
+            if (textInputOnFocus && tags) {
+                let result = tags;
                 for (let i = 0; i < result.length; i++) {
                     result[i].isClicked = false;
                 }
                 // if (tags.length === 0) 
-                setTags(result);
+                setTagsModified(result);
             }
         })();
-    }, [textInputOnFocus]);
+    }, [textInputOnFocus, tags]);
 
     const handleShowFlashcard = (flashcardID: string) => {
         navigation.navigate("Card", {id: flashcardID})
         // console.log(flashcardID);
     };
 
-    const handleTagClick = (tag: Tag) => {
-        if (tags) {           
+    const handleTagClick = (tag: modifiedTag) => {
+        if (tagsModified) {           
             // set to text
             // setText(`#${tag.tag}`);
 
@@ -297,7 +307,7 @@ export const SearchBody = (props: SearchBodyProps) => {
             });
 
             // update isClicked value
-            setTags((prev) => {
+            setTagsModified((prev) => {
                 let result = [...prev];
                 for (let i = 0; i < result.length; i++) {
                     if (result[i]._id === tag._id) {
@@ -329,8 +339,8 @@ export const SearchBody = (props: SearchBodyProps) => {
             <View style={styles.topContainer}>
                 <Text variant="headlineSmall">Tags</Text>
                 <View style={styles.tagsContainer}>
-                    {tags.length > 0 ?
-                    tags.map(item => {
+                    {tagsModified.length > 0 ?
+                    tagsModified.map(item => {
                         return (
                             <Chip
                                 key={item._id} 
@@ -341,7 +351,7 @@ export const SearchBody = (props: SearchBodyProps) => {
                             >
                                 <Text variant='bodyMedium'>
                                     #{item.tag}
-                                    <Text variant='labelSmall'> {"(0)"}</Text>
+                                    {/* <Text variant='labelSmall'> {"(0)"}</Text> */}
                                 </Text>
                             </Chip>
                         );
