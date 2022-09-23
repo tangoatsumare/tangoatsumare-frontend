@@ -100,6 +100,11 @@ export const Home = () => {
 
   const cancelSearch = () => {
     setText('');
+    clearKeyboard();
+  };
+
+  const clearKeyboard = () => {
+    // setText('');
     Keyboard.dismiss();
     setTextInputOnFocus(false);
   };
@@ -209,7 +214,7 @@ export const Home = () => {
     if (text) {
         setSubmitIsClick(true);
         // change the screen back to the feed/collection  
-        cancelSearch();
+        clearKeyboard();
     } else {
         console.log('search not executed due to empty string');
     }
