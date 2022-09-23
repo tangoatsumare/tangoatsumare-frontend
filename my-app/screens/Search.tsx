@@ -1,10 +1,12 @@
 import { useNavigation } from "@react-navigation/core";
 import { StackNavigationProp } from '@react-navigation/stack';
+import { ParamListBase } from '@react-navigation/native'
 import { useEffect, useRef, useState } from 'react';
 import {ScrollView, View, StyleSheet, FlatList} from 'react-native';
-import { Button, Divider, Text, TextInput, Searchbar, Card, Avatar } from "react-native-paper";
+import { Button, Divider, Text, TextInput, Searchbar, Card, Avatar, Chip } from "react-native-paper";
 import { Keyboard, Dimensions } from 'react-native';
 import { HTTPRequest } from '../utils/httpRequest';
+import { useTheme } from 'react-native-paper';
 
 interface SearchBarProps {
     text: string,
@@ -134,41 +136,98 @@ export const SearchBar = (props: SearchBarProps) => {
 interface Tag {
     _id: string,
     tag: Tag,
-    flashcards: string[]
+    flashcards: string[],
+    isClicked: boolean // additional property
 }
 
 export const SearchBody = (props: SearchBodyProps) => {
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
+    const theme = useTheme();
     const { text, setText, textInputOnFocus, setTextInputOnFocus, flashcardsCurated } = props;
     const [tags, setTags ] = useState<Tag[]>([]);
-
-    const handleShowFlashcard = (flashcardID: string) => {
-        navigation.navigate("Card", {id: flashcardID})
-        // console.log(flashcardID);
-      }
+    const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
     useEffect(() => {
         (async () => {
             if (textInputOnFocus) {
-                if (tags.length === 0) setTags(await HTTPRequest.getTags());
+                let result = await HTTPRequest.getTags();
+                for (let i = 0; i < result.length; i++) {
+                    result[i].isClicked = false;
+                }
+                // if (tags.length === 0) 
+                setTags(result);
             }
         })();
     }, [textInputOnFocus]);
 
+    const handleShowFlashcard = (flashcardID: string) => {
+        navigation.navigate("Card", {id: flashcardID})
+        // console.log(flashcardID);
+    };
+
+    const handleTagClick = (tag: Tag) => {
+        if (tags) {
+            // update the currentSelected tags
+            setSelectedTags((prev) => {
+                // if it is in a clicked state before, remove it from selectedTags
+                if (tag.isClicked) {
+                    return prev.filter(item => item !== tag.tag);
+                }
+                // else, add to selected tags
+                else {
+                    return prev.concat(tag.tag);
+                }
+            });
+
+            // update isClicked value
+            setTags((prev) => {
+                let result = [...prev];
+                for (let i = 0; i < result.length; i++) {
+                    if (result[i]._id === tag._id) {
+                        result[i].isClicked = !result[i].isClicked;
+                    }
+                }
+                return result;
+            })
+        }
+    };
+
+    useEffect(() => {
+        if (selectedTags) console.log(selectedTags);
+    }, [selectedTags]);
+
     return (
         <ScrollView>
             <Text variant="headlineSmall">Tags</Text>
-            <Text>when clicked, the result list is updated</Text>
-            <Text>to allow multiple clicks possible</Text>
+            <Text>MVP: to allow single click</Text>
+            <Text>Advanced: to allow multiple clicks possible</Text>
             <View style={styles.tagsContainer}>
                 {tags.length > 0 ?
                 tags.map(item => {
                     return (
-                        <Button key={item._id} style={styles.tagButton} mode="contained-tonal">
-                        <Text variant='bodyMedium'>{item.tag}
-                            <Text variant='labelSmall'> {"(0)"}</Text>
-                        </Text>
-                    </Button>
+                        <Chip
+                            key={item._id} 
+                            style={item.isClicked? {...styles.tagButton, backgroundColor:theme.colors.secondary}: styles.tagButton }
+                            mode="flat"
+                            selected={item.isClicked}
+                            onPress={() => handleTagClick(item)}
+                        >
+                            <Text variant='bodyMedium'>
+                                #{item.tag}
+                                <Text variant='labelSmall'> {"(0)"}</Text>
+                            </Text>
+                        </Chip>
+                        // <Button
+                        //     key={item._id} 
+                        //     style={styles.tagButton} 
+                        //     mode="contained-tonal"
+                        //     onPress={() => handleTagClick(item)}
+                        // >
+                        //     <Text variant='bodyMedium'>
+                        //         #{item.tag}
+                        //         <Text variant='labelSmall'> {"(0)"}</Text>
+                        //     </Text>
+                        // </Button>
                     );
                 })
                 : null}
@@ -205,12 +264,8 @@ const styles = StyleSheet.create({
     },
     // https://medium.com/@kalebjdavenport/how-to-create-a-grid-layout-in-react-native-7948f1a6f949
     tagsContainer: {
-        // padding: 10,
-        // alignItems: 'center',
-        // justifyContent: 'center',
         flexDirection: 'row',
         flexWrap: 'wrap',
-        // marginHorizontal: "auto",
         width: width
     },
     tagButton: {
@@ -219,7 +274,5 @@ const styles = StyleSheet.create({
         flex: 1,
         margin: 5,
         borderRadius: 30,
-        // alignItems: 'center',
-        // justifyContent: 'center',
-    }
+    },
 });
