@@ -7,6 +7,8 @@ import { Button, Divider, Text, TextInput, Searchbar, Card, Avatar, Chip } from 
 import { Keyboard, Dimensions } from 'react-native';
 import { HTTPRequest } from '../utils/httpRequest';
 import { useTheme } from 'react-native-paper';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 interface SearchBarProps {
     text: string,
@@ -19,7 +21,10 @@ interface SearchBarProps {
     submitIsClick: boolean,
     setSubmitIsClick: any,
     resetIsClick: boolean,
-    flashcardsMaster: object[]
+    flashcardsMaster: object[],
+    hashTagSearchMode: boolean,
+    setHashTagSearchMode: any,
+    handleEditSubmit: any
 }
 
 interface SearchBodyProps {
@@ -27,7 +32,10 @@ interface SearchBodyProps {
     setText: any,
     textInputOnFocus: boolean,
     setTextInputOnFocus: any,
-    flashcardsCurated: object[]
+    flashcardsCurated: object[],
+    hashTagSearchMode: boolean,
+    setHashTagSearchMode: any,
+    handleEditSubmit: any
 }
 
 const { width } = Dimensions.get('window');
@@ -45,7 +53,10 @@ export const SearchBar = (props: SearchBarProps) => {
         submitIsClick,
         setSubmitIsClick,
         resetIsClick,
-        flashcardsMaster
+        flashcardsMaster,
+        hashTagSearchMode,
+        setHashTagSearchMode,
+        handleEditSubmit
     } = props;
 
     const [pressed, setPressed] = useState(false);
@@ -75,13 +86,6 @@ export const SearchBar = (props: SearchBarProps) => {
         setFlashcardsCurated(flashcards);
     };
 
-    const handleEditSubmit = () => {
-        // console.log("edit submit is hit");
-        setSubmitIsClick(true);
-        // change the screen back to the feed/collection
-        setTextInputOnFocus(false);
-    };
-
     return (
         <View style={{
             flex: 1,
@@ -92,11 +96,9 @@ export const SearchBar = (props: SearchBarProps) => {
                 ref={inputRef}
                 style={{
                     flex: 1, 
-                    // alignItems: 'center', 
                     justifyContent: 'center',
                     maxWidth: width / 2,
                     width: width / 2
-                    // fontSize: 20
                 }}
                 mode="outlined"
                 // TO FIX
@@ -108,6 +110,8 @@ export const SearchBar = (props: SearchBarProps) => {
                 // onChangeText={text => setText(text)}
                 placeholder="search"
                 value={pressed || resetIsClick ? '': null}
+                // value={text}
+                // value={pressed || resetIsClick ? '': text}
                 onChangeText={(text) => {
                     setText(text); // save it in a state
                     if (pressed) {
@@ -124,7 +128,7 @@ export const SearchBar = (props: SearchBarProps) => {
                         onPress={() => {
                             setText('');
                             setPressed(true);
-                            // resetFlashcardsCurated();
+                            Keyboard.dismiss();
                         }}
                     />: null}
             />
@@ -143,7 +147,16 @@ interface Tag {
 export const SearchBody = (props: SearchBodyProps) => {
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
     const theme = useTheme();
-    const { text, setText, textInputOnFocus, setTextInputOnFocus, flashcardsCurated } = props;
+    const { 
+        text, 
+        setText, 
+        textInputOnFocus, 
+        setTextInputOnFocus, 
+        flashcardsCurated,
+        hashTagSearchMode,
+        setHashTagSearchMode,
+        handleEditSubmit
+    } = props;
     const [tags, setTags ] = useState<Tag[]>([]);
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
@@ -166,7 +179,10 @@ export const SearchBody = (props: SearchBodyProps) => {
     };
 
     const handleTagClick = (tag: Tag) => {
-        if (tags) {
+        if (tags) {           
+            // set to text
+            // setText(`#${tag.tag}`);
+
             // update the currentSelected tags
             setSelectedTags((prev) => {
                 // if it is in a clicked state before, remove it from selectedTags
@@ -193,86 +209,139 @@ export const SearchBody = (props: SearchBodyProps) => {
     };
 
     useEffect(() => {
-        if (selectedTags) console.log(selectedTags);
+        if (selectedTags.length > 0) {
+            // turn on hashtag search mode if there exists isClicked
+            setHashTagSearchMode(true);
+        } else {
+            setHashTagSearchMode(false);
+        }
     }, [selectedTags]);
 
+    // useEffect(() => {
+    //     if (hashTagSearchMode) {
+    //         console.log(selectedTags);
+    //     }
+    // }, [hashTagSearchMode]);
+
     return (
-        <ScrollView>
-            <Text variant="headlineSmall">Tags</Text>
-            <Text>MVP: to allow single click</Text>
-            <Text>Advanced: to allow multiple clicks possible</Text>
-            <View style={styles.tagsContainer}>
-                {tags.length > 0 ?
-                tags.map(item => {
-                    return (
-                        <Chip
-                            key={item._id} 
-                            style={item.isClicked? {...styles.tagButton, backgroundColor:theme.colors.secondary}: styles.tagButton }
-                            mode="flat"
-                            selected={item.isClicked}
-                            onPress={() => handleTagClick(item)}
+        <ScrollView contentContainerStyle={styles.mainContainer}>
+            <View style={styles.topContainer}>
+                <Text variant="headlineSmall">Tags</Text>
+                <Text>MVP: to allow single click</Text>
+                <Text>Advanced: to allow multiple clicks possible</Text>
+                <View style={styles.tagsContainer}>
+                    {tags.length > 0 ?
+                    tags.map(item => {
+                        return (
+                            <Chip
+                                key={item._id} 
+                                style={item.isClicked? {...styles.tagButton, backgroundColor:theme.colors.secondary}: styles.tagButton }
+                                mode="flat"
+                                selected={item.isClicked}
+                                onPress={() => handleTagClick(item)}
+                            >
+                                <Text variant='bodyMedium'>
+                                    #{item.tag}
+                                    <Text variant='labelSmall'> {"(0)"}</Text>
+                                </Text>
+                            </Chip>
+                        );
+                    })
+                    : null}
+                </View>
+                <Divider bold={true} />
+            </View>
+            <View style={styles.bottomContainer}>
+                <View style={styles.resultsContainer}>
+                    <Text variant="headlineSmall">Results</Text>
+                    {flashcardsCurated && flashcardsCurated.length > 0 &&
+                        flashcardsCurated.map(card => {
+                            return (
+                                <View style={{marginBottom: 5}} key={card._id}>
+                                    <Card
+                                        onPress={() => handleShowFlashcard(card._id)}
+                                    >
+                                        <Card.Title 
+                                            title={card.target_word} 
+                                            subtitle={card.example_sentence}
+                                            left={(props) => <Avatar.Image {...props} source={{uri:card.picture_url}} />}
+                                        />
+                                        <Card.Content>
+                                        </Card.Content>
+                                    </Card>
+                                </View>
+                            );
+                        })
+                    }
+                </View>
+                {text !== '' || hashTagSearchMode ? 
+                    <TouchableOpacity 
+                        style={styles.searchButtonContainer}
+                        onPress={handleEditSubmit}
+                    >
+                        <Button
+                            style={styles.searchButton}
                         >
-                            <Text variant='bodyMedium'>
-                                #{item.tag}
-                                <Text variant='labelSmall'> {"(0)"}</Text>
-                            </Text>
-                        </Chip>
-                        // <Button
-                        //     key={item._id} 
-                        //     style={styles.tagButton} 
-                        //     mode="contained-tonal"
-                        //     onPress={() => handleTagClick(item)}
-                        // >
-                        //     <Text variant='bodyMedium'>
-                        //         #{item.tag}
-                        //         <Text variant='labelSmall'> {"(0)"}</Text>
-                        //     </Text>
-                        // </Button>
-                    );
-                })
+                            <Icon name="search" size={20} color="white" />
+                        </Button> 
+                    </TouchableOpacity>
                 : null}
             </View>
-            <Divider bold={true} />
-            <Text variant="headlineSmall">Results</Text>
-            {flashcardsCurated && flashcardsCurated.length > 0 &&
-                flashcardsCurated.map(card => {
-                    return (
-                        <View style={{marginBottom: 5}} key={card._id}>
-                            <Card
-                                onPress={() => handleShowFlashcard(card._id)}
-                            >
-                                <Card.Title 
-                                    title={card.target_word} 
-                                    subtitle={card.example_sentence}
-                                    left={(props) => <Avatar.Image {...props} source={{uri:card.picture_url}} />}
-                                />
-                                <Card.Content>
-                                </Card.Content>
-                            </Card>
-                        </View>
-                    );
-                })
-            }
         </ScrollView>
 
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        padding: 10
-    },
     // https://medium.com/@kalebjdavenport/how-to-create-a-grid-layout-in-react-native-7948f1a6f949
+    mainContainer: {
+        padding: 10,
+        flex: 1,
+        // justifyContent: 'flex-start',
+        // alignItems: "stretch",
+    },
+    topContainer: {
+        // padding: 10,
+        flex: 1,
+    },
     tagsContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        width: width
+        width: width,
+        marginHorizontal: 'auto'
     },
     tagButton: {
-        minWidth: 130,
+        minWidth: 125,
         maxWidth: 200,
-        flex: 1,
         margin: 5,
         borderRadius: 30,
     },
+
+    bottomContainer: {
+        padding: 10,
+        flex: 1,
+        alignItems: "stretch",
+    },
+    resultsContainer: {
+        flex: 1,
+
+    },
+    searchButtonContainer: {
+        justifyContent: 'center',
+        alignSelf: 'flex-end',
+        width: 70,
+        height: 70,
+        borderRadius: 100,
+        shadowColor: 'rgba(0,0,0,0.1)',
+        shadowOffset: { width: 3, height: 20 },
+        shadowOpacity: 0.8,
+        shadowRadius: 15,
+        backgroundColor: "rgba(0,0,0,0.7)"
+    },
+    searchButton: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'black',
+        padding: 10
+    }
 });

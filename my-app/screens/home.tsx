@@ -38,8 +38,9 @@ export const Home = () => {
   const [flashcardsCollection, setFlashcardsCollection] = useState<object[]>([]);
   const [flashcardsFeed, setFlashcardsFeed] = useState<object[]>([]);
   const [resetIsClick, setResetIsClick] = useState<boolean>(false);
-
   const [submitIsClick, setSubmitIsClick] = useState<boolean>(false);
+
+  const [hashTagSearchMode, setHashTagSearchMode] = useState<boolean>(false);
 
   const isFocused = useIsFocused();
   const auth = getAuth();
@@ -66,6 +67,9 @@ export const Home = () => {
           setSubmitIsClick={setSubmitIsClick}
           resetIsClick={resetIsClick}
           flashcardsMaster={flashcardsMaster}
+          hashTagSearchMode={hashTagSearchMode}
+          setHashTagSearchMode={setHashTagSearchMode}
+          handleEditSubmit={handleEditSubmit}
         />
       ),
       headerRight: () => {
@@ -95,16 +99,22 @@ export const Home = () => {
   });
 
   const cancelSearch = () => {
+    setText('');
     Keyboard.dismiss();
     setTextInputOnFocus(false);
   };
   
   const resetHomeScreen = () => {
+    setText('');
     setResetIsClick(true);
     setSubmitIsClick(false);
     setFlashcardsFeed(flashcardsMaster);
     setFlashcardsCollection(flashcardsMaster.filter(flashcard => flashcard["created_by"] === userId));
   };
+
+  useEffect(() => {
+    if (text) console.log(text);
+  }, [text]);
 
   useEffect(() => {
     if (resetIsClick) {
@@ -119,12 +129,6 @@ export const Home = () => {
   const scrollToRight = () => {
     scrollRef.current?.scrollToEnd({ animated: true});
   };
-
-  // useEffect(() => {
-  //   if (isFocused && !textInputOnFocus) {
-  //     console.log('Hello')
-  //   }
-  // }, [isFocused, textInputOnFocus]);
 
   useEffect(() => {
       (async () => {
@@ -200,6 +204,16 @@ export const Home = () => {
       setValue('collection')
     }
   }
+
+  const handleEditSubmit = () => {
+    if (text) {
+        setSubmitIsClick(true);
+        // change the screen back to the feed/collection  
+        cancelSearch();
+    } else {
+        console.log('search not executed due to empty string');
+    }
+};
 
   const Feed = ({item}) => {
     return (
@@ -345,6 +359,9 @@ export const Home = () => {
           textInputOnFocus={textInputOnFocus}
           setTextInputOnFocus={setTextInputOnFocus}
           flashcardsCurated={flashcardsCurated}
+          hashTagSearchMode={hashTagSearchMode}
+          setHashTagSearchMode={setHashTagSearchMode}
+          handleEditSubmit={handleEditSubmit}
         /> 
       }
   </View>
@@ -353,6 +370,7 @@ export const Home = () => {
 
 const styles = StyleSheet.create({
   master: {
+    flex: 1
   },
   button: {
     alignItems: 'center',
