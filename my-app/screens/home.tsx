@@ -23,6 +23,12 @@ import { useTheme } from 'react-native-paper';
 
 const { width } = Dimensions.get('window');
 
+interface Tag {
+  _id: string,
+  tag: string,
+  flashcards: string[]
+}
+
 export const Home = () => {
   const theme = useTheme();
   dayjs.extend(relativeTime);
@@ -40,6 +46,7 @@ export const Home = () => {
   const [resetIsClick, setResetIsClick] = useState<boolean>(false);
   const [submitIsClick, setSubmitIsClick] = useState<boolean>(false);
 
+  const [tagsToFlashcards, setTagsToFlashcards] = useState<object>({});
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [hashTagSearchMode, setHashTagSearchMode] = useState<boolean>(false);
 
@@ -71,6 +78,9 @@ export const Home = () => {
           hashTagSearchMode={hashTagSearchMode}
           setHashTagSearchMode={setHashTagSearchMode}
           handleEditSubmit={handleEditSubmit}
+          selectedTags={selectedTags}
+          setSelectedTags={setSelectedTags}
+          tagsToFlashcards={tagsToFlashcards}
         />
       ),
       headerRight: () => {
@@ -144,6 +154,16 @@ export const Home = () => {
     scrollRef.current?.scrollToEnd({ animated: true});
   };
 
+  const getTagsToFlashcardsIdObject = (tags: Tag[]): object => {
+    const tagsToFlashcardsId = {};
+    for (const tag of tags) {
+      // https://stackoverflow.com/questions/11508463/javascript-set-object-key-by-variable
+        tagsToFlashcardsId[tag.tag] = tag.flashcards;
+
+    }
+    return tagsToFlashcardsId;
+  }
+
   useEffect(() => {
       (async () => {
         if (isFocused) {
@@ -151,7 +171,7 @@ export const Home = () => {
               console.log("it is focused now. HTTP request will be sent to backend");
               let flashcardsAll = await HTTPRequest.getFlashcards();
               const usersAll = await HTTPRequest.getUsers();
-              
+
               // remove the deleted cards from the flashcards
               // cards with delete keyword in its created_by field are cards that deleted by their owners
               flashcardsAll = flashcardsAll.filter((card: any) => !card.created_by.includes("delete"));
@@ -170,6 +190,11 @@ export const Home = () => {
               setFlashcardsMaster(result);
               setFlashcardsFeed(result);
               setFlashcardsCollection(result.filter(flashcard => flashcard["created_by"] === userId));
+              
+              // fetching hashtag data
+              const tags = await HTTPRequest.getTags();            
+              setTagsToFlashcards(getTagsToFlashcardsIdObject(tags));
+
           } catch (err) {
               console.log(err);
           }
@@ -185,6 +210,12 @@ export const Home = () => {
       setFlashcardsCollection(flashcardsCurated.filter(flashcard => flashcard["created_by"] === userId));
     }
   },[ flashcardsCurated, textInputOnFocus ]);
+
+  useEffect(() => {
+    if (tagsToFlashcards) {
+      console.log(tagsToFlashcards);
+    }
+  }, [tagsToFlashcards]);
 
   // should be in utils maybe?
   const handleUID = () => {
@@ -415,7 +446,7 @@ const styles = StyleSheet.create({
     width: 75,
     height: 30,
     // maxWidth: 200,
-    margin: 5,
+    margin: 2,
     borderRadius: 30,
     alignItems: 'center',
     // justifyContent: 'center'

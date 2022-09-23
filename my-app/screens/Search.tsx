@@ -24,7 +24,10 @@ interface SearchBarProps {
     flashcardsMaster: object[],
     hashTagSearchMode: boolean,
     setHashTagSearchMode: any,
-    handleEditSubmit: any
+    handleEditSubmit: any,
+    selectedTags: string[],
+    setSelectedTags: any,
+    tagsToFlashcards: object
 }
 
 interface SearchBodyProps {
@@ -58,7 +61,10 @@ export const SearchBar = (props: SearchBarProps) => {
         flashcardsMaster,
         hashTagSearchMode,
         setHashTagSearchMode,
-        handleEditSubmit
+        handleEditSubmit,
+        selectedTags,
+        setSelectedTags,
+        tagsToFlashcards
     } = props;
 
     const [pressed, setPressed] = useState(false);
@@ -76,16 +82,107 @@ export const SearchBar = (props: SearchBarProps) => {
     }, [textInputOnFocus]);
 
     useEffect(() => {
-        if (text) {
+        if (text || selectedTags.length !== 0) {
             updateFlashcardsCurated(flashcardsFeed);
-        } else if (text === "") {
+        } else if (text === "" || selectedTags.length === 0) { // TO VERIFY
             resetFlashcardsCurated();
         }
-    }, [text]);
+    }, [text, selectedTags]);
 
     const updateFlashcardsCurated = (flashcards: object[]) => {
+        
+        // const verifyFlashcardAgainstSearchParams = (card:any , text: string, tags: string[]): boolean => {
+        //     const checkText = (): boolean => card.target_word.includes(text);
+        //     const checkHashTags = (): boolean => card.tags.some((item: string) => tags.includes(item));
+
+        //     return checkText() || checkHashTags(); // TO CHANGE: a valid card should satisfy both conditions
+        // }
+        
+        // curate the flashcardsCurated by the search text
         flashcards = flashcards.filter(card => card.target_word.includes(text));
-        setFlashcardsCurated(flashcards);
+            // verifyFlashcardAgainstSearchParams(card, text, selectedTags));
+
+        // <----- TO TEST AND DEBUG -----> START
+
+        // formatting an array of all selected tags' sub-array
+        const filterArr = [];
+        for (let i = 0; i < selectedTags.length; i++) {
+            filterArr.push(tagsToFlashcards[selectedTags[i]]); 
+            // the data would be something like: [[1,2,3,4],[3,4,5,6],[2,3]]
+            // each item is each hashtag's flashcardIds array
+        }
+
+        // using reduce to get the intersection of multiple arrays
+        const flashcardIntersectionArrFromSelectedTags = filterArr.length !== 0 ?
+            filterArr.reduce((prev, curr) => {
+                return curr.filter(value => prev.includes(value));
+            })
+            // for example, [[1,2,3,4],[3,4,5,6],[2,3]] would give [3]
+            // which is representing the intersection of multiple hashtags' common flashcardId(s)
+        : filterArr; // if filterArr is empty, that means no intersection. So simply assign filterArr here
+
+        // grab all ids from the function incoming parameter
+        const flashcardIdsFromUI: string[] = [];
+        for (const item of flashcards) {
+            flashcardIdsFromUI.push(item._id);
+        }
+        console.log("hi:", flashcardIdsFromUI);
+        // the data would be like [1,2,3,4,5,6,7,8]
+        // which is representing the flashcardIds that are stored in the flashcards variable
+
+        // grab the intersected match between the flashcardIds and the flashcardIntersectionArrFromSelectedTags
+        const matchingFlashcards = flashcardIntersectionArrFromSelectedTags.filter(item => {
+            return flashcardIdsFromUI.includes(item);
+        });
+        // for example
+        // flashcardIntersectionArrFromSelectedTags is [3]
+        // flashcardIdsFromUI is [1,2,3,4,5,6,7,8]
+        // then matchingFlashcards would be [3], which is the intersection
+
+        // set flashcardsCurated with the search text and/or the search hashtags
+        // if no selectedTags, return the flashcards that are filtered by the text
+        // else, return the result with both text and hashtag(s) filtering
+        setFlashcardsCurated(selectedTags.length > 0 ? matchingFlashcards: flashcards);
+        
+        // <----- TO TEST AND DEBUG -----> END
+
+
+        // https://stackoverflow.com/questions/1885557/simplest-code-for-array-intersection-in-javascript
+        // reference code example
+        // const object = {
+        //     food: [1,2,3],
+        //     fashion: [3,4,5]
+        // };
+        // const tags = ["food","fashion"];
+        // const arr1 = [];
+        // for (let i = 0; i < tags.length; i++) {
+        //     const result = object[tags[i]];
+        //     arr1.push(result);
+        // }
+        // // arr1 is [[1,2,3],[3,4,5]]
+        // const reduce = arr1.reduce((prev, curr) => curr.filter(value => prev.includes(value)))
+        // // reduce is [3]
+
+
+        // reference code example 
+        // const tags = ["food", "lifestyle", "fashion"];
+        // const flashcard = {
+        //     tags: ["Apple", "food", "Banana"]
+        // };
+        // flashcard.tags.some(item => tags.includes(item));  ===> returns true
+
+
+        // each card's tag array would need to include the tags within the selectedTags
+        // && card.tags.some(item => selectedTag.includes(item));
+
+
+        // TODO: curate the flashcardsCurated by hashtags
+        console.log(selectedTags);
+        console.log(flashcards);
+
+        // get the tags array in the flashcard
+        const flashcardsTag = flashcards.map(card => card.tags);
+        console.log("tags in the matching flashcards:", flashcardsTag);
     };
 
     return (
@@ -141,7 +238,7 @@ export const SearchBar = (props: SearchBarProps) => {
 
 interface Tag {
     _id: string,
-    tag: Tag,
+    tag: string,
     flashcards: string[],
     isClicked: boolean // additional property
 }
@@ -231,8 +328,6 @@ export const SearchBody = (props: SearchBodyProps) => {
         <ScrollView contentContainerStyle={styles.mainContainer}>
             <View style={styles.topContainer}>
                 <Text variant="headlineSmall">Tags</Text>
-                <Text>MVP: to allow single click</Text>
-                <Text>Advanced: to allow multiple clicks possible</Text>
                 <View style={styles.tagsContainer}>
                     {tags.length > 0 ?
                     tags.map(item => {
@@ -299,16 +394,17 @@ export const SearchBody = (props: SearchBodyProps) => {
 const styles = StyleSheet.create({
     // https://medium.com/@kalebjdavenport/how-to-create-a-grid-layout-in-react-native-7948f1a6f949
     mainContainer: {
-        padding: 10,
+        // padding: 10,
         flex: 1,
         // justifyContent: 'flex-start',
         // alignItems: "stretch",
     },
     topContainer: {
-        // padding: 10,
+        padding: 10,
         // flex: 1,
     },
     tagsContainer: {
+        // padding: 10,
         flexDirection: 'row',
         flexWrap: 'wrap',
         width: width,
