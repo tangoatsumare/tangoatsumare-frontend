@@ -35,7 +35,9 @@ interface SearchBodyProps {
     flashcardsCurated: object[],
     hashTagSearchMode: boolean,
     setHashTagSearchMode: any,
-    handleEditSubmit: any
+    handleEditSubmit: any,
+    selectedTags: string[],
+    setSelectedTags: any 
 }
 
 const { width } = Dimensions.get('window');
@@ -155,10 +157,12 @@ export const SearchBody = (props: SearchBodyProps) => {
         flashcardsCurated,
         hashTagSearchMode,
         setHashTagSearchMode,
-        handleEditSubmit
+        handleEditSubmit,
+        selectedTags,
+        setSelectedTags
     } = props;
     const [tags, setTags ] = useState<Tag[]>([]);
-    const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
 
     useEffect(() => {
         (async () => {
@@ -302,7 +306,7 @@ const styles = StyleSheet.create({
     },
     topContainer: {
         // padding: 10,
-        flex: 1,
+        // flex: 1,
     },
     tagsContainer: {
         flexDirection: 'row',

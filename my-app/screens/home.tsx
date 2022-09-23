@@ -5,7 +5,7 @@ import { useIsFocused } from "@react-navigation/native";
 import React, { useEffect, useLayoutEffect, useState, useRef } from "react";
 import { Keyboard, Dimensions } from 'react-native';
 import { View, StyleSheet, FlatList, TouchableOpacity, ScrollView } from 'react-native'
-import { SegmentedButtons, Text, Button, Card, Paragraph, Title, Avatar, Divider } from "react-native-paper";
+import { SegmentedButtons, Text, Button, Card, Paragraph, Title, Avatar, Divider, Chip } from "react-native-paper";
 // import { Collection } from "../Components/collection";
 // import { Feed } from "../Components/feed";
 import { HTTPRequest } from "../utils/httpRequest";
@@ -15,8 +15,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { getAuth } from 'firebase/auth';
 import { SearchBar, SearchBody } from '../screens/Search';
 
-import Swipeable from 'react-native-gesture-handler/Swipeable';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useTheme } from 'react-native-paper';
 
 //test
   import { getProfileInfoById } from "../utils/profileInfo";
@@ -25,6 +24,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 const { width } = Dimensions.get('window');
 
 export const Home = () => {
+  const theme = useTheme();
   dayjs.extend(relativeTime);
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
   const [value, setValue] = useState('feed');
@@ -40,6 +40,7 @@ export const Home = () => {
   const [resetIsClick, setResetIsClick] = useState<boolean>(false);
   const [submitIsClick, setSubmitIsClick] = useState<boolean>(false);
 
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [hashTagSearchMode, setHashTagSearchMode] = useState<boolean>(false);
 
   const isFocused = useIsFocused();
@@ -111,6 +112,7 @@ export const Home = () => {
   
   const resetHomeScreen = () => {
     setText('');
+    setSelectedTags([]);
     setResetIsClick(true);
     setSubmitIsClick(false);
     setFlashcardsFeed(flashcardsMaster);
@@ -126,6 +128,13 @@ export const Home = () => {
       setResetIsClick(false); // reset it
     }
   }, [resetIsClick]);
+
+  // clear previously saved text & selected tags whenever the search bar is focused
+  useEffect(() => {
+    if (textInputOnFocus) {
+      setSelectedTags([]);
+    }
+  }, [textInputOnFocus]);
 
   const scrollToLeft = () => {
     scrollRef.current?.scrollTo({y:0, animated: true})
@@ -211,7 +220,12 @@ export const Home = () => {
   }
 
   const handleEditSubmit = () => {
-    if (text) {
+    if (text || selectedTags.length !== 0) {
+        const searchParams = {
+          text,
+          selectedTags
+        };
+        console.log(searchParams);
         setSubmitIsClick(true);
         // change the screen back to the feed/collection  
         clearKeyboard();
@@ -316,6 +330,17 @@ export const Home = () => {
             style={styles.segment}
           /> 
           <Divider />
+          <View style={styles.tagsContainer}>
+            {selectedTags.length !== 0 ? 
+              selectedTags.map(item => {
+                return (
+                  <Chip key={item} style={{...styles.tag, backgroundColor: theme.colors.secondary}}>
+                    <Text variant="labelMedium">{item}</Text>
+                  </Chip>
+                );
+              })
+            :null}
+          </View>
           <ScrollView 
               horizontal 
               snapToInterval={width} 
@@ -367,6 +392,8 @@ export const Home = () => {
           hashTagSearchMode={hashTagSearchMode}
           setHashTagSearchMode={setHashTagSearchMode}
           handleEditSubmit={handleEditSubmit}
+          selectedTags={selectedTags}
+          setSelectedTags={setSelectedTags}
         /> 
       }
   </View>
@@ -376,6 +403,22 @@ export const Home = () => {
 const styles = StyleSheet.create({
   master: {
     flex: 1
+  },
+  tagsContainer: {
+    padding: 10,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    width: width,
+    // marginHorizontal: 'auto'
+  },
+  tag: {
+    width: 75,
+    height: 30,
+    // maxWidth: 200,
+    margin: 5,
+    borderRadius: 30,
+    alignItems: 'center',
+    // justifyContent: 'center'
   },
   button: {
     alignItems: 'center',
