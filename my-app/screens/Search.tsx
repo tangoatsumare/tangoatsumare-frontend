@@ -1,22 +1,23 @@
 import { useNavigation } from "@react-navigation/core";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useEffect, useRef, useState } from 'react';
-import {ScrollView, View, StyleSheet} from 'react-native';
+import {ScrollView, View, StyleSheet, FlatList} from 'react-native';
 import { Button, Divider, Text, TextInput, Searchbar, Card, Avatar } from "react-native-paper";
 import { Keyboard, Dimensions } from 'react-native';
+import { HTTPRequest } from '../utils/httpRequest';
 
 interface SearchBarProps {
     text: string,
     setText: any,
     textInputOnFocus: boolean,
     setTextInputOnFocus: any,
-    flashcardsCurated: [],
+    flashcardsCurated: object[],
     setFlashcardsCurated: any,
-    flashcardsFeed: [],
+    flashcardsFeed: object[],
     submitIsClick: boolean,
     setSubmitIsClick: any,
     resetIsClick: boolean,
-    flashcardsMaster: []
+    flashcardsMaster: object[]
 }
 
 interface SearchBodyProps {
@@ -24,7 +25,7 @@ interface SearchBodyProps {
     setText: any,
     textInputOnFocus: boolean,
     setTextInputOnFocus: any,
-    flashcardsCurated: []
+    flashcardsCurated: object[]
 }
 
 const { width } = Dimensions.get('window');
@@ -130,36 +131,47 @@ export const SearchBar = (props: SearchBarProps) => {
     );
 };
 
+interface Tag {
+    _id: string,
+    tag: Tag,
+    flashcards: string[]
+}
+
 export const SearchBody = (props: SearchBodyProps) => {
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
     const { text, setText, textInputOnFocus, setTextInputOnFocus, flashcardsCurated } = props;
-    
+    const [tags, setTags ] = useState<Tag[]>([]);
+
     const handleShowFlashcard = (flashcardID: string) => {
         navigation.navigate("Card", {id: flashcardID})
         // console.log(flashcardID);
       }
 
+    useEffect(() => {
+        (async () => {
+            if (textInputOnFocus) {
+                if (tags.length === 0) setTags(await HTTPRequest.getTags());
+            }
+        })();
+    }, [textInputOnFocus]);
+
     return (
         <ScrollView>
             <Text variant="headlineSmall">Tags</Text>
             <Text>when clicked, the result list is updated</Text>
-            <Text>multiple clicks possible?</Text>
-            <View style={{alignItems: 'flex-start'}}>
-                <Button style={styles.categoryButton} mode="contained-tonal">
-                    <Text variant='bodyMedium'>#cat1 
-                        <Text variant='labelSmall'> {"(0)"}</Text>
-                    </Text>
-                </Button>
-                <Button style={styles.categoryButton} mode="contained-tonal">
-                <Text variant='bodyMedium'>#cat2 
-                        <Text variant='labelSmall'> {"(0)"}</Text>
-                    </Text>
-                </Button>
-                <Button style={styles.categoryButton} mode="contained-tonal">
-                    <Text variant='bodyMedium'>#cat3 
-                        <Text variant='labelSmall'> {"(0)"}</Text>
-                    </Text>
-                </Button>
+            <Text>to allow multiple clicks possible</Text>
+            <View style={styles.tagsContainer}>
+                {tags.length > 0 ?
+                tags.map(item => {
+                    return (
+                        <Button key={item._id} style={styles.tagButton} mode="contained-tonal">
+                        <Text variant='bodyMedium'>{item.tag}
+                            <Text variant='labelSmall'> {"(0)"}</Text>
+                        </Text>
+                    </Button>
+                    );
+                })
+                : null}
             </View>
             <Divider bold={true} />
             <Text variant="headlineSmall">Results</Text>
@@ -191,8 +203,23 @@ const styles = StyleSheet.create({
     container: {
         padding: 10
     },
-    categoryButton: {
-        marginBottom: 5,
+    // https://medium.com/@kalebjdavenport/how-to-create-a-grid-layout-in-react-native-7948f1a6f949
+    tagsContainer: {
+        // padding: 10,
+        // alignItems: 'center',
+        // justifyContent: 'center',
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        // marginHorizontal: "auto",
+        width: width
+    },
+    tagButton: {
+        minWidth: 130,
+        maxWidth: 200,
+        flex: 1,
+        margin: 5,
         borderRadius: 30,
+        // alignItems: 'center',
+        // justifyContent: 'center',
     }
 });

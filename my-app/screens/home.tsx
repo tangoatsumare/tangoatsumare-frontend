@@ -320,7 +320,7 @@ export const Home = () => {
               }
               contentContainerStyle={{paddingBottom: 200}}
             />
-            : <Text style={styles.container}>result not found.</Text>
+            : <Text style={styles.container}>{submitIsClick ? "result not found." : "no entry"}</Text>
           }
             {flashcardsCollection.length > 0 ? 
               <FlatList style={styles.container}
@@ -334,7 +334,7 @@ export const Home = () => {
                   // https://thewebdev.info/2022/02/19/how-to-fix-the-react-native-flatlist-last-item-not-visible-issue/
                   contentContainerStyle={{paddingBottom: 200}}
                 />
-            : <Text style={styles.container}>result not found.</Text>
+            : <Text style={styles.container}>{submitIsClick ? "result not found." : "no entry"}</Text>
           }
         </ScrollView>
     </View>
