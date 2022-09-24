@@ -90,8 +90,10 @@ export const FeedCard = () => {
               //fetch the users data for username and avatar display
              const user = await axios
               .get(`https://tangoatsumare-api.herokuapp.com/api/usersuid/${userId}`)
-                  setUserName(user.data[0].user_name);
-                  setUserAvatar(user.data[0].avatar_url);
+                  const userName = user.data[0].user_name
+                  const avatar = user.data[0].avatar_url
+                  setUser(userName, avatar)
+                
             } catch (err) {
                 console.log(err);
             }
@@ -100,6 +102,11 @@ export const FeedCard = () => {
    
   )();}, []);
 
+
+  function setUser (name: any, uri: any){
+    setUserName(name);
+    setUserAvatar(uri);
+  }
   //Liking the card
 //run on load, check to see if this user has already liked the card
   function checkIfLiked (array: any) {
@@ -173,7 +180,7 @@ function checkIfReported (array: any) {
     if (reporters.length >= 3){
         await axios.patch(`https://tangoatsumare-api.herokuapp.com/api/flashcards/${flashcardId}`, { 
             flagging_users: reporters,
-            flagged_inappropirate: true
+            flagged_inappropriate: true
          }) 
          .then(res => alert("reported"))
          .catch(err => console.log(err));
