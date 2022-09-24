@@ -132,7 +132,7 @@ export const Home = () => {
               // cards with delete keyword in its created_by field are cards that deleted by their owners
               flashcardsAll = flashcardsAll.filter((card: any) => !card.created_by.includes("delete"));
               //remove flagged cards
-              flashcardsAll = flashcardsAll.filter((card: any) => (card.flagged_inappropriate === false));
+              flashcardsAll = flashcardsAll.filter((card: any) => (!card.flagged_inappropriate));
 
 
               // for (const card of flashcardsAll) {
@@ -314,16 +314,16 @@ export const Home = () => {
         >
             <View style={styles.header}>
                 <View style={styles.user}>
-                    <Avatar.Image 
+                    {/* <Avatar.Image 
                     size={35} 
                     source={{ 
                         uri: item.avatar_url? item.avatar_url: 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png' 
                     }} 
-                    style={styles.userLeft}/>
-                    <View style={styles.userRight}>
+                    style={styles.userLeft}/> */}
+                    {/* <View style={styles.userRight}>
                         <Text variant="bodyLarge">{item.created_by_username}</Text>
                         <Text variant="bodySmall">{item.created_timestamp}</Text>
-                    </View>
+                    </View> */}
                 </View>
                 <Card style={styles.card}>
                     <Card.Content>
@@ -334,15 +334,15 @@ export const Home = () => {
                             style={styles.image}
                             resizeMode="contain"
                         />
-                        <Title style={styles.textVocab}>{item.target_word}</Title>
-                        <Paragraph style={styles.text}>Sentence: {item.example_sentence}</Paragraph>
+                        {/* <Paragraph style={styles.text}>Sentence: {item.example_sentence}</Paragraph> */}
                     </Card.Content>
                     <Card.Actions>
                     </Card.Actions>
                 </Card>
+                <Title style={styles.textVocab}>{item.target_word}</Title>
             </View>
         </TouchableOpacity>
-        <View style={styles.buttonGroup}>
+        {/* <View style={styles.buttonGroup}>
             <Button icon="butterfly">
                 views
             </Button>
@@ -355,7 +355,7 @@ export const Home = () => {
             <Button icon="emoticon-angry-outline">
                 report
             </Button>
-        </View>
+        </View> */}
       </View>
     );
   };
@@ -429,7 +429,9 @@ export const Home = () => {
           {flashcardsFeed.length > 0 ?
             <FlatList style={styles.container}
               data={flashcardsFeed}
-              keyExtractor={(item) => item._id}
+              numColumns={2}
+              key={'_'}
+              keyExtractor={(item) => "_" + item._id}
               renderItem={({item}) => (       
                   <Feed item={item} />
                 )
@@ -505,9 +507,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   item: {
-    padding: 10,
-    borderBottomWidth: 0.2,
-    borderBottomColor: 'grey'
+    // padding: 10,
+    width: width / 2,
+    // borderBottomWidth: 0.2,
+    // borderBottomColor: 'grey'
   },
   header: {
 
