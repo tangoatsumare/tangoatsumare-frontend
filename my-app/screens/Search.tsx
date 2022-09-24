@@ -96,20 +96,9 @@ export const SearchBar = (props: SearchBarProps) => {
         }
     }, [text, selectedTags]);
 
-    const updateFlashcardsCurated = (flashcards: object[]) => {
-        
-        // const verifyFlashcardAgainstSearchParams = (card:any , text: string, tags: string[]): boolean => {
-        //     const checkText = (): boolean => card.target_word.includes(text);
-        //     const checkHashTags = (): boolean => card.tags.some((item: string) => tags.includes(item));
-
-        //     return checkText() || checkHashTags(); // TO CHANGE: a valid card should satisfy both conditions
-        // }
-        
+    const updateFlashcardsCurated = (flashcards: object[]) => {        
         // curate the flashcardsCurated by the search text
         flashcards = flashcards.filter(card => card.target_word.includes(text));
-            // verifyFlashcardAgainstSearchParams(card, text, selectedTags));
-
-        // <----- TO TEST AND DEBUG -----> START
 
         // formatting an array of all selected tags' sub-array
         const filterArr = [];
@@ -151,9 +140,6 @@ export const SearchBar = (props: SearchBarProps) => {
         // if no selectedTags, return the flashcards that are filtered by the text
         // else, return the result with both text and hashtag(s) filtering
         setFlashcardsCurated(selectedTags.length > 0 ? flashcards.filter(item => matchingFlashcardIds.includes(item._id)): flashcards);
-        
-        // <----- TO TEST AND DEBUG -----> END
-
 
         // https://stackoverflow.com/questions/1885557/simplest-code-for-array-intersection-in-javascript
         // reference code example

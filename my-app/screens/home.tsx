@@ -136,6 +136,8 @@ export const Home = () => {
 
               // remove the deleted cards from the flashcards
               flashcardsAll = filterOutDeletedFlashcardsFromFlashcards(flashcardsAll);
+          
+              // TODO: filter by flags
 
               const formattedFlashcards = formatFlashcardRelatedUserDetails(flashcardsAll, usersAll);
               const result: any[] = formattedFlashcards.reverse();
