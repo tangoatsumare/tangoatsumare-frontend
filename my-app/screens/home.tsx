@@ -190,6 +190,11 @@ export const Home = () => {
     console.log(flashcardID);
   }
 
+  const handleShowFeedcard = (flashcardID: string) => {
+    navigation.navigate("FeedCard", {id: flashcardID})
+    console.log(flashcardID);
+  }
+
 
   const handleScroll = (e: object) => {
     const currentScrollPosition = e.nativeEvent.contentOffset.x;
@@ -205,7 +210,7 @@ export const Home = () => {
     return (
       <View style={styles.item}>
         <TouchableOpacity 
-            onPress={() => { handleShowFlashcard(item._id) }}
+            onPress={() => { handleShowFeedcard(item._id) }}
         >
             <View style={styles.header}>
                 <View style={styles.user}>
