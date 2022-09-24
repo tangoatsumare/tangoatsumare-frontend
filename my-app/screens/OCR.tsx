@@ -50,6 +50,8 @@ export const OCR = ({ route, navigation }: OCRProps) => {
     const [ finalTagList, setFinalTagList ] = useState<any>([]);
     const [ tagInfo, setTagInfo ] = useState<any>();
     const [ allTagInfo, setAllTagInfo ] = useState<any>();
+    const [ selectedTagsList, setSelectedTagsList ] = useState<any>([]);
+    const [ numOfTags, setNumOfTags ] = useState<any>(0);
 
     // send to cloud vision once components are mounted
     useEffect(() => {
@@ -118,23 +120,47 @@ export const OCR = ({ route, navigation }: OCRProps) => {
         if (tags) {
             return Object.keys(tags).map((tag) => {
                 return (
-                    <Button mode="contained" key={tag} labelStyle={{color: 'white'}} style={styles.tagButtons}
+                    <Button mode="contained" key={tag} 
+                    labelStyle={{color: 'white'}}
+                    style={tags[tag] ? {...styles.tagButtons, backgroundColor: '#FF4F4F'} : styles.tagButtons}
+                    // selected={tags[tag]} //need to change this to something else or useeffect for this ?
                     onPress={() => {
                         
                         console.log(`${tag} pressed`);
                         console.log("tags[tag] boolean check before: ", tags[tag]);
                         if (tags[tag] === false) {
                             tags[tag] = true;
+                            setSelectedTagsList([...selectedTagsList, tag])
+                            setNumOfTags(numOfTags+1);
+                            // console.log("tag: ", tag);
                         } else {
                             tags[tag] = false;
+                            const tempTagsList = selectedTagsList
+                            const tagIndex = tempTagsList.indexOf(tag);
+                            if (tagIndex > -1) tempTagsList.splice(tagIndex, 1);
+                            setSelectedTagsList(tempTagsList)
+                            setNumOfTags(numOfTags-1);
                         }
-                    }}>
+                        console.log("tags[tag] boolean check after: ", tags[tag]);
+                    }}
+                    >
                         {tag}
                     </Button>
                 )
             })
         }
     }
+
+    // useEffect(() => {
+    //     if (selectedTagsList) {
+    //         console.log("selected tags list check: ", selectedTagsList)
+    //     }
+    // }, [selectedTagsList])
+    useEffect(() => {
+        if (numOfTags > 0) {
+            console.log("selected tags list check: ", selectedTagsList)
+        }
+    },[numOfTags])
 
     const handleFinalTagList = () => {
         const tagArr: any = finalTagList;
@@ -169,11 +195,11 @@ export const OCR = ({ route, navigation }: OCRProps) => {
         })();
     }, [])
 
-    useEffect(() => {
-        if (allTagInfo) {
-            console.log("alasdfasdfasdfl tag info check in test array: ", allTagInfo) 
-        }
-    }, [allTagInfo])
+    // useEffect(() => {
+    //     if (allTagInfo) {
+    //         console.log("alasdfasdfasdfl tag info check in test array: ", allTagInfo) 
+    //     }
+    // }, [allTagInfo])
 
     // 🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡
 
@@ -502,20 +528,28 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     tagBtnContainer: {
-        // flex: 0,
+        flex: 0,
+        justifyContent: 'center',
+        alignContent: 'center',
+        // alignItems: 'center',
         // flexDirection: 'row',
         // justifyContent: 'space-between',
         // flexWrap: 'wrap',
         // alignItems: 'flex-start',
-        backgroundColor: 'yellow',
-        width: 350,
+        // backgroundColor: 'yellow',
+        // width: 350,
+        
     },
     tagButtons: {
-        // width: '20%',
+        // width: '50%',
+        // fontSize: 50,
+        // alignItems: 'center',
+        // justifyContent: 'center',
+        // color: 'black',
+        // padding: 10
         backgroundColor: 'lightgray',
+        
     }
-    // tagButtonsOn: {
-    //     backgroundColor: 'yellow',
-    // }
+
   });
   
