@@ -137,6 +137,9 @@ export const Home = () => {
               // remove the deleted cards from the flashcards
               // cards with delete keyword in its created_by field are cards that deleted by their owners
               flashcardsAll = flashcardsAll.filter((card: any) => !card.created_by.includes("delete"));
+              //remove flagged cards
+              flashcardsAll = flashcardsAll.filter((card: any) => (card.flagged_inappropriate === false));
+
 
               for (const card of flashcardsAll) {
                   const result = usersAll.find((user: any) => user.uuid === card.created_by);
