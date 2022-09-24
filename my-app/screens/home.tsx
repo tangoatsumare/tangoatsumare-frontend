@@ -29,14 +29,13 @@ export interface Tag {
   flashcards: string[]
 }
 
+type SegmentedButtonsValue = 'feed' | 'collection'
+
 export const Home = () => {
   const theme = useTheme();
   dayjs.extend(relativeTime);
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
-  const [value, setValue] = useState('feed');
-  const [userUid, setUserUid] = useState<string>('');
-  const [userProfileInfo, setUserProfileInfo] = useState<any>();
-
+  const [value, setValue] = useState<SegmentedButtonsValue>('feed'); // segmented button's value: feed / collection
   const [text, setText] = useState<string>('');
   const [textInputOnFocus, setTextInputOnFocus] = useState<boolean>(false);
   const [flashcardsMaster, setFlashcardsMaster] = useState<object[]>([]);
@@ -112,30 +111,6 @@ export const Home = () => {
     })
   });
 
-  const cancelSearch = () => {
-    setText('');
-    clearKeyboard();
-  };
-
-  const clearKeyboard = () => {
-    // setText('');
-    Keyboard.dismiss();
-    setTextInputOnFocus(false);
-  };
-  
-  const resetHomeScreen = () => {
-    setText('');
-    setSelectedTags([]);
-    setResetIsClick(true);
-    setSubmitIsClick(false);
-    setFlashcardsFeed(flashcardsMaster);
-    setFlashcardsCollection(flashcardsMaster.filter(flashcard => flashcard["created_by"] === userId));
-  };
-
-  useEffect(() => {
-    if (text) console.log(text);
-  }, [text]);
-
   useEffect(() => {
     if (resetIsClick) {
       setResetIsClick(false); // reset it
@@ -149,38 +124,21 @@ export const Home = () => {
     }
   }, [textInputOnFocus]);
 
-  const scrollToLeft = () => {
-    scrollRef.current?.scrollTo({y:0, animated: true})
-  };
-
-  const scrollToRight = () => {
-    scrollRef.current?.scrollToEnd({ animated: true});
-  };
-
-  const getTagsToFlashcardsIdObject = (tags: Tag[]): object => {
-    const tagsToFlashcardsId = {};
-    for (const tag of tags) {
-      // https://stackoverflow.com/questions/11508463/javascript-set-object-key-by-variable
-        tagsToFlashcardsId[tag.tag] = tag.flashcards;
-
-    }
-    return tagsToFlashcardsId;
-  }
-
   useEffect(() => {
       (async () => {
         if (isFocused) {
           try {
               console.log("it is focused now. HTTP request will be sent to backend");
+
               let flashcardsAll = await HTTPRequest.getFlashcards();
               const usersAll = await HTTPRequest.getUsers();
+              const tagsData = await HTTPRequest.getTags(); // fetching hashtag data
 
               // remove the deleted cards from the flashcards
-              // cards with delete keyword in its created_by field are cards that deleted by their owners
-              flashcardsAll = flashcardsAll.filter((card: any) => !card.created_by.includes("delete"));
+              flashcardsAll = filterOutDeletedFlashcardsFromFlashcards(flashcardsAll);
 
-              // fetching hashtag data
-              const tagsData = await HTTPRequest.getTags();
+              const formattedFlashcards = formatFlashcardRelatedUserDetails(flashcardsAll, usersAll);
+              const result: any[] = formattedFlashcards.reverse();
 
               // <---- TO TEST AND DEBUG ---->
               // mock data for testing the hashtags
@@ -218,20 +176,9 @@ export const Home = () => {
               // tagsData[3].flashcards.push(testFlashcard2._id);
               // End of Test 4
 
+              // setting states
               setTags(tagsData);
               setTagsToFlashcards(getTagsToFlashcardsIdObject(tagsData));
-
-              for (const card of flashcardsAll) {
-                  const result = usersAll.find((user: any) => user.uuid === card.created_by);
-                  if (result) {
-                      card.created_by_username = result.user_name; // replace uid with username
-                      card.avatar_url = result.avatar_url; // add field
-                  }
-                  card.created_timestamp = dayjs(card.created_timestamp).fromNow(); // https://day.js.org/docs/en/plugin/relative-time
-              }
-  
-              const result: [] = flashcardsAll.reverse();
-
               setFlashcardsMaster(result);
               setFlashcardsFeed(result);
               setFlashcardsCollection(result.filter(flashcard => flashcard["created_by"] === userId));
@@ -258,38 +205,92 @@ export const Home = () => {
     }
   }, [tagsToFlashcards]);
 
+  const cancelSearch = () => {
+    setText('');
+    clearKeyboard();
+  };
+
+  const clearKeyboard = () => {
+    Keyboard.dismiss();
+    setTextInputOnFocus(false);
+  };
+  
+  const resetHomeScreen = () => {
+    setText('');
+    setSelectedTags([]);
+    setResetIsClick(true);
+    setSubmitIsClick(false);
+    setFlashcardsFeed(flashcardsMaster);
+    setFlashcardsCollection(flashcardsMaster.filter(flashcard => flashcard["created_by"] === userId));
+  };
+
+  const scrollToLeft = () => {
+    scrollRef.current?.scrollTo({y:0, animated: true})
+  };
+
+  const scrollToRight = () => {
+    scrollRef.current?.scrollToEnd({ animated: true});
+  };
+
+  // reshape the object so it is easier to work with
+  const getTagsToFlashcardsIdObject = (tags: Tag[]): object => {
+    const tagsToFlashcardsId = {};
+    for (const tag of tags) {
+      // https://stackoverflow.com/questions/11508463/javascript-set-object-key-by-variable
+        tagsToFlashcardsId[tag.tag] = tag.flashcards;
+
+    }
+    return tagsToFlashcardsId;
+  }
+
+  const formatFlashcardRelatedUserDetails = (cards: any[], users: any[]): any[] => {
+    const formattedCards = [...cards];
+    for (const card of cards) {
+      const result = users.find((user: any) => user.uuid === card.created_by);
+      if (result) {
+          card.created_by_username = result.user_name; // replace uid with username
+          card.avatar_url = result.avatar_url; // add field
+      }
+      card.created_timestamp = dayjs(card.created_timestamp).fromNow(); // https://day.js.org/docs/en/plugin/relative-time
+    }
+    return formattedCards;
+  };
+
+  const filterOutDeletedFlashcardsFromFlashcards = (cards) => {
+    // cards with delete keyword in its created_by field are cards that deleted by their owners
+    return cards.filter((card: any) => !card.created_by.includes("delete"));
+  }
+
   // should be in utils maybe?
-  const handleUID = () => {
-    const auth = getAuth();
-    const userId = auth.currentUser?.uid
-    setUserUid(userId || '') // typescript??
-  }
+  // const handleUID = () => {
+  //   const auth = getAuth();
+  //   const userId = auth.currentUser?.uid
+  //   setUserUid(userId || '') // typescript??
+  // }
 
-  useEffect(() => {
-    handleUID();
-    handleUserProfileInfo();
-  }, []);
+  // useEffect(() => {
+  //   handleUID();
+  //   handleUserProfileInfo();
+  // }, []);
 
-  const handleUserProfileInfo = async () => {
-    const info = await getProfileInfoById(12345);
-    setUserProfileInfo(info);
-  }
+  // const handleUserProfileInfo = async () => {
+  //   const info = await getProfileInfoById(12345);
+  //   setUserProfileInfo(info);
+  // }
 
   const handleShowFlashcard = (flashcardID: string) => {
     navigation.navigate("Card", {id: flashcardID})
     console.log(flashcardID);
-  }
-
+  };
 
   const handleScroll = (e: object) => {
     const currentScrollPosition = e.nativeEvent.contentOffset.x;
-    // console.log(currentScrollPosition);
     if (currentScrollPosition === 0) {
       setValue('feed');
     } else if (currentScrollPosition === width) {
       setValue('collection')
     }
-  }
+  };
 
   const handleEditSubmit = () => {
     if (text || selectedTags.length !== 0) {
@@ -299,8 +300,7 @@ export const Home = () => {
         };
         console.log(searchParams);
         setSubmitIsClick(true);
-        // change the screen back to the feed/collection  
-        clearKeyboard();
+        clearKeyboard(); // change the screen back to the feed/collection  
     } else {
         console.log('search not executed due to empty string');
     }
@@ -483,22 +483,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     width: width,
-    // marginHorizontal: 'auto'
   },
   tag: {
     width: 75,
     height: 30,
-    // maxWidth: 200,
     margin: 2,
     borderRadius: 30,
-    alignItems: 'center',
-    // justifyContent: 'center'
+    alignItems: 'center'
   },
   button: {
     alignItems: 'center',
   },
   container: {
-    // marginTop: 20,
     width: width,
     flex: 1
   },
@@ -506,8 +502,7 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 10,
     alignItems: 'center',
-    justifyContent: 'center',
-    // backgroundColor: 'white'
+    justifyContent: 'center'
   },
   item: {
     padding: 10,
