@@ -129,6 +129,21 @@ export const Home = () => {
               const tagsData = await HTTPRequest.getTags(); // fetching hashtag data
 
               // remove the deleted cards from the flashcards
+              // cards with delete keyword in its created_by field are cards that deleted by their owners
+              flashcardsAll = flashcardsAll.filter((card: any) => !card.created_by.includes("delete"));
+              //remove flagged cards
+              flashcardsAll = flashcardsAll.filter((card: any) => (card.flagged_inappropriate === false));
+
+
+              for (const card of flashcardsAll) {
+                  const result = usersAll.find((user: any) => user.uuid === card.created_by);
+                  if (result) {
+                      card.created_by_username = result.user_name; // replace uid with username
+                      card.avatar_url = result.avatar_url; // add field
+                  }
+                  card.created_timestamp = dayjs(card.created_timestamp).fromNow(); // https://day.js.org/docs/en/plugin/relative-time
+              }
+  
               flashcardsAll = filterOutDeletedFlashcardsFromFlashcards(flashcardsAll);
           
               // TODO: filter by flags

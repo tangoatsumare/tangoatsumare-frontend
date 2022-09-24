@@ -50,6 +50,7 @@ export const FeedCard = () => {
   const [userName, setUserName] = useState("");
   const [flashcardId, setFlashcardId] = useState("");
   const [reported, setReported] = useState(false);
+  const [date, setDate] = useState("");
 
   // const route = useRoute<RouteProp<Record<string, StackParamsList>, string>>();
   const route = useRoute<RouteProp<StackParamsList, "Card">>();
@@ -69,11 +70,13 @@ export const FeedCard = () => {
                 setFlashcard(response.data[0]);
                 setEngDef(response.data[0].Eng_meaning[0]);
                 setFlashcardId(response.data[0]._id);
-                setLikers(response.data[0].likers)
+                const newDate = dayjs(response.data[0].created_timestamp).format('DD/MM/YYYY');
+                setDate(newDate)
                 const flaggersArray = response.data[0].flagging_users
                 checkIfReported(flaggersArray);
                 const likersArray = response.data[0].likers
                 checkIfLiked(likersArray);
+
                 //fetch all of the users SRS To Cards data, to see if the card already exists in the users deck
           const userToSRSCards = await axios.get(`https://tangoatsumare-api.herokuapp.com/api/cardflashjoinuid/${userId}`)
             const SRSArray =   userToSRSCards.data; // keith
@@ -87,8 +90,10 @@ export const FeedCard = () => {
               //fetch the users data for username and avatar display
              const user = await axios
               .get(`https://tangoatsumare-api.herokuapp.com/api/usersuid/${userId}`)
-                  setUserName(user.data[0].user_name);
-                  setUserAvatar(user.data[0].avatar_url);
+                  const userName = user.data[0].user_name
+                  const avatar = user.data[0].avatar_url
+                  setUser(userName, avatar)
+                
             } catch (err) {
                 console.log(err);
             }
@@ -97,6 +102,11 @@ export const FeedCard = () => {
    
   )();}, []);
 
+
+  function setUser (name: any, uri: any){
+    setUserName(name);
+    setUserAvatar(uri);
+  }
   //Liking the card
 //run on load, check to see if this user has already liked the card
   function checkIfLiked (array: any) {
@@ -106,6 +116,7 @@ export const FeedCard = () => {
       if (user === userId) {
         setLiked(true);
       }
+      setLikers(array)
     }
   };
 
@@ -127,11 +138,11 @@ function checkIfReported (array: any) {
         setReported(true);
       }
     }
+    setFlaggingUsers(array)
   };
 
  //a function to like the card if the user has not liked it already
   const like = async () => {
-    alert("liked");
     const likersArray = likers;
     likersArray.push(userId);
     // await HTTPRequest.updateFlashCardProperties({ likers: likersArray });
@@ -166,12 +177,22 @@ function checkIfReported (array: any) {
  const report = async () => {
     const reporters = flaggingUsers;
     reporters.push(userId);
-    await axios.patch(`https://tangoatsumare-api.herokuapp.com/api/flashcards/${flashcardId}`, { 
-        flagging_users: reporters
-     })
-        .then(res => alert("reported"))
-        .catch(err => console.log(err));
-    setReported(true);
+    if (reporters.length >= 3){
+        await axios.patch(`https://tangoatsumare-api.herokuapp.com/api/flashcards/${flashcardId}`, { 
+            flagging_users: reporters,
+            flagged_inappropriate: true
+         }) 
+         .then(res => alert("reported"))
+         .catch(err => console.log(err));
+     setReported(true);
+    } else {
+        await axios.patch(`https://tangoatsumare-api.herokuapp.com/api/flashcards/${flashcardId}`, { 
+            flagging_users: reporters
+         })
+            .then(res => alert("reported"))
+            .catch(err => console.log(err));
+        setReported(true);
+    }
   };
  
   const displayCard = (card: any) => {
@@ -188,7 +209,7 @@ function checkIfReported (array: any) {
             />
             <View style={styles.userRight}>
               <Text variant="bodyLarge">{userName}</Text>
-              <Text variant="bodySmall">{card.created_timestamp}</Text>
+              <Text variant="bodySmall">{date}</Text>
             </View>
           </View>
           <Card style={styles.card}>
