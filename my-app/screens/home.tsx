@@ -150,7 +150,6 @@ export const Home = () => {
                   card.created_timestamp = dayjs(card.created_timestamp).fromNow(); // https://day.js.org/docs/en/plugin/relative-time
               }
   
-              const result: [] = flashcardsAll.reverse();
               flashcardsAll = filterOutDeletedFlashcardsFromFlashcards(flashcardsAll);
           
               // TODO: filter by flags
