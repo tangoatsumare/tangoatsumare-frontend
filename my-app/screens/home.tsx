@@ -6,20 +6,14 @@ import React, { useEffect, useLayoutEffect, useState, useRef } from "react";
 import { Keyboard, Dimensions } from 'react-native';
 import { View, StyleSheet, FlatList, TouchableOpacity, ScrollView } from 'react-native'
 import { SegmentedButtons, Text, Button, Card, Paragraph, Title, Avatar, Divider, Chip } from "react-native-paper";
+import { useTheme } from 'react-native-paper';
 // import { Collection } from "../Components/collection";
 // import { Feed } from "../Components/feed";
 import { HTTPRequest } from "../utils/httpRequest";
+import { SearchBar, SearchBody } from '../screens/Search';
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-
 import { getAuth } from 'firebase/auth';
-import { SearchBar, SearchBody } from '../screens/Search';
-
-import { useTheme } from 'react-native-paper';
-
-//test
-  import { getProfileInfoById } from "../utils/profileInfo";
-//test
 
 const { width } = Dimensions.get('window');
 
@@ -258,27 +252,10 @@ export const Home = () => {
     return formattedCards;
   };
 
-  const filterOutDeletedFlashcardsFromFlashcards = (cards) => {
+  const filterOutDeletedFlashcardsFromFlashcards = (cards: any[]): any[] => {
     // cards with delete keyword in its created_by field are cards that deleted by their owners
     return cards.filter((card: any) => !card.created_by.includes("delete"));
   }
-
-  // should be in utils maybe?
-  // const handleUID = () => {
-  //   const auth = getAuth();
-  //   const userId = auth.currentUser?.uid
-  //   setUserUid(userId || '') // typescript??
-  // }
-
-  // useEffect(() => {
-  //   handleUID();
-  //   handleUserProfileInfo();
-  // }, []);
-
-  // const handleUserProfileInfo = async () => {
-  //   const info = await getProfileInfoById(12345);
-  //   setUserProfileInfo(info);
-  // }
 
   const handleShowFlashcard = (flashcardID: string) => {
     navigation.navigate("Card", {id: flashcardID})
