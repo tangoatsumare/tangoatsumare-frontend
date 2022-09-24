@@ -70,7 +70,6 @@ export const FeedCard = () => {
                 setFlashcard(response.data[0]);
                 setEngDef(response.data[0].Eng_meaning[0]);
                 setFlashcardId(response.data[0]._id);
-                setLikers(response.data[0].likers)
                 const newDate = dayjs(response.data[0].created_timestamp).format('DD/MM/YYYY');
                 setDate(newDate)
                 const flaggersArray = response.data[0].flagging_users
@@ -110,6 +109,7 @@ export const FeedCard = () => {
       if (user === userId) {
         setLiked(true);
       }
+      setLikers(array)
     }
   };
 
@@ -131,11 +131,11 @@ function checkIfReported (array: any) {
         setReported(true);
       }
     }
+    setFlaggingUsers(array)
   };
 
  //a function to like the card if the user has not liked it already
   const like = async () => {
-    alert("liked");
     const likersArray = likers;
     likersArray.push(userId);
     // await HTTPRequest.updateFlashCardProperties({ likers: likersArray });
