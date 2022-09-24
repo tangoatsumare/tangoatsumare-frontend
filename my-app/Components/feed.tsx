@@ -9,7 +9,7 @@ import { HTTPRequest } from "../utils/httpRequest";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
-export const Feed = (props) => {
+export const Feed = (props: any) => {
     dayjs.extend(relativeTime);
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
     const { flashcards, setFlashcards } = props;
@@ -46,7 +46,7 @@ export const Feed = (props) => {
       }, [isFocused]);
 
       const handleShowFlashcard = (flashcardID: string) => {
-        navigation.navigate("Card", {id: flashcardID})
+        navigation.navigate("FeedCard", {id: flashcardID})
         console.log(flashcardID)
       }
     
