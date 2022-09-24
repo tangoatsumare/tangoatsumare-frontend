@@ -15,6 +15,7 @@ import { Collection } from "./collection";
 import { SingleCard } from "./card";
 import { Front } from "../screens/front";
 import { Back } from "../screens/back";
+import {Tutorial} from "./tutorial"
 
 
 
@@ -66,7 +67,8 @@ export const StackNav = () => {
             <RootStack.Screen name="Profile" component={Profile}/>
             <RootStack.Screen name="Login" options={{headerShown: false}} component={Login} />
             <RootStack.Screen name="Register" component={Register}/>
-            <RootStack.Screen name="ProfileSetup" component={ProfileSetup}/>
+            <RootStack.Screen name="ProfileSetup" options={{headerShown: false}} component={ProfileSetup}/>
+            <RootStack.Screen name="Tutorial" component={Tutorial}/>
             <RootStack.Screen name="SRS" options={{headerTitle:"Review"}} component={SRS}/>
             <RootStack.Screen name="Camera" component={Camera}/>
             <RootStack.Screen name="OCR" component={OCR}/>

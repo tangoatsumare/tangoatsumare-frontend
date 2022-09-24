@@ -2,7 +2,7 @@ import { useNavigation } from "@react-navigation/core";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Keyboard, Platform } from 'react-native'
@@ -99,13 +99,13 @@ export const ProfileSetup = () => {
             'Content-Type': 'application/json',
           }
         })
-        .then(async response => {
-          // console.log(response);
-          const result = await response.json();
-          // console.log(result);
-          setGetUserinfo(result);
-        })
-      } catch(err) {
+          .then(async response => {
+            // console.log(response);
+            const result = await response.json();
+            // console.log(result);
+            setGetUserinfo(result);
+          })
+      } catch (err) {
         console.log(err);
       }
     })()
@@ -205,7 +205,11 @@ export const ProfileSetup = () => {
     //   aboutMe
     // }
     // console.log("test usestate info: ", test)
-    navigation.navigate("Home");
+    navigation.navigate("TabHome");
+  }
+
+  function tutorial() {
+    navigation.navigate("Tutorial");
   }
 
   // const sendInfoToDb = async () => {
@@ -283,17 +287,17 @@ export const ProfileSetup = () => {
   // touchablewithoutfeedback disables buttons and makes them not pressable...
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container} keyboardVerticalOffset={5}>
-      <KeyboardAwareScrollView>
-        {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */}
-        <View>
-          <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-            {profilePic && <Image source={{ uri: profilePic }} style={styles.avatar} resizeMode="contain" />}
-            <Button onPress={selectProfilePic} style={{ marginBottom: 25 }}>
-              <Text>Select An Image</Text>
-            </Button>
-          </View>
-          {/* <View style={styles.wrapperInput}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container} keyboardVerticalOffset={5}>
+        <KeyboardAwareScrollView>
+          {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */}
+          <View>
+            <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+              {profilePic && <Image source={{ uri: profilePic }} style={styles.avatar} resizeMode="contain" />}
+              <Button onPress={selectProfilePic} style={{ marginBottom: 25 }}>
+                <Text>Select An Image</Text>
+              </Button>
+            </View>
+            {/* <View style={styles.wrapperInput}>
             <TextInput
             style={styles.input}
             placeholder="Full Name"
@@ -301,7 +305,7 @@ export const ProfileSetup = () => {
             onChangeText={(text: string) => setFullName(text)} 
             />
           </View> */}
-          {/* <View style={styles.wrapperInput}>
+            {/* <View style={styles.wrapperInput}>
             <TextInput
             style={styles.input}
             placeholder="Last Name"
@@ -309,18 +313,18 @@ export const ProfileSetup = () => {
             onChangeText={(text: string) => setLastName(text)} 
             />
           </View> */}
-          <View style={styles.wrapperInput}>
-            <TextInput
-              style={styles.input}
-              placeholder="Username"
-              value={username}
-              onChangeText={(text: string) => setUsername(text)}
-            />
-          </View>
-          <Text>
-            {isAvailable}
-          </Text>
-          {/* <View style={styles.wrapperInput}>
+            <View style={styles.wrapperInput}>
+              <TextInput
+                style={styles.input}
+                placeholder="Username"
+                value={username}
+                onChangeText={(text: string) => setUsername(text)}
+              />
+            </View>
+            <Text>
+              {isAvailable}
+            </Text>
+            {/* <View style={styles.wrapperInput}>
             <TextInput
             style={styles.input}
             placeholder="Preferred Languages"
@@ -328,38 +332,41 @@ export const ProfileSetup = () => {
             onChangeText={(text: string) => setHomeCountry(text)} 
             />
           </View> */}
-          <View style={styles.wrapperInput}>
-            <TextInput
-              style={styles.input}
-              placeholder="Currently learning"
-              value={currentlyLearning}
-              onChangeText={(text: string) => setCurrentlyLearning(text)}
-            />
+            <View style={styles.wrapperInput}>
+              <TextInput
+                style={styles.input}
+                placeholder="Currently learning"
+                value={currentlyLearning}
+                onChangeText={(text: string) => setCurrentlyLearning(text)}
+              />
+            </View>
+            <View style={styles.wrapperInput}>
+              <TextInput
+                style={styles.input}
+                placeholder="About Me"
+                value={aboutMe}
+                onChangeText={(text: string) => setAboutMe(text)}
+              />
+            </View>
+            <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+              <Button mode="contained" style={{ marginTop: 25 }}
+                onPress={() => {
+                  submitProfileInfo();
+                  setSubmitted(true);
+                  handleSendInfoToDb();
+                  // navigation.navigate("Home");
+                }}
+              >
+                <Text>Submit</Text>
+              </Button>
+              <Button onPress={tutorial} style={{ marginBottom: 25 }}>
+                <Text>Tutorial</Text>
+              </Button>
+            </View>
           </View>
-          <View style={styles.wrapperInput}>
-            <TextInput
-              style={styles.input}
-              placeholder="About Me"
-              value={aboutMe}
-              onChangeText={(text: string) => setAboutMe(text)}
-            />
-          </View>
-          <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-            <Button mode="contained" style={{ marginTop: 25 }}
-              onPress={() => {
-                submitProfileInfo();
-                setSubmitted(true);
-                handleSendInfoToDb();
-                // navigation.navigate("Home");
-              }}
-            >
-              <Text>Submit</Text>
-            </Button>
-          </View>
-        </View>
-        {/* </TouchableWithoutFeedback> */}
-      </KeyboardAwareScrollView>
-    </KeyboardAvoidingView>
+          {/* </TouchableWithoutFeedback> */}
+        </KeyboardAwareScrollView>
+      </KeyboardAvoidingView>
   )
 }
 
@@ -394,5 +401,4 @@ const styles = StyleSheet.create({
     borderWidth: 0.25,
     marginBottom: 20
   }
-}
-);
+});
