@@ -6,6 +6,7 @@ const FLASHCARDS_URL = `https://tangoatsumare-api.herokuapp.com/api/flashcards/`
 const FLASHCARDS_BY_USER_URL = `https://tangoatsumare-api.herokuapp.com/api/flashcardsby/`;
 const SRS_FLASHCARDS_BY_USER_URL = `https://tangoatsumare-api.herokuapp.com/api/cardflashjoinuid/`;
 const USERSTOCARDS_URL = `https://tangoatsumare-api.herokuapp.com/api/userstocards/`;
+const TAGS_URL = `https://tangoatsumare-api.herokuapp.com/api/tags`;
 
 export interface UsersToCardsSRSProps {
     _id: string,
@@ -60,6 +61,13 @@ const HTTPRequest = (() => {
         .catch(err => console.log(err));
     };
 
+    const getTags = () => {
+        return axios
+            .get(TAGS_URL)
+            .then((response: any) => response.data)
+            .catch(err => err);
+    };
+
     return {
         getUsers,
         getFlashcards,
@@ -67,6 +75,7 @@ const HTTPRequest = (() => {
         getSRSFlashcardsByUser,
         updateFlashcardsSRSProperties,
         addSRSCard,
+        getTags
     }
 })();
 
