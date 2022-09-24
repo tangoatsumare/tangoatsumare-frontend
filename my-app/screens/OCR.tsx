@@ -26,6 +26,11 @@ interface OCRProps {
     navigation: any;
 }
 
+interface Tag {
+    [key: string]: any;
+}
+
+
 export const OCR = ({ route, navigation }: OCRProps) => {
     const auth = getAuth();
     const userId = auth.currentUser?.uid;
@@ -40,12 +45,18 @@ export const OCR = ({ route, navigation }: OCRProps) => {
     const [ cardSubmissionBtnIsClick, setCardSubmissionBtnIsClick ] = useState<boolean>(false);
     const [ cardIsSubmitted, setCardIsSubmitted ] = useState<boolean>(false);
     const [ cardSubmissionError, setCardSubmissionError ] = useState<boolean>(false);
+    // 🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡
+    const [ tags, setTags ] = useState<any>()
+    const [ finalTagList, setFinalTagList ] = useState<any>([]);
+    const [ tagInfo, setTagInfo ] = useState<any>();
+    const [ allTagInfo, setAllTagInfo ] = useState<any>();
 
     // send to cloud vision once components are mounted
     useEffect(() => {
         (async () => {
             try {
-                const result = await sendImageToCloudVisionApi(image_base64);
+                // const result = await sendImageToCloudVisionApi(image_base64);
+                const result = "hi";
                 setResponseText(result);
             } catch (err) {
                 console.log(err);
@@ -99,6 +110,73 @@ export const OCR = ({ route, navigation }: OCRProps) => {
         }
     }
 
+    // 🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡
+
+    const handleTagCreation = () => {
+
+        // ⏭⏭⏭⏭⏭⏭ NEXT change color on press
+        if (tags) {
+            return Object.keys(tags).map((tag) => {
+                return (
+                    <Button mode="contained" key={tag} labelStyle={{color: 'white'}} style={styles.tagButtons}
+                    onPress={() => {
+                        
+                        console.log(`${tag} pressed`);
+                        console.log("tags[tag] boolean check before: ", tags[tag]);
+                        if (tags[tag] === false) {
+                            tags[tag] = true;
+                        } else {
+                            tags[tag] = false;
+                        }
+                    }}>
+                        {tag}
+                    </Button>
+                )
+            })
+        }
+    }
+
+    const handleFinalTagList = () => {
+        const tagArr: any = finalTagList;
+        Object.keys(tagInfo).map((tag) => {
+            if (tags[tag] === true && !finalTagList.includes(tag)) {
+                tagArr.push(tagInfo[tag])
+            }
+        })
+        setFinalTagList(tagArr);
+    }
+
+    useEffect(() => {
+        (async () => {
+            let tagObj: Tag = {};
+            try {
+                const response = await
+                    axios.get(`https://tangoatsumare-api.herokuapp.com/api/tags`)
+                const tagData = response.data
+                const tempTagObj: any = {}
+                Object.keys(tagData).map((tag) => {
+                    tagObj[tagData[tag].tag] = false;
+                    tempTagObj[tagData[tag].tag] = tagData[tag]._id;
+                })
+                console.log("tempobj check: ", tempTagObj);
+                console.log("tagobj check: ", tagObj)
+                setTags(tagObj);
+                setTagInfo(tempTagObj);
+                setAllTagInfo(tagData);
+            } catch(err) {
+                console.log(err);
+            }
+        })();
+    }, [])
+
+    useEffect(() => {
+        if (allTagInfo) {
+            console.log("alasdfasdfasdfl tag info check in test array: ", allTagInfo) 
+        }
+    }, [allTagInfo])
+
+    // 🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡
+
     useEffect(() => {
         async function fetchData () {
             await receiveDictionaryInfo();
@@ -139,6 +217,8 @@ export const OCR = ({ route, navigation }: OCRProps) => {
     useEffect(() => {
         (async () => {
             if (cloudStoragePath) { // if photo is successfully uploaded to firebase, execute the flashcard POST request
+                // added
+                handleFinalTagList();
                 const flashcard: TangoFlashcard = {
                     target_word: selectedText,
                     example_sentence: responseText,
@@ -153,7 +233,7 @@ export const OCR = ({ route, navigation }: OCRProps) => {
                     public: true,
                     likers: [],
                     haters: [],
-                    tags: [],
+                    tags: finalTagList, // formerly []
                     flagged_inappropriate: false,
                     flagging_users: []
                 };
@@ -199,8 +279,25 @@ export const OCR = ({ route, navigation }: OCRProps) => {
                         },
                         body: JSON.stringify(requestBodyForUsersToCards)
                     });
+                    
+                    // 🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡
+                    if (finalTagList.length > 0) {
+                        for (let i = 0; i < allTagInfo.length; i++) {
+                            if (finalTagList.includes(allTagInfo[i]._id)) {
+                                const flashcardIdArray = allTagInfo[i].flashcards
+                                flashcardIdArray.push(requestBodyForUsersToCards.flashcard_id); // should push flashcard id
+                                await axios.patch(`https://tangoatsumare-api.herokuapp.com/api/tags/${allTagInfo[i]._id}`, {
+                                    flashcards: flashcardIdArray
+                                })
+                                .then(res => console.log("Tag patch successful"))
+                                .catch(err => console.log("Error! ", err))
+                            }
+                        }
+                    }
+    
                     console.log('SRS flashcard POSTed to the backend API');
                     setCardIsSubmitted(true);
+                    
                 } catch (err) {
                     console.log(err);
                     setCardSubmissionError(true);
@@ -285,6 +382,15 @@ export const OCR = ({ route, navigation }: OCRProps) => {
                         style={styles.lookupText}
                         variant="displayMedium"
                     >{resultFromDictionaryLookup}</Text>
+
+                    {/* 🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡 */}
+
+                    <Text style={styles.tagBtnContainer}>
+                        {handleTagCreation()}
+                    </Text>
+
+                    {/* 🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡 */}
+
                 </>
                     :
                 !cardIsSubmitted && !cardSubmissionError ? 
@@ -368,7 +474,7 @@ const styles = StyleSheet.create({
         marginLeft: 20
     },
     responseText: {
-        fontSize: 50,
+        fontSize: 20,
         margin: 20
     },
     responseTextEditMode: {
@@ -394,6 +500,22 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    tagBtnContainer: {
+        // flex: 0,
+        // flexDirection: 'row',
+        // justifyContent: 'space-between',
+        // flexWrap: 'wrap',
+        // alignItems: 'flex-start',
+        backgroundColor: 'yellow',
+        width: 350,
+    },
+    tagButtons: {
+        // width: '20%',
+        backgroundColor: 'lightgray',
     }
+    // tagButtonsOn: {
+    //     backgroundColor: 'yellow',
+    // }
   });
   
