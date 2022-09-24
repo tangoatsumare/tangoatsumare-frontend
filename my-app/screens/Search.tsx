@@ -360,7 +360,9 @@ export const SearchBody = (props: SearchBodyProps) => {
                 </View>
                 <Divider bold={true} />
             </View>
-            <View style={styles.bottomContainer}>
+            <ScrollView 
+                contentContainerStyle={styles.bottomContainer}
+            >
                 <View style={styles.resultsContainer}>
                     <Text variant="headlineSmall">Results</Text>
                     {flashcardsCurated && flashcardsCurated.length > 0 &&
@@ -395,7 +397,7 @@ export const SearchBody = (props: SearchBodyProps) => {
                         </Button> 
                     </TouchableOpacity>
                 : null}
-            </View>
+            </ScrollView>
         </ScrollView>
 
     );
@@ -431,10 +433,10 @@ const styles = StyleSheet.create({
         padding: 10,
         flex: 1,
         alignItems: "stretch",
+        // paddingBottom: 0
     },
     resultsContainer: {
         flex: 1,
-
     },
     searchButtonContainer: {
         justifyContent: 'center',
