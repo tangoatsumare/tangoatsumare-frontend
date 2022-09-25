@@ -29,6 +29,7 @@ export const TabHome = () => {
             initialRouteName="Home"
             shifting={true}
             sceneAnimationEnabled={false}
+            barStyle={{ backgroundColor: '#FFFFFF' }}
         >
             <Tab.Screen
                 name="Home"

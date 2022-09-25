@@ -12,6 +12,8 @@ import { SearchBar, SearchBody } from '../screens/Search';
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { getAuth } from 'firebase/auth';
+import { Collection } from "../Components/collection";
+import { Feed } from "../Components/feed";
 
 const { width, height } = Dimensions.get('screen');
 
@@ -211,14 +213,6 @@ export const Home = () => {
     setFlashcardsCollection(flashcardsMaster.filter(flashcard => flashcard["created_by"] === userId));
   };
 
-  // const scrollToLeft = () => {
-  //   scrollRef.current?.scrollTo({y:0, animated: true})
-  // };
-
-  // const scrollToRight = () => {
-  //   scrollRef.current?.scrollToEnd({ animated: true});
-  // };
-
   // reshape the object so it is easier to work with
   const getTagsToFlashcardsIdObject = (tags: Tag[]): object => {
     const tagsToFlashcardsId = {};
@@ -248,26 +242,6 @@ export const Home = () => {
     return cards.filter((card: any) => !card.created_by.includes("delete"));
   }
 
-  const handleShowFlashcard = (flashcardID: string) => {
-    navigation.navigate("Card", {id: flashcardID})
-    console.log(flashcardID);
-  }
-
-  const handleShowFeedcard = (flashcardID: string) => {
-    navigation.navigate("FeedCard", {id: flashcardID})
-    console.log(flashcardID);
-  }
-
-
-  // const handleScroll = (e: object) => {
-  //   const currentScrollPosition = e.nativeEvent.contentOffset.x;
-  //   if (currentScrollPosition === 0) {
-  //     setValue('feed');
-  //   } else if (currentScrollPosition === width) {
-  //     setValue('collection')
-  //   }
-  // };
-
   const handleEditSubmit = () => {
     if (text || selectedTags.length !== 0) {
         const searchParams = {
@@ -281,53 +255,6 @@ export const Home = () => {
         console.log('search not executed due to empty string');
     }
 };
-
-  const Feed = ({item}) => {
-    return (
-      <View style={styles.item}>
-        <TouchableOpacity 
-            onPress={() => { handleShowFeedcard(item._id) }}
-        >
-            <View style={styles.header}>
-                <Card style={styles.card}>
-                    <Card.Content>
-                        <Card.Cover 
-                            source={{
-                                uri: item.picture_url ? item.picture_url : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'
-                            }} 
-                            style={styles.image}
-                            resizeMode="contain"
-                        />
-                    </Card.Content>
-                    <Card.Actions>
-                    </Card.Actions>
-                </Card>
-                <Title style={styles.textVocab}>{item.target_word}</Title>
-            </View>
-        </TouchableOpacity>
-      </View>
-    );
-  };
-
-  const Collection = ({item}) => {
-    return (
-      <TouchableOpacity 
-        onPress={() => { handleShowFlashcard(item._id) }}
-        style={styles.collectionItem}
-      >
-        <Card key={item.target_word} style={styles.card}>
-              <Card.Content>
-              <Card.Cover   source={{uri: item.picture_url ? item.picture_url : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}} />
-              <Title style={styles.textVocab}>{item.target_word}</Title>
-              <Paragraph style={styles.text}>Sentence: {item.example_sentence}</Paragraph>
-              </Card.Content>
-              <Card.Actions>
-        
-          </Card.Actions>
-          </Card>
-      </TouchableOpacity>
-    );
-  };
 
   const Tab = forwardRef(({item, onItemPress}, ref) => {
     return (
@@ -363,7 +290,7 @@ export const Home = () => {
           height: 4,
           width: indicatorWidth,
           left: 0,
-          backgroundColor: 'red', // TO CHANGE: per Figma variable
+          backgroundColor: theme.colors.primary,
           bottom: -10,
           transform: [{
             translateX
@@ -431,39 +358,28 @@ export const Home = () => {
     <View style={styles.master}>
       { !textInputOnFocus && flashcardsFeed && flashcardsCollection ? 
         <View> 
-          <Divider />
-          <View style={styles.tagsContainer}>
             {selectedTags.length !== 0 ? 
-              selectedTags.map(item => {
-                return (
-                  <Chip key={item} style={{...styles.tag, backgroundColor: theme.colors.secondary}}>
-                    <Text style={{fontSize: 10}}>{item}</Text>
-                  </Chip>
-                );
-              })
+              <View style={styles.tagsContainer}>
+                {selectedTags.map(item => {
+                  return (
+                    <Chip key={item} style={{...styles.tag, backgroundColor: theme.colors.primary}}>
+                      <Text style={{fontSize: 10}}>{item}</Text>
+                    </Chip>
+                  );
+                })}
+              </View>         
             :null}
-          </View>         
           <Animated.ScrollView 
-              contentContainerStyle={{marginTop: 30}}
+              contentContainerStyle={{ marginTop: selectedTags.length !== 0 ? 20 : 50 }}
               ref={scrollRef}
               horizontal 
               onScroll={Animated.event(
                 [{nativeEvent: {contentOffset: {x: scrollX}}}],
                 { useNativeDriver: false }
                 )}
-              // bounces={false}
-              // contentContainerStyle={{backgroundColor: 'white'}}
-              // snapToInterval={width} 
               pagingEnabled={true}
               decelerationRate="fast" 
               showsHorizontalScrollIndicator={false}              
-              // ref={scrollRef}
-              // https://stackoverflow.com/questions/29310553/is-it-possible-to-keep-a-scrollview-scrolled-to-the-bottom
-              // onContentSizeChange={scrollToRight}
-              // https://stackoverflow.com/questions/29503252/get-current-scroll-position-of-scrollview-in-react-native
-              // onScroll={handleScroll}
-              // onScrollEndDrag={handleScroll}
-              // scrollEventThrottle={16}
           >
           {flashcardsFeed.length > 0 ?
             <FlatList style={styles.container}
@@ -476,6 +392,7 @@ export const Home = () => {
                 )
               }
               contentContainerStyle={{paddingBottom: 200}}
+              showsVerticalScrollIndicator={false}
             />
             : <Text style={styles.container}>{submitIsClick ? "result not found." : "no entry"}</Text>
           }
@@ -490,6 +407,7 @@ export const Home = () => {
                   // workaround for the last item of flatlist not showing properly
                   // https://thewebdev.info/2022/02/19/how-to-fix-the-react-native-flatlist-last-item-not-visible-issue/
                   contentContainerStyle={{paddingBottom: 200}}
+                  showsVerticalScrollIndicator={false}
                 />
             : <Text style={styles.container}>{submitIsClick ? "result not found." : "no entry"}</Text>
           }
@@ -522,7 +440,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'white'
   },
   tagsContainer: {
-    padding: 10,
+    marginTop: 50,
+    paddingLeft: 10,
+    paddingRight: 10,
     flexDirection: 'row',
     flexWrap: 'wrap',
     width: width,
@@ -534,67 +454,8 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     alignItems: 'center'
   },
-  button: {
-    alignItems: 'center',
-  },
   container: {
     width: width,
-    flex: 1
+    flex: 1,
   },
-  segment: {
-    paddingTop: 10,
-    paddingBottom: 10,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  item: {
-    // padding: 10,
-    width: width / 2,
-    // borderBottomWidth: 0.2,
-    // borderBottomColor: 'grey'
-  },
-  collectionItem: {
-    padding: 10,
-  },
-  header: {
-
-  },
-  user: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'flex-start',
-      marginBottom: 10,
-      marginTop: 10
-  },
-  userLeft: {
-      marginRight: 10
-  },
-  userRight: {
-      alignItems: 'flex-start'
-  },
-  username: {
-
-  },
-  buttonGroup: {
-    flexDirection: 'row'
-  },
-  text: {
-
-  },
-  textVocab: {
-      textAlign: 'center',
-      fontWeight: "bold"
-  },
-  card: {
-      borderRadius: 10,
-      marginLeft: 20,
-      marginRight: 20
-  },
-  image: {
-      backgroundColor: 'transparent'
-  },
-  separator: {
-      height: 0.2,
-      backgroundColor: "grey"
-  }
-})
+});

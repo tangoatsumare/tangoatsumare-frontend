@@ -323,28 +323,39 @@ export const SearchBody = (props: SearchBodyProps) => {
     return (
         <ScrollView contentContainerStyle={styles.mainContainer}>
             <View style={styles.topContainer}>
-                <Text variant="headlineSmall">Tags</Text>
+                {/* <Text variant="headlineSmall">Tags</Text> */}
                 <View style={styles.tagsContainer}>
                     {tagsModified.length > 0 ?
                     tagsModified.map(item => {
                         return (
                             <Chip
                                 key={item._id} 
-                                style={item.isClicked? {...styles.tagButton, backgroundColor:theme.colors.secondary}: styles.tagButton }
+                                style={item.isClicked? 
+                                    {...styles.tagButton, backgroundColor:theme.colors.secondary}
+                                    : {...styles.tagButton, backgroundColor: theme.colors.primary }
+                                }
                                 mode="flat"
                                 selected={item.isClicked}
                                 onPress={() => handleTagClick(item)}
+                                selectedColor={theme.colors.tertiary}
                             >
-                                <Text variant='bodyMedium'>
-                                    #{item.tag}
-                                    {/* <Text variant='labelSmall'> {"(0)"}</Text> */}
+                                <Text 
+                                    variant='bodyMedium'
+                                    style={
+                                        // item.isClicked? 
+                                        {color: theme.colors.tertiary}
+                                        // : 
+                                        // {color: theme.colors.secondary}
+                                    }
+                                >
+                                    {item.tag}
                                 </Text>
                             </Chip>
                         );
                     })
                     : null}
                 </View>
-                <Divider bold={true} />
+                {/* <Divider bold={true} /> */}
             </View>
             <ScrollView 
                 contentContainerStyle={styles.bottomContainer}
