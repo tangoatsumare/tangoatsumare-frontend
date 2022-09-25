@@ -5,7 +5,7 @@ import { useIsFocused } from "@react-navigation/native";
 import React, { useEffect, useLayoutEffect, useState, useRef, createRef, forwardRef, useCallback } from "react";
 import { Keyboard, Dimensions, Animated, findNodeHandle, Image } from 'react-native';
 import { View, StyleSheet, FlatList, TouchableOpacity, ScrollView } from 'react-native'
-import { SegmentedButtons, Text, Button, Card, Paragraph, Title, Avatar, Divider, Chip } from "react-native-paper";
+import { SegmentedButtons, Text, Button, Card, Paragraph, Title, Avatar, Divider, Chip, Searchbar } from "react-native-paper";
 import { useTheme } from 'react-native-paper';
 import { HTTPRequest } from "../utils/httpRequest";
 import { SearchBar, SearchBody } from '../screens/Search';
@@ -81,6 +81,19 @@ export const Home = () => {
       headerStyle: {
         backgroundColor: 'white' // TO CHANGE: per figma variable
       },
+      // headerTitle: () => (
+        // testing with react native paper search bar component
+      //   <Searchbar 
+      //     placeholder="search"
+      //     elevation={0}
+      //     style={{
+      //       borderRadius: 20,
+      //       height: 35,
+      //       width: width / 1.5,
+      //       backgroundColor: 'lightgrey'
+      //     }}
+      //   />
+      // ),
       headerTitle: () => (
         <SearchBar 
           text={text} 
