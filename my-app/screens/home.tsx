@@ -364,7 +364,7 @@ export const Home = () => {
     return (
       <TouchableOpacity 
         onPress={() => { handleShowFlashcard(item._id) }}
-        style={styles.item}
+        style={styles.collectionItem}
       >
         <Card key={item.target_word} style={styles.card}>
               <Card.Content>
@@ -511,6 +511,9 @@ const styles = StyleSheet.create({
     width: width / 2,
     // borderBottomWidth: 0.2,
     // borderBottomColor: 'grey'
+  },
+  collectionItem: {
+    padding: 10,
   },
   header: {
 

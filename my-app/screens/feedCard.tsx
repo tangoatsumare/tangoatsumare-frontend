@@ -56,6 +56,8 @@ export const FeedCard = () => {
   const route = useRoute<RouteProp<StackParamsList, "Card">>();
   const auth = getAuth();
   const userId = auth.currentUser?.uid;
+  // let userId;
+  let currentUserId;
   const isFocused = useIsFocused();
 
 
@@ -76,6 +78,7 @@ export const FeedCard = () => {
                 checkIfReported(flaggersArray);
                 const likersArray = response.data[0].likers
                 checkIfLiked(likersArray);
+                currentUserId = response.data[0].created_by;
 
                 //fetch all of the users SRS To Cards data, to see if the card already exists in the users deck
           const userToSRSCards = await axios.get(`https://tangoatsumare-api.herokuapp.com/api/cardflashjoinuid/${userId}`)
@@ -89,7 +92,7 @@ export const FeedCard = () => {
             // checkIfInDeck();
               //fetch the users data for username and avatar display
              const user = await axios
-              .get(`https://tangoatsumare-api.herokuapp.com/api/usersuid/${userId}`)
+              .get(`https://tangoatsumare-api.herokuapp.com/api/usersuid/${currentUserId}`)
                   const userName = user.data[0].user_name
                   const avatar = user.data[0].avatar_url
                   setUser(userName, avatar)

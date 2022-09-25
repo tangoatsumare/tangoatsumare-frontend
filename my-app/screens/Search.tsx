@@ -271,7 +271,7 @@ export const SearchBody = (props: SearchBodyProps) => {
     }, [textInputOnFocus, tags]);
 
     const handleShowFlashcard = (flashcardID: string) => {
-        navigation.navigate("Card", {id: flashcardID})
+        navigation.navigate("FeedCard", {id: flashcardID})
         // console.log(flashcardID);
     };
 
