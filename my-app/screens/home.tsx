@@ -81,19 +81,7 @@ export const Home = () => {
       headerStyle: {
         backgroundColor: 'white' // TO CHANGE: per figma variable
       },
-      // headerTitle: () => (
-        // testing with react native paper search bar component
-      //   <Searchbar 
-      //     placeholder="search"
-      //     elevation={0}
-      //     style={{
-      //       borderRadius: 20,
-      //       height: 35,
-      //       width: width / 1.5,
-      //       backgroundColor: 'lightgrey'
-      //     }}
-      //   />
-      // ),
+      headerShadowVisible: false,
       headerTitle: () => (
         <SearchBar 
           text={text} 
@@ -118,17 +106,18 @@ export const Home = () => {
         />
       ),
       headerRight: () => {
-        if (textInputOnFocus) {
-          return (
-            <Button 
-                mode="text" 
-                onPress={cancelSearch}
-                style={{marginLeft: 5}}
-            >
-              <Text variant="labelLarge" style={{color: 'black'}}>cancel</Text>
-              </Button>
-          );
-        } else if (!textInputOnFocus && submitIsClick) {
+        // if (textInputOnFocus) {
+        //   return (
+        //     <Button 
+        //         mode="text" 
+        //         onPress={cancelSearch}
+        //         style={{marginLeft: 5}}
+        //     >
+        //       <Text variant="labelLarge" style={{color: 'black'}}>cancel</Text>
+        //       </Button>
+        //   );
+        // } else 
+        if (!textInputOnFocus && submitIsClick) {
           return (
             <Button 
                 mode="text" 
@@ -404,7 +393,7 @@ export const Home = () => {
                   <Feed item={item} />
                 )
               }
-              contentContainerStyle={{paddingBottom: 200}}
+              contentContainerStyle={{paddingBottom: 50}}
               showsVerticalScrollIndicator={false}
             />
             : <Text style={styles.container}>{submitIsClick ? "result not found." : "no entry"}</Text>
@@ -419,7 +408,7 @@ export const Home = () => {
                   }
                   // workaround for the last item of flatlist not showing properly
                   // https://thewebdev.info/2022/02/19/how-to-fix-the-react-native-flatlist-last-item-not-visible-issue/
-                  contentContainerStyle={{paddingBottom: 200}}
+                  contentContainerStyle={{paddingBottom: 50}}
                   showsVerticalScrollIndicator={false}
                 />
             : <Text style={styles.container}>{submitIsClick ? "result not found." : "no entry"}</Text>

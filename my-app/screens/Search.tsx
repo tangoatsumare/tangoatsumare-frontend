@@ -7,7 +7,6 @@ import { Button, Divider, Text,  Searchbar, Card, Avatar, Chip, TextInput as Pap
 import { Keyboard, Dimensions } from 'react-native';
 import { HTTPRequest } from '../utils/httpRequest';
 import { useTheme } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 // import * as MaterialDesignIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Tag } from './home';
@@ -196,7 +195,7 @@ export const SearchBar = (props: SearchBarProps) => {
             <PaperTextInput.Icon 
                 icon="magnify" 
                 // disabled={true}
-                iconColor="rgba(0,0,0,0.5)"
+                iconColor={textInputOnFocus ? theme.colors.primary: "rgba(0,0,0,0.5)"}
                 style={{
                     marginLeft: 20 // hard coded
                 }}
@@ -208,7 +207,7 @@ export const SearchBar = (props: SearchBarProps) => {
                     marginLeft: 40,
                     alignSelf: 'center',
                     width: width / 2,
-                    fontSize:  textInputOnFocus ? 20 : 15
+                    fontSize:  15
                 }}
                 // // issue with japanese typing getting messed up due to the state changes
                 // // https://github.com/facebook/react-native/issues/19339
@@ -341,7 +340,7 @@ export const SearchBody = (props: SearchBodyProps) => {
     // }, [hashTagSearchMode]);
 
     return (
-        <ScrollView contentContainerStyle={styles.mainContainer}>
+        <View style={styles.mainContainer}>
             <View style={styles.topContainer}>
                 {/* <Text variant="headlineSmall">Tags</Text> */}
                 <View style={styles.tagsContainer}>
@@ -375,33 +374,45 @@ export const SearchBody = (props: SearchBodyProps) => {
                     })
                     : null}
                 </View>
-                {/* <Divider bold={true} /> */}
             </View>
-            <ScrollView 
+            {flashcardsCurated && flashcardsCurated.length > 0 &&
+                <FlatList 
+                    // contentContainerStyle={styles.resultsContainer}
+                    // style={styles.bottomContainer}
+                    data={flashcardsCurated}
+                    // showsVerticalScrollIndicator={false}
+                    keyExtractor={(item) => item._id}
+                    renderItem={({item}) => (
+                        <TouchableOpacity 
+                        style={{marginBottom: 5}} key={item._id}
+                        onPress={() => handleShowFlashcard(item._id)}
+                        >
+                            <Card
+                                mode="contained"
+                                style={{backgroundColor: "transparent"}}
+                            >
+                                <Card.Title 
+                                    title={item.target_word} 
+                                    titleVariant="headlineSmall"
+                                    subtitle={item.example_sentence}
+                                    left={(props) => (
+                                        <Avatar.Image {...props} 
+                                            source={{uri:item.picture_url}} 
+                                            style={{backgroundColor: 'transparent'}}
+                                        />
+                                    )}
+                                />
+                                <Card.Content>
+                                </Card.Content>
+                            </Card>
+                        </TouchableOpacity>
+                    )
+                    }
+                />
+            }
+            {/* <ScrollView 
                 contentContainerStyle={styles.bottomContainer}
             >
-                <View style={styles.resultsContainer}>
-                    <Text variant="headlineSmall">Results</Text>
-                    {flashcardsCurated && flashcardsCurated.length > 0 &&
-                        flashcardsCurated.map(card => {
-                            return (
-                                <View style={{marginBottom: 5}} key={card._id}>
-                                    <Card
-                                        onPress={() => handleShowFlashcard(card._id)}
-                                    >
-                                        <Card.Title 
-                                            title={card.target_word} 
-                                            subtitle={card.example_sentence}
-                                            left={(props) => <Avatar.Image {...props} source={{uri:card.picture_url}} />}
-                                        />
-                                        <Card.Content>
-                                        </Card.Content>
-                                    </Card>
-                                </View>
-                            );
-                        })
-                    }
-                </View>
                 {text !== '' || hashTagSearchMode ? 
                 <View style={styles.searchButtonContainer}>
                     <TouchableOpacity 
@@ -416,8 +427,8 @@ export const SearchBody = (props: SearchBodyProps) => {
                     </TouchableOpacity>
                 </View>
                 : null}
-            </ScrollView>
-        </ScrollView>
+            </ScrollView> */}
+        </View>
 
     );
 }

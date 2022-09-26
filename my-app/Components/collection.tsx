@@ -48,10 +48,11 @@ export const Collection = ({item}) => {
             }} 
             style={{
               height: imgHeight,
-              // padding: 10
+              backgroundColor: "transparent",
+              borderRadius: 20
             }}
-            // resizeMode="cover"
-            resizeMode="contain"
+            resizeMode="cover"
+            // resizeMode="contain"
           />
           
         </Card.Content>
@@ -74,6 +75,6 @@ const styles = StyleSheet.create({
   },
   card: {
     borderRadius: 10,
-    backgroundColor: "rgba(0,0,0,0.05)"
+    backgroundColor: "transparent"
   },
 });

@@ -13,6 +13,7 @@
     "@google-cloud/vision": "^2.4.2",
     "@mdi/js": "^7.0.96",
     "@mdi/react": "^1.6.1",
+    "@react-navigation/bottom-tabs": "^6.4.0",
     "@react-navigation/drawer": "^6.4.4",
     "@react-navigation/material-bottom-tabs": "^6.2.3",
     "@react-navigation/native": "^6.0.12",

@@ -11,31 +11,38 @@ import { Review } from "../screens/review";
 import { ProfileSetup } from "../screens/profileSetup";
 import React from 'react';
 import {createMaterialBottomTabNavigator} from "@react-navigation/material-bottom-tabs";
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Collection } from "./collection";
 import { SingleCard } from "./card";
 import { Front } from "../screens/front";
 import { Back } from "../screens/back";
 import { FeedCard } from "../screens/feedCard";
-
-// import { Search } from "../screens/Search";
-
+import { useTheme } from "react-native-paper";
 
 const Tab = createMaterialBottomTabNavigator();
+// const Tab = createBottomTabNavigator();
 
 export const TabHome = () => {
+    const theme = useTheme();
 
     return (
         <Tab.Navigator
             initialRouteName="Home"
             shifting={true}
             sceneAnimationEnabled={false}
-            barStyle={{ backgroundColor: '#FFFFFF' }}
+            barStyle={{ 
+                backgroundColor: '#FFFFFF',
+                // height: 80,
+            }}
+            labeled={false} // hide labels
+            activeColor={theme.colors.primary}
+            
         >
             <Tab.Screen
                 name="Home"
                 component={HomeNav}
                 options={{
-                    tabBarIcon: 'home-account',
+                    tabBarIcon: 'home-account'
                 }}
             />
             <Tab.Screen
@@ -44,6 +51,8 @@ export const TabHome = () => {
                 options={{
                     title: 'Review',
                     tabBarIcon: 'card-multiple-outline',
+                    // https://reactnavigation.org/docs/tab-based-navigation#add-badges-to-icons
+                    tabBarBadge: "todo", // TODO: Show the ready to review cards here
                 }}
             />
             <Tab.Screen

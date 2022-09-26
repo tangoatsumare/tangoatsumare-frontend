@@ -38,6 +38,7 @@ export const Feed = ({item}) => {
                         style={{
                             paddingHorizontal: 0,
                             paddingVertical: 0,
+                            // backgroundColor: 'transparent'
                             // height: imgHeight
                           }}
                     >
@@ -47,13 +48,11 @@ export const Feed = ({item}) => {
                                     item.picture_url : 
                                     'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'
                             }} 
-                            // style={styles.image}
                             style={{
-                                // height: imgHeight / 2,
-                                // padding: 10
+                                borderRadius: 20,
+                                backgroundColor: 'transparent'
                               }}
-                            // resizeMode="cover"
-                            resizeMode="contain"
+                            resizeMode="cover"
                         />
                     </Card.Content>
                     <Card.Actions>
@@ -82,7 +81,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         marginLeft: 5,
         marginRight: 5,
-        backgroundColor: "rgba(0,0,0,0.05)"
+        backgroundColor: "white"
     },
     image: {
         backgroundColor: 'transparent'
