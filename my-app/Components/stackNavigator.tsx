@@ -17,49 +17,78 @@ import { SingleCard } from "./card";
 import { Front } from "../screens/front";
 import { Back } from "../screens/back";
 import { FeedCard } from "../screens/feedCard";
-import { useTheme } from "react-native-paper";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-const Tab = createMaterialBottomTabNavigator();
-// const Tab = createBottomTabNavigator();
+// const Tab = createMaterialBottomTabNavigator();
+const Tab = createBottomTabNavigator();
 
 export const TabHome = () => {
-    const theme = useTheme();
-
     return (
         <Tab.Navigator
             initialRouteName="Home"
-            shifting={true}
-            sceneAnimationEnabled={false}
-            barStyle={{ 
-                backgroundColor: '#FFFFFF',
-                // height: 80,
-            }}
-            labeled={false} // hide labels
-            activeColor={theme.colors.primary}
+            screenOptions={({route}) => ({
+                tabBarShowLabel: false,
+                tabBarActiveTintColor: '#FF4F4F', // hard coded
+                tabBarStyle: {
+                    backgroundColor: "#FFFFFF", // hard coded
+                    borderTopWidth: 0,
+                    // height: 100
+                },
+                tabBarIcon: ({focused, color, size}) => {
+                    let iconName;
+                    if (route.name === 'Home') {
+                      iconName = 'home-variant-outline'; // per figma
+                    } else if (route.name === 'SRS') {
+                      iconName = 'card-multiple-outline';  // per figma
+                    } else if (route.name === 'Camera') {
+                      iconName = 'camera-plus-outline';  // per figma
+                    } 
+                    return <MaterialCommunityIcons name={iconName} size={30} color={color} />;
+                  },
+            })}
+            // shifting={true}
+            // sceneAnimationEnabled={false}
+            // barStyle={{ 
+            //     backgroundColor: '#FFFFFF',
+            //     // height: 80,
+            // }}
+            // labeled={false} // hide labels
+            // activeColor={theme.colors.primary}
             
         >
             <Tab.Screen
                 name="Home"
                 component={HomeNav}
                 options={{
-                    tabBarIcon: 'home-account'
+                    // https://stackoverflow.com/questions/68674747/header-in-react-navigation-bottom-tabs
+                    headerShown: false,
+                    // tabBarIcon: ({ color, size }) => (
+                    //     <MaterialCommunityIcons name="home-account" color={color} size={size} />
+                    // ),
                 }}
             />
             <Tab.Screen
                 name="SRS"
                 component={SRSNav}
                 options={{
+                    headerShown: false,
                     title: 'Review',
-                    tabBarIcon: 'card-multiple-outline',
+                    // tabBarIcon: ({ color, size }) => (
+                    //     <MaterialCommunityIcons name="card-multiple-outline" color={color} size={size} />
+                    // ),
                     // https://reactnavigation.org/docs/tab-based-navigation#add-badges-to-icons
                     tabBarBadge: "todo", // TODO: Show the ready to review cards here
+                    tabBarBadgeStyle: {}
                 }}
             />
             <Tab.Screen
                 name="Camera"
                 component={CamNav}
                 options={{
-                    tabBarIcon: 'camera',
+                    headerShown: false,
+                    // tabBarIcon: ({ color, size }) => (
+                    //     <MaterialCommunityIcons name="camera" color={color} size={size} />
+                    // ),
                 }}
             />
         </Tab.Navigator>

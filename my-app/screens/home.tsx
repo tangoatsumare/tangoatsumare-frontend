@@ -119,13 +119,13 @@ export const Home = () => {
         // } else 
         if (!textInputOnFocus && submitIsClick) {
           return (
-            <Button 
+            <TouchableOpacity 
                 mode="text" 
                 onPress={resetHomeScreen}
-                style={{marginLeft: 5}}
+                style={{marginRight: 15}} // Hard coded
             >
               <Text variant="labelLarge" style={{color: 'black'}}>reset</Text>
-              </Button>
+              </TouchableOpacity>
           );
         }
       }

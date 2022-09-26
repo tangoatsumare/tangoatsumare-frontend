@@ -10,6 +10,7 @@ import { useTheme } from 'react-native-paper';
 // import * as MaterialDesignIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Tag } from './home';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface SearchBarProps {
     text: string,
@@ -189,7 +190,7 @@ export const SearchBar = (props: SearchBarProps) => {
             borderColor: textInputOnFocus ? theme.colors.primary: 'rgba(0,0,0,0.1)',
             borderWidth: textInputOnFocus ? 0.5: 0,
             borderRadius: 30,
-            width: width / 2,
+            width: width / 1.5, // ratio that the search bar takes up the page
             height: 30
         }}>
             <PaperTextInput.Icon 
@@ -205,8 +206,9 @@ export const SearchBar = (props: SearchBarProps) => {
                 style={{
                     flex: 1, 
                     marginLeft: 40,
+                    marginRight: 40,
                     alignSelf: 'center',
-                    width: width / 2,
+                    width: "auto",
                     fontSize:  15
                 }}
                 // // issue with japanese typing getting messed up due to the state changes
@@ -215,7 +217,7 @@ export const SearchBar = (props: SearchBarProps) => {
                 // // the following reactive code works except for Language such as Japanese
                 // // value={text}
                 // onChangeText={text => setText(text)}
-                placeholder="search"
+                placeholder="Search Tango"
                 value={pressed || resetIsClick ? '': null}
                 // // value={text}
                 // // value={pressed || resetIsClick ? '': text}
@@ -232,7 +234,7 @@ export const SearchBar = (props: SearchBarProps) => {
             {textInputOnFocus ? 
                 <PaperTextInput.Icon
                     style={{
-                        marginLeft: width - 50,  // Hard coded
+                        marginLeft: width + 80,  // Hard coded
                     }}
                     size={20}
                     iconColor="rgba(0,0,0,0.5)"
@@ -375,61 +377,60 @@ export const SearchBody = (props: SearchBodyProps) => {
                     : null}
                 </View>
             </View>
-            {flashcardsCurated && flashcardsCurated.length > 0 &&
-                <FlatList 
-                    // contentContainerStyle={styles.resultsContainer}
-                    // style={styles.bottomContainer}
-                    data={flashcardsCurated}
-                    // showsVerticalScrollIndicator={false}
-                    keyExtractor={(item) => item._id}
-                    renderItem={({item}) => (
-                        <TouchableOpacity 
-                        style={{marginBottom: 5}} key={item._id}
-                        onPress={() => handleShowFlashcard(item._id)}
-                        >
-                            <Card
-                                mode="contained"
-                                style={{backgroundColor: "transparent"}}
+            <View style={styles.bottomContainer}>
+                {flashcardsCurated && flashcardsCurated.length > 0 ?
+                    <FlatList 
+                        // contentContainerStyle={styles.resultsContainer}
+                        // style={styles.bottomContainer}
+                        data={flashcardsCurated}
+                        // showsVerticalScrollIndicator={false}
+                        keyExtractor={(item) => item._id}
+                        renderItem={({item}) => (
+                            <TouchableOpacity 
+                            style={{marginBottom: 5}} key={item._id}
+                            onPress={() => handleShowFlashcard(item._id)}
                             >
-                                <Card.Title 
-                                    title={item.target_word} 
-                                    titleVariant="headlineSmall"
-                                    subtitle={item.example_sentence}
-                                    left={(props) => (
-                                        <Avatar.Image {...props} 
-                                            source={{uri:item.picture_url}} 
-                                            style={{backgroundColor: 'transparent'}}
-                                        />
-                                    )}
-                                />
-                                <Card.Content>
-                                </Card.Content>
-                            </Card>
-                        </TouchableOpacity>
-                    )
-                    }
-                />
-            }
-            {/* <ScrollView 
-                contentContainerStyle={styles.bottomContainer}
-            >
+                                <Card
+                                    mode="contained"
+                                    style={{backgroundColor: "transparent"}}
+                                >
+                                    <Card.Title 
+                                        title={item.target_word} 
+                                        titleVariant="headlineSmall"
+                                        subtitle={item.example_sentence}
+                                        left={(props) => (
+                                            <Avatar.Image {...props} 
+                                                source={{uri:item.picture_url}} 
+                                                style={{backgroundColor: 'transparent'}}
+                                            />
+                                        )}
+                                    />
+                                    <Card.Content>
+                                    </Card.Content>
+                                </Card>
+                            </TouchableOpacity>
+                        )
+                        }
+                    />
+                :
+                    <View style={{flex: 1}}></View> // empty placeholder to fill the div when flatlist is empty
+                }
                 {text !== '' || hashTagSearchMode ? 
-                <View style={styles.searchButtonContainer}>
-                    <TouchableOpacity 
-                        style={styles.searchButton}
-                        onPress={handleEditSubmit}
-                    >
-                        <Icon 
-                            name="magnify" 
-                            size={35} 
-                            color="white"
-                        />
-                    </TouchableOpacity>
-                </View>
+                    <View style={styles.searchButtonContainer}>
+                        <TouchableOpacity 
+                            style={styles.searchButton}
+                            onPress={handleEditSubmit}
+                        >
+                            <Icon 
+                                name="magnify" 
+                                size={35} 
+                                color="white"
+                            />
+                        </TouchableOpacity>
+                    </View>
                 : null}
-            </ScrollView> */}
-        </View>
-
+                </View>
+            </View>
     );
 }
 
