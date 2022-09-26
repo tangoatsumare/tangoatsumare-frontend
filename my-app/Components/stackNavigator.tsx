@@ -112,7 +112,16 @@ export const StackNav = () => {
             <RootStack.Screen name="Camera" component={Camera}/>
             <RootStack.Screen name="OCR" component={OCR}/>
             <RootStack.Screen name="Collection" component={Collection}/>
-            <RootStack.Screen name="Card" component={SingleCard}/>
+            <RootStack.Screen 
+                name="Card" 
+                component={SingleCard} 
+                options={{
+                    headerShadowVisible: false,
+                    headerTitle: '',
+                    headerTintColor: 'black',
+                    headerStyle: {},
+                }}
+            />
             <RootStack.Screen name="FeedCard" component={FeedCard}/>
             <RootStack.Screen name="Front" component={Front}/>
             <RootStack.Screen name="Back" component={Back}/>
