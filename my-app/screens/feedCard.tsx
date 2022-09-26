@@ -8,6 +8,8 @@ import {
   Paragraph,
   Title,
   Text,
+  Chip,
+  useTheme,
 } from "react-native-paper";
 import React, { useEffect, useState } from "react";
 import {
@@ -16,6 +18,7 @@ import {
   View,
   Image,
   ViewPagerAndroidComponent,
+  Animated
 } from "react-native";
 import axios from "axios";
 import { useRoute } from "@react-navigation/core";
@@ -33,7 +36,8 @@ import { report } from "process";
 import dayjs from "dayjs";
 import { mdiCardsPlayingSpadeMultiple } from "@mdi/js";
 
-export const FeedCard = () => {
+export const FeedCard = ({route}) => {
+  const theme = useTheme();
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
   const [flashcard, setFlashcard] = useState({});
   const [imageUrl, setImageUrl] = useState("");
@@ -51,9 +55,12 @@ export const FeedCard = () => {
   const [flashcardId, setFlashcardId] = useState("");
   const [reported, setReported] = useState(false);
   const [date, setDate] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
 
   // const route = useRoute<RouteProp<Record<string, StackParamsList>, string>>();
-  const route = useRoute<RouteProp<StackParamsList, "Card">>();
+  // const route = useRoute<RouteProp<StackParamsList, "Card">>();
+  const {item} = route?.params;
+  // console.log(item._id);
   const auth = getAuth();
   const userId = auth.currentUser?.uid;
   // let userId;
@@ -62,49 +69,49 @@ export const FeedCard = () => {
 
 
   useEffect(() => {
+    if (item) {
+      (async () => {
+          try {
+            setFlashcard(item);
+            setEngDef(item.Eng_meaning[0]);
+            setFlashcardId(item._id);
+            const newDate = dayjs(item.created_timestamp).format('DD/MM/YYYY');
+            setDate(newDate)
+            const flaggersArray = item.flagging_users
+            checkIfReported(flaggersArray);
+            const likersArray = item.likers
+            checkIfLiked(likersArray);
+            currentUserId = item.created_by;
+  
+            //fetch all of the users SRS To Cards data, to see if the card already exists in the users deck
+            let userToSRSCards: SRSTangoFlashcard[] = await HTTPRequest.getSRSFlashcardsByUser(userId);
+            // const userToSRSCards = await axios.get(`https://tangoatsumare-api.herokuapp.com/api/cardflashjoinuid/${userId}`)
+            const FCId = item._id;
+            checkIfInDeck(userToSRSCards, FCId);
+                  
+            //fetch the users data for username and avatar display
+            const user = await HTTPRequest.getUserByUserId(currentUserId);
+            const userName = user.user_name;
+            const avatar = user.avatar_url;
+            setUser(userName, avatar);
 
-    (async () => {
-        try{
-            //fetch the selected flashcard data
-            const response = await axios.get(
-                `https://tangoatsumare-api.herokuapp.com/api/flashcards/${route.params?.id}`
-              )
-                setFlashcard(response.data[0]);
-                setEngDef(response.data[0].Eng_meaning[0]);
-                setFlashcardId(response.data[0]._id);
-                const newDate = dayjs(response.data[0].created_timestamp).format('DD/MM/YYYY');
-                setDate(newDate)
-                const flaggersArray = response.data[0].flagging_users
-                checkIfReported(flaggersArray);
-                const likersArray = response.data[0].likers
-                checkIfLiked(likersArray);
-                currentUserId = response.data[0].created_by;
-
-                //fetch all of the users SRS To Cards data, to see if the card already exists in the users deck
-          const userToSRSCards = await axios.get(`https://tangoatsumare-api.herokuapp.com/api/cardflashjoinuid/${userId}`)
-            const SRSArray =   userToSRSCards.data; // keith
-            // setUserSRSCards(userToSRSCards.data);
-              console.log("srs cards:", userToSRSCards.data);
-            //   setHasSRSCard(false);
-              const FCId = response.data[0]._id;
-             checkIfInDeck(SRSArray, FCId); // keith
-                
-            // checkIfInDeck();
-              //fetch the users data for username and avatar display
-             const user = await axios
-              .get(`https://tangoatsumare-api.herokuapp.com/api/usersuid/${currentUserId}`)
-                  const userName = user.data[0].user_name
-                  const avatar = user.data[0].avatar_url
-                  setUser(userName, avatar)
-                
-            } catch (err) {
-                console.log(err);
+            const tagsData = await HTTPRequest.getTags(); // fetching hashtag data
+            // console.log(item.tags);
+            // console.log(tagsData);
+            const tagsOfCard: string[] = [];
+            for (const tag of item.tags) {
+              const result = tagsData.find(data => data._id === tag).tag;
+              if (result) tagsOfCard.push(result);
             }
-            
-        }
-   
-  )();}, []);
+            setTags(tagsOfCard);
 
+          } catch (err) {
+              console.log(err);
+          }
+        }
+      )();
+    }
+  }, [item]);
 
   function setUser (name: any, uri: any){
     setUserName(name);
@@ -166,6 +173,7 @@ function checkIfReported (array: any) {
     await HTTPRequest.addSRSCard({
       flashcard_id: flashcardId,
       uid: userId,
+      counter: 0,
       interval: 0,
       repetition: 0,
       efactor: 2.5,
@@ -198,13 +206,78 @@ function checkIfReported (array: any) {
     }
   };
  
-  const displayCard = (card: any) => {
+  const ButtonGroup = () => {
     return (
-      <View>
+      <View style={styles.buttonGroup}>
+          { liked === true?
+            <Button icon="star">{likers.length} likes</Button>
+          :
+            <Button
+              icon="star"
+              onPress={like}
+            >
+            {likers.length} likes
+            </Button>
+          }
+          { hasSRSCard ? 
+            <Button icon="bookshelf">
+              In deck
+            </Button> 
+          : 
+            <Button
+              icon="bookshelf"
+              onPress={addCardToDeck}
+            >
+              Add to deck
+            </Button>
+          }
+          { reported === true ?
+            <Button icon="emoticon-angry-outline">reported</Button>
+          :
+            <Button
+              icon="emoticon-angry-outline"
+              onPress={report}
+            >
+              Report Inappropriate
+            </Button>
+          }
+        </View>
+    );
+  }
+
+
+  const DisplayCard = ({flashcard}: any) => {
+    const [loadingProfileImg, setLoadingProfileImg] = useState<boolean>(true);
+    const [loadingCardImg, setLoadingCardImg] = useState<boolean>(true);
+    const fadeAnim = React.useRef(new Animated.Value(0)).current;
+  
+    useEffect(() => {
+      if (!loadingProfileImg && !loadingCardImg) {
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true
+        }).start();
+      }
+    }, [loadingCardImg, loadingProfileImg]);
+
+    return (
+      <Animated.View
+        style={{
+          // flex: 1,
+          opacity: fadeAnim,
+          backgroundColor: "white",
+          paddingLeft: 30,
+          paddingRight: 30
+        }}
+      >
         <View style={styles.header}>
           <View style={styles.user}>
             <Avatar.Image
               size={35}
+              onLoadEnd={() => {
+                setLoadingProfileImg(false)
+              }}
               source={{ 
                 uri: userAvatar? userAvatar: 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png' 
             }}               
@@ -215,83 +288,59 @@ function checkIfReported (array: any) {
               <Text variant="bodySmall">{date}</Text>
             </View>
           </View>
-          <Card style={styles.card}>
+          <Card style={styles.card} mode="contained">
             <Card.Content>
               <Card.Cover
+                onLoadEnd={() => setLoadingCardImg(false)}
                 source={{
-                  uri: card.picture_url
-                    ? card.picture_url
+                  uri: flashcard.picture_url
+                    ? flashcard.picture_url
                     : "https://www.escj.org/sites/default/files/default_images/noImageUploaded.png",
                 }}
                 style={styles.image}
                 resizeMode="contain"
               />
-              <Title style={styles.textVocab}>{card.target_word}</Title>
-              <Paragraph style={styles.text}>
-                Sentence: {card.example_sentence}
-              </Paragraph>
+              <ButtonGroup />
+              <View style={{paddingTop: 50}}>
+                <Text style={styles.textVocab} variant="displayLarge">{flashcard.target_word}</Text>
+                <Text style={styles.text} variant="displayMedium">{flashcard.Eng_meaning}</Text>
+                <Text style={styles.text} variant="headlineMedium">{flashcard.example_sentence}</Text>
+              </View>
+              <View style={{flexDirection: 'row'}}>
+                {tags.length > 0 ? tags.map(tag => {
+                  return (
+                    <Chip 
+                      key={tag} 
+                      style={{
+                        margin: 5, 
+                        borderRadius: 20, 
+                        backgroundColor: '#FF4F4F'
+                      }}
+                      textStyle={{
+                        color: 'white'
+                      }}
+                    >{tag}</Chip>
+                  );
+                })
+                : null}
+              </View>
             </Card.Content>
           </Card>
         </View>
-        <View style={styles.buttonGroup}>
-          {liked === true?　
-          <Button icon="star">{likers.length} likes</Button>:
-          <Button
-          icon="star"
-          onPress={() => {
-            {
-              like();
-            }
-          }}
-        >
-          {likers.length} likes
-        </Button>
-          }
-          {hasSRSCard ? 
-          <Button icon="bookshelf">
-            In deck
-            </Button> : 
-             <Button
-          icon="bookshelf"
-          onPress={() => {
-            {
-              addCardToDeck();
-            }
-          }}
-        >
-          Add to deck
-        </Button>
-        }
-        {reported === true ?
-         <Button icon="emoticon-angry-outline">reported</Button>
-        :
-        <Button
-        icon="emoticon-angry-outline"
-        onPress={() => {
-          {
-            report();
-          }
-        }}
-      >
-        report
-      </Button>
-        }
-        </View>
-      </View>
+      </Animated.View>
     );
   };
 
-  return <View style={styles.container}>{displayCard(flashcard)}</View>;
+  return (
+    <View style={styles.container}>
+      {flashcard && userAvatar && userName && date && likers && tags && 
+        <DisplayCard flashcard={flashcard}/>
+      }
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-  item: {
-    padding: 10,
-    //   borderTopWidth: 0.2,
-    //   borderTopColor: 'grey',
-    borderBottomWidth: 0.2,
-    borderBottomColor: "grey",
-  },
   header: {},
   user: {
     flexDirection: "row",
@@ -311,6 +360,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   container: {
+    flex: 1,
     // alignItems: 'center',
     // justifyContent: 'center',
   },
@@ -319,7 +369,9 @@ const styles = StyleSheet.create({
     height: 0.2,
     backgroundColor: "grey",
   },
-  text: {},
+  text: {
+    textAlign: "center",
+  },
   textVocab: {
     textAlign: "center",
     fontWeight: "bold",
@@ -328,13 +380,16 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginLeft: 20,
     marginRight: 20,
-    // marginTop: 2,
-    // padding: 10
+    backgroundColor: "transparent",
   },
   image: {
+    // height: '60%',
     backgroundColor: "transparent",
+    borderRadius: 20,
   },
   buttonGroup: {
     flexDirection: "row",
+    alignItems: 'center',
+    justifyContent: 'center'
   },
 });

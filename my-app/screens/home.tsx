@@ -228,7 +228,9 @@ export const Home = () => {
           card.created_by_username = result.user_name; // replace uid with username
           card.avatar_url = result.avatar_url; // add field
       }
-      card.created_timestamp = dayjs(card.created_timestamp).fromNow(); // https://day.js.org/docs/en/plugin/relative-time
+      // card.created_timestamp = dayjs(card.created_timestamp)
+        // .fromNow(); 
+      // https://day.js.org/docs/en/plugin/relative-time
     }
     return formattedCards;
   };

@@ -122,7 +122,16 @@ export const StackNav = () => {
                     headerStyle: {},
                 }}
             />
-            <RootStack.Screen name="FeedCard" component={FeedCard}/>
+            <RootStack.Screen 
+                name="FeedCard" 
+                component={FeedCard}
+                options={{
+                    headerShadowVisible: false,
+                    headerTitle: '',
+                    headerTintColor: 'black',
+                    headerStyle: {},
+                }}
+            />
             <RootStack.Screen name="Front" component={Front}/>
             <RootStack.Screen name="Back" component={Back}/>
             <RootStack.Screen name="Review" component={Review}/>

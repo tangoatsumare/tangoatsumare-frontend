@@ -10,9 +10,9 @@ const { width, height } = Dimensions.get('screen');
 
 export const Feed = ({item}) => {
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
-    const handleShowFeedcard = (flashcardID: string) => {
-        navigation.navigate("FeedCard", {id: flashcardID})
-        console.log(flashcardID);
+    const handleShowFeedcard = (item: any) => {
+        navigation.navigate("FeedCard", {item: item})
+        console.log(item._id);
     };
 
     const [imgHeight, setImgHeight] = useState<number>();
@@ -29,7 +29,7 @@ export const Feed = ({item}) => {
     return (
       <View style={styles.item}>
         <TouchableOpacity 
-            onPress={() => { handleShowFeedcard(item._id) }}
+            onPress={() => { handleShowFeedcard(item) }}
         >
             <View style={styles.header}>
                 <Card style={styles.card} mode="contained">

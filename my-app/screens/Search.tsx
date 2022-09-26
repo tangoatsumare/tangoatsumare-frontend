@@ -291,8 +291,8 @@ export const SearchBody = (props: SearchBodyProps) => {
         })();
     }, [textInputOnFocus, tags]);
 
-    const handleShowFlashcard = (flashcardID: string) => {
-        navigation.navigate("FeedCard", {id: flashcardID})
+    const handleShowFlashcard = (item: any) => {
+        navigation.navigate("FeedCard", {item: item})
         // console.log(flashcardID);
     };
 
@@ -388,7 +388,7 @@ export const SearchBody = (props: SearchBodyProps) => {
                         renderItem={({item}) => (
                             <TouchableOpacity 
                             style={{marginBottom: 5}} key={item._id}
-                            onPress={() => handleShowFlashcard(item._id)}
+                            onPress={() => handleShowFlashcard(item)}
                             >
                                 <Card
                                     mode="contained"
