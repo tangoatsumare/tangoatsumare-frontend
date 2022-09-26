@@ -20,14 +20,21 @@ export const SingleCard = () => {
 
   // const route = useRoute<RouteProp<Record<string, StackParamsList>, string>>();
   const route = useRoute<RouteProp<StackParamsList, 'Card'>>();
+  const { item } = route?.params; // grab directly from the params
+  console.log(item);
+
+  // useEffect(() => {
+  //   axios
+  //     .get(`https://tangoatsumare-api.herokuapp.com/api/flashcards/${route.params?.id}`)
+  //     .then((response) => {
+  //       setFlashcard(response.data[0])
+  //       setEngDef(response.data[0].Eng_meaning[0])
+  //     });
+  // }, []);
 
   useEffect(() => {
-    axios
-      .get(`https://tangoatsumare-api.herokuapp.com/api/flashcards/${route.params?.id}`)
-      .then((response) => {
-        setFlashcard(response.data[0])
-        setEngDef(response.data[0].Eng_meaning[0])
-      });
+    setFlashcard(item);
+    setEngDef(item.Eng_meaning[0]);
   }, []);
 
   const DisplayCard = ({flashcard}: any) => {
@@ -93,7 +100,7 @@ export const SingleCard = () => {
       contentContainerStyle={styles.container}
       bounces={false}
     >
-      <DisplayCard flashcard={flashcard} />
+      {flashcard && <DisplayCard flashcard={flashcard} />}
     </ScrollView>
   )
 }

@@ -7,9 +7,9 @@ import {View, StyleSheet, FlatList, TouchableOpacity, Image} from 'react-native'
 
 export const Collection = ({item}) => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
-  const handleShowFlashcard = (flashcardID: string) => {
-    navigation.navigate("Card", {id: flashcardID})
-    console.log(flashcardID);
+  const handleShowFlashcard = (item: any) => {
+    navigation.navigate("Card", {item: item})
+    console.log(item._id);
   }
 
   const [imgHeight, setImgHeight] = useState<number>();
@@ -24,7 +24,7 @@ export const Collection = ({item}) => {
 
   return (
     <TouchableOpacity 
-      onPress={() => { handleShowFlashcard(item._id) }}
+      onPress={() => { handleShowFlashcard(item) }}
       style={styles.collectionItem}
     >
       <Card 

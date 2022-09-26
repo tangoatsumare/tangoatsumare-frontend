@@ -190,12 +190,6 @@ export const Home = () => {
     }
   },[ flashcardsCurated, textInputOnFocus ]);
 
-  // useEffect(() => {
-  //   if (tagsToFlashcards) {
-  //     console.log(tagsToFlashcards);
-  //   }
-  // }, [tagsToFlashcards]);
-
   const cancelSearch = () => {
     setText('');
     clearKeyboard();
