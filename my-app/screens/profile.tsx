@@ -58,8 +58,11 @@ export const Profile = () => {
         <Text style={{minHeight: 105}}>
           {userProfileInfo && userProfileInfo[0].about_me}
         </Text>
-
-        <Text>__________________________________________</Text>
+        <Divider style={{
+          width: '100%',
+          borderBottomWidth: 1,
+          borderColor: 'black'
+        }}/>
 
         <View style={styles.checkBox}>
           <Text> New cards public </Text>  
@@ -90,7 +93,7 @@ const styles = StyleSheet.create({
     width: '75%'
   },
   checkBox: {
-    width: '95%',
+    width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between'
