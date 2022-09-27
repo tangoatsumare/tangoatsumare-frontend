@@ -29,8 +29,7 @@ export const Login = () => {
       await setRenderingIndicator(true);
       await setTimeout(() => {
         setRenderingIndicator(false);
-        // navigation.navigate('TabHome');
-        navigation.navigate('Profile');
+        navigation.navigate('TabHome');
       }, 1000);
 
     } catch(error: any) {
