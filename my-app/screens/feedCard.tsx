@@ -258,7 +258,6 @@ function checkIfReported (array: any) {
     );
   }
 
-
   const DisplayCard = ({flashcard}: any) => {
     const [loadingProfileImg, setLoadingProfileImg] = useState<boolean>(true);
     const [loadingCardImg, setLoadingCardImg] = useState<boolean>(true);

@@ -3,7 +3,7 @@ import { StackNavigationProp} from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 import {Button, Text, Card, Paragraph, Title} from "react-native-paper";
 import React, { useEffect, useState } from "react";
-import {View, StyleSheet, FlatList, TouchableOpacity, Image} from 'react-native'
+import {View, StyleSheet, FlatList, TouchableOpacity, Image, Animated} from 'react-native'
 
 export const Collection = ({item}) => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
@@ -13,6 +13,21 @@ export const Collection = ({item}) => {
   }
 
   const [imgHeight, setImgHeight] = useState<number>();
+
+  const [loading, setLoading] = useState(true);
+
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+
+  // https://www.youtube.com/watch?v=Jj9NaKkknis
+  useEffect(() => {
+    if (!loading) {
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true
+      }).start();
+    }
+  }, [loading]);
 
   useEffect(() => {
     if (item.picture_url) {
@@ -27,37 +42,42 @@ export const Collection = ({item}) => {
       onPress={() => { handleShowFlashcard(item) }}
       style={styles.collectionItem}
     >
-      <Card 
-        key={item.target_word} 
-        style={styles.card}
-        mode="contained"
+      <Animated.View
+        style={{opacity: fadeAnim}}
       >
-        <Card.Content
-          style={{
-            paddingHorizontal: 0,
-            paddingVertical: 0,
-            height: imgHeight
-          }}
-          // https://stackoverflow.com/questions/61511559/how-can-i-resize-an-image-in-a-react-paper-card-cover-to-fit-the-height
+        <Card 
+          key={item.target_word} 
+          style={styles.card}
+          mode="contained"
         >
-          <Card.Cover 
-            source={{
-              uri: item.picture_url ? 
-                    item.picture_url : 
-                    'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'
-            }} 
+          <Card.Content
             style={{
-              height: imgHeight,
-              backgroundColor: "transparent",
-              borderRadius: 20
+              paddingHorizontal: 0,
+              paddingVertical: 0,
+              height: imgHeight
             }}
-            resizeMode="cover"
-            // resizeMode="contain"
-          />
-          
-        </Card.Content>
-      </Card>
-      <Title style={styles.textVocab}>{item.target_word}</Title>
+            // https://stackoverflow.com/questions/61511559/how-can-i-resize-an-image-in-a-react-paper-card-cover-to-fit-the-height
+          >
+            <Card.Cover 
+              source={{
+                uri: item.picture_url ? 
+                      item.picture_url : 
+                      'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'
+              }}
+              onLoadEnd={() => setLoading(false)}
+              style={{
+                height: imgHeight,
+                backgroundColor: "transparent",
+                borderRadius: 20
+              }}
+              resizeMode="cover"
+              // resizeMode="contain"
+            />
+            
+          </Card.Content>
+        </Card>
+        <Title style={styles.textVocab}>{item.target_word}</Title>
+      </Animated.View>
     </TouchableOpacity>
   );
 };

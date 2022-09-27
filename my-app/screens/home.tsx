@@ -5,7 +5,9 @@ import { useIsFocused } from "@react-navigation/native";
 import React, { useEffect, useLayoutEffect, useState, useRef, createRef, forwardRef, useCallback } from "react";
 import { Keyboard, Dimensions, Animated, findNodeHandle, Image } from 'react-native';
 import { View, StyleSheet, FlatList, TouchableOpacity, ScrollView } from 'react-native'
-import { SegmentedButtons, Text, Button, Card, Paragraph, Title, Avatar, Divider, Chip, Searchbar } from "react-native-paper";
+import { 
+  ActivityIndicator, Text, Button, Card, Paragraph, Title, Avatar, Divider, Chip, Searchbar 
+} from "react-native-paper";
 import { useTheme } from 'react-native-paper';
 import { HTTPRequest } from "../utils/httpRequest";
 import { SearchBar, SearchBody } from '../screens/Search';
@@ -23,8 +25,6 @@ export interface Tag {
   flashcards: string[]
 }
 
-type SegmentedButtonsValue = 'feed' | 'collection'
-
 // NEW
 // implementation of animated tab indicator
 // https://www.youtube.com/watch?v=ZiSN9uik6OY&t=464s
@@ -41,20 +41,19 @@ const data = Object.keys(views).map((i) => ({
 
 export const Home = () => {
   // for animated indicator
-  const scrollX = useRef(new Animated.Value(0)).current;
+  let scrollX = useRef(new Animated.Value(0)).current;
   const scrollRef = useRef();
   const onItemPress = useCallback(itemIndex => {
     if (itemIndex === 0) {
-      scrollRef.current?.scrollTo({y:0})
+      scrollRef.current?.scrollTo({y:0});
     } else if (itemIndex === 1) {
-      scrollRef.current?.scrollToEnd()
+      scrollRef.current?.scrollToEnd();
     }
   });
 
   const theme = useTheme();
   dayjs.extend(relativeTime);
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
-  const [value, setValue] = useState<SegmentedButtonsValue>('feed'); // segmented button's value: feed / collection
   const [text, setText] = useState<string>('');
   const [textInputOnFocus, setTextInputOnFocus] = useState<boolean>(false);
   const [flashcardsMaster, setFlashcardsMaster] = useState<object[]>([]);
@@ -73,7 +72,7 @@ export const Home = () => {
   const auth = getAuth();
   const userId = auth.currentUser?.uid;
 
-  // const scrollRef = useRef();
+  const [loading, setLoading] = useState(true);
 
   // setting the header section
   useLayoutEffect(() => {
@@ -103,6 +102,7 @@ export const Home = () => {
           tagsToFlashcards={tagsToFlashcards}
           tags={tags}
           setTags={setTags}
+          scrollRef={scrollRef}
         />
       ),
       headerRight: () => {
@@ -173,7 +173,7 @@ export const Home = () => {
               setFlashcardsMaster(result);
               setFlashcardsFeed(result);
               setFlashcardsCollection(result.filter(flashcard => flashcard["created_by"] === userId));
-              
+              setLoading(false);
           } catch (err) {
               console.log(err);
           }
@@ -189,11 +189,6 @@ export const Home = () => {
       setFlashcardsCollection(flashcardsCurated.filter(flashcard => flashcard.created_by === userId));
     }
   },[ flashcardsCurated, textInputOnFocus ]);
-
-  const cancelSearch = () => {
-    setText('');
-    clearKeyboard();
-  };
 
   const clearKeyboard = () => {
     Keyboard.dismiss();
@@ -271,6 +266,12 @@ export const Home = () => {
     );
   });
   
+  // useEffect(() => {
+  //   if (!textInputOnFocus && scrollRef.current) {
+  //     scrollRef.current.scrollToEnd();
+  //   }
+  // }, [textInputOnFocus, scrollRef.current]);
+
   const Indicator = ({measures, scrollX}) => {
     const inputRange = data.map((_, i) => i * width);
     const indicatorWidth = scrollX.interpolate({
@@ -281,6 +282,7 @@ export const Home = () => {
       inputRange,
       outputRange: measures.map(measure => measure.x),
     });
+
     return (
       <Animated.View
         style={{
@@ -302,14 +304,14 @@ export const Home = () => {
     const [measures, setMeasures] = useState([]);
     const containerRef = useRef();
     // TO FIX: this useEffect needs to fire after the main components are mounted
+      
     useEffect(() => {
-      if (containerRef.current) {
+      if (containerRef.current && scrollRef.current) {
         let m = [];
         data.forEach(item => {
           item.ref.current.measureLayout(
             containerRef.current, 
             (x, y, width, height) => {
-              // console.log(x, y, width, height);
               m.push({
                 x, y, width, height
               });
@@ -321,9 +323,7 @@ export const Home = () => {
           )
         })
       }
-    }, [containerRef.current]);
-  
-    // console.log(measures);
+    }, [containerRef.current, scrollRef.current]);
   
     return (
       <View 
@@ -346,10 +346,23 @@ export const Home = () => {
           {data.map((item, index) => {
             return <Tab key={item.key} item={item} ref={item.ref} onItemPress={() => onItemPress(index)} />;
           })}
-          {measures.length > 0 && <Indicator measures={measures} scrollX={scrollX} />}
+          { 
+            measures.length > 0 && 
+            <Indicator measures={measures} scrollX={scrollX} />
+          }
         </View>
       </View>
     );
+  };
+
+  const [currentView, setCurrentView] = useState("feed");
+  const handleScroll = (event) => {
+    if (event.nativeEvent.contentOffset.x === width) {
+      setCurrentView("collection")
+    } else if (event.nativeEvent.contentOffset.x === 0) {
+      setCurrentView("feed");
+    }
+    // console.log(event.nativeEvent.contentOffset.x);
   };
 
   return (
@@ -371,10 +384,21 @@ export const Home = () => {
               contentContainerStyle={{ marginTop: selectedTags.length !== 0 ? 20 : 50 }}
               ref={scrollRef}
               horizontal 
-              onScroll={Animated.event(
+              onContentSizeChange={() => { 
+                // after search bar text input is not focused, 
+                // force a scroll to the end if current view is collection
+                if (currentView === 'collection') scrollRef.current.scrollToEnd()
+              }}
+              onScroll={
+                Animated.event(
                 [{nativeEvent: {contentOffset: {x: scrollX}}}],
-                { useNativeDriver: false }
-                )}
+                {
+                  useNativeDriver: false,
+                  listener: event => {
+                      handleScroll(event);
+                  }
+                })
+              }
               pagingEnabled={true}
               decelerationRate="fast" 
               showsHorizontalScrollIndicator={false}              
@@ -392,7 +416,23 @@ export const Home = () => {
               contentContainerStyle={{paddingBottom: 50}}
               showsVerticalScrollIndicator={false}
             />
-            : <Text style={styles.container}>{submitIsClick ? "result not found." : "no entry"}</Text>
+            : 
+              <View style={{
+                    width: width,
+                    height: "100%",
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'center'
+              }}>
+                {submitIsClick ? 
+                  loading ? 
+                    <ActivityIndicator /> : 
+                    <Text>result not found.</Text> : 
+                  loading ? 
+                    <ActivityIndicator /> : 
+                    <Text>no entry</Text>
+                }
+              </View>
           }
             {flashcardsCollection.length > 0 ? 
               <FlatList style={styles.container}

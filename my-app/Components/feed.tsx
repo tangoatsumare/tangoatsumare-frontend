@@ -3,7 +3,9 @@ import { StackNavigationProp} from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 import React, {useState, useEffect} from "react";
 import {Text, Button, Card, Paragraph, Title, Avatar} from "react-native-paper";
-import {Image, View, StyleSheet, FlatList, TouchableOpacity, Dimensions} from 'react-native'
+import {Image, View, StyleSheet, FlatList, TouchableOpacity, 
+  Animated, Dimensions
+} from 'react-native'
 
 
 const { width, height } = Dimensions.get('screen');
@@ -25,29 +27,43 @@ export const Feed = ({item}) => {
       }
     }, [item]);
   
-    
+    const [loading, setLoading] = useState(true);
+
+    const fadeAnim = React.useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+      if (!loading) {
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true
+        }).start();
+      }
+    }, [loading]);
+
     return (
       <View style={styles.item}>
         <TouchableOpacity 
             onPress={() => { handleShowFeedcard(item) }}
         >
-            <View style={styles.header}>
+            <Animated.View 
+              style={{
+                ...styles.header, 
+                opacity: fadeAnim
+              }}
+            >
                 <Card style={styles.card} mode="contained">
                     <Card.Content
-                        // style={{paddingHorizontal: 0}}
                         style={{
                             paddingHorizontal: 0,
                             paddingVertical: 0,
-                            // backgroundColor: 'transparent'
-                            // height: imgHeight
                           }}
                     >
                         <Card.Cover 
-                            source={{
-                                uri: item.picture_url ? 
-                                    item.picture_url : 
-                                    'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'
-                            }} 
+                            source={item.picture_url && {uri: item.picture_url}} 
+                            onLoadEnd={() => {
+                              setLoading(false)
+                            }}
                             style={{
                                 borderRadius: 20,
                                 backgroundColor: 'transparent'
@@ -59,7 +75,7 @@ export const Feed = ({item}) => {
                     </Card.Actions>
                 </Card>
                 <Title style={styles.textVocab}>{item.target_word}</Title>
-            </View>
+            </Animated.View>
         </TouchableOpacity>
       </View>
     );

@@ -2,7 +2,7 @@ import { useNavigation } from "@react-navigation/core";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 import { useEffect, useRef, useState } from 'react';
-import {ScrollView, View, StyleSheet, FlatList, TextInput} from 'react-native';
+import { Animated, ScrollView, View, StyleSheet, FlatList, TextInput} from 'react-native';
 import { Button, Divider, Text,  Searchbar, Card, Avatar, Chip, TextInput as PaperTextInput} from "react-native-paper";
 import { Keyboard, Dimensions } from 'react-native';
 import { HTTPRequest } from '../utils/httpRequest';
@@ -277,7 +277,6 @@ export const SearchBody = (props: SearchBodyProps) => {
     } = props;
     const [tagsModified, setTagsModified ] = useState<modifiedTag[]>([]);
 
-
     useEffect(() => {
         (async () => {
             if (textInputOnFocus && tags) {
@@ -335,11 +334,51 @@ export const SearchBody = (props: SearchBodyProps) => {
         }
     }, [selectedTags]);
 
-    // useEffect(() => {
-    //     if (hashTagSearchMode) {
-    //         console.log(selectedTags);
-    //     }
-    // }, [hashTagSearchMode]);
+    const SearchResultCard = ({item}) => {
+        const [loading, setLoading] = useState(true);
+        const fadeAnim = useRef(new Animated.Value(0)).current;
+    
+        useEffect(() => {
+          if (!loading) {
+            Animated.timing(fadeAnim, {
+              toValue: 1,
+              duration: 300,
+              useNativeDriver: true
+            }).start();
+          }
+        }, [loading]);
+
+        return (
+            <TouchableOpacity 
+            style={{marginBottom: 5}} key={item._id}
+            onPress={() => handleShowFlashcard(item)}
+            >
+                <Animated.View
+                    style={{opacity: fadeAnim}}
+                >
+                    <Card
+                        mode="contained"
+                        style={{backgroundColor: "transparent"}}
+                    >
+                        <Card.Title 
+                            title={item.target_word} 
+                            titleVariant="headlineSmall"
+                            subtitle={item.example_sentence}
+                            left={(props) => (
+                                <Avatar.Image {...props} 
+                                    source={{uri:item.picture_url}} 
+                                    onLoadEnd={() => setLoading(false)}
+                                    style={{backgroundColor: 'transparent'}}
+                                />
+                            )}
+                        />
+                        <Card.Content>
+                        </Card.Content>
+                    </Card>
+                </Animated.View>
+            </TouchableOpacity>
+        );
+    };
 
     return (
         <View style={styles.mainContainer}>
@@ -380,35 +419,10 @@ export const SearchBody = (props: SearchBodyProps) => {
             <View style={styles.bottomContainer}>
                 {flashcardsCurated && flashcardsCurated.length > 0 ?
                     <FlatList 
-                        // contentContainerStyle={styles.resultsContainer}
-                        // style={styles.bottomContainer}
                         data={flashcardsCurated}
-                        // showsVerticalScrollIndicator={false}
                         keyExtractor={(item) => item._id}
                         renderItem={({item}) => (
-                            <TouchableOpacity 
-                            style={{marginBottom: 5}} key={item._id}
-                            onPress={() => handleShowFlashcard(item)}
-                            >
-                                <Card
-                                    mode="contained"
-                                    style={{backgroundColor: "transparent"}}
-                                >
-                                    <Card.Title 
-                                        title={item.target_word} 
-                                        titleVariant="headlineSmall"
-                                        subtitle={item.example_sentence}
-                                        left={(props) => (
-                                            <Avatar.Image {...props} 
-                                                source={{uri:item.picture_url}} 
-                                                style={{backgroundColor: 'transparent'}}
-                                            />
-                                        )}
-                                    />
-                                    <Card.Content>
-                                    </Card.Content>
-                                </Card>
-                            </TouchableOpacity>
+                            <SearchResultCard item={item} />
                         )
                         }
                     />
