@@ -1,17 +1,21 @@
 import { useNavigation} from "@react-navigation/core";
 import { StackNavigationProp} from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
-import React, { useEffect, useState, useRef } from "react";
-import { View, StyleSheet, FlatList } from 'react-native'
-import { Button, Card, Paragraph, Text, Title } from "react-native-paper";
+import React, { useEffect, useState, useRef, useLayoutEffect } from "react";
+import { View, StyleSheet, Dimensions, Animated, TouchableOpacity } from 'react-native'
+import { Button, Card, Text, Title } from "react-native-paper";
 import { 
     setFlashcardAsGood,
     setFlashcardAsAgain,
   } from "../utils/supermemo";
 import { UsersToCardsSRSProps, HTTPRequest } from "../utils/httpRequest";
 import { getAuth } from 'firebase/auth';
+import { useTheme } from "react-native-paper";
+
+const {width, height} = Dimensions.get('screen');
 
 export const Review = ({route}) => {
+    const theme = useTheme();
     const auth = getAuth();
     const userId = auth.currentUser?.uid;
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
@@ -19,7 +23,7 @@ export const Review = ({route}) => {
     let { flashcardsAll } = route.params;
     const [flashcards, setFlashcards] = useState(flashcardsAll);
     const [flashcard, setFlashcard] = useState({});
-    const [engDef, setEngDef] = useState<string>('');
+    // const [engDef, setEngDef] = useState<string>('');
 
     const [ sideOfFlashcard, setSideOfFlashcard ] = useState<string>("Front"); // Front and Back
     const [ index, setIndex ] = useState<number>(0);
@@ -27,9 +31,18 @@ export const Review = ({route}) => {
     const [ isEndOfReview, setIsEndOfReview ] = useState<boolean>(false);
     const isFirst = useRef(true);
 
+    // header 
+    useLayoutEffect(() => {
+        if (isEndOfReview) {
+            navigation.setOptions({
+                headerLeft: () => <></>
+            })
+        }
+    }, [isEndOfReview]);
+
     useEffect(() => {
         setFlashcard(flashcardsAll[index].Flashcard[0]); // Updated per endpoint response format
-        setEngDef(flashcardsAll[index].Flashcard[0].Eng_meaning[0]); // Updated per endpoint response format
+        // setEngDef(flashcardsAll[index].Flashcard[0].Eng_meaning[0]); // Updated per endpoint response format
     }, [index]); // update states whenever index is changed
 
     const handleGoodButtonClick = () => {
@@ -95,60 +108,153 @@ export const Review = ({route}) => {
         })();
     }, [isEndOfReview]);
 
-    const DisplayCard = (card: any) => {
+    
+    const DisplayCard = ({flashcard}: any) => {
+        const [loading, setLoading] = useState(true);
+        const fadeAnim = useRef(new Animated.Value(0)).current;
+    
+        // https://www.youtube.com/watch?v=Jj9NaKkknis
+        useEffect(() => {
+          if (!loading) {
+            Animated.timing(fadeAnim, {
+              toValue: 1,
+              duration: 300,
+              // https://stackoverflow.com/questions/61014661/animated-usenativedriver-was-not-specified-issue-of-reactnativebase-input
+              useNativeDriver: true
+            }).start();
+          }
+        }, [loading]);
+
         return (
-            <Card key={card.target_word} style={styles.card}>
-                <Card.Content>
-                    <Card.Cover  source={{uri: card.picture_url ? card.picture_url :  'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}}style={styles.photo} />
-                    <Title style={styles.textVocab}>{card.target_word}</Title>
-                    {sideOfFlashcard === 'Back' && <Paragraph style={styles.text}>{card.reading}</Paragraph>}
-                    {sideOfFlashcard === 'Back' && <Paragraph style={styles.text}> Meaning: {engDef}</Paragraph>}
-                    <Paragraph style={styles.text}>Sentence: {card.example_sentence}</Paragraph>
-                </Card.Content>        
-            </Card>
+            <Animated.View 
+                style={{
+                    flex: 1, 
+                    alignItems: 'center',
+                    opacity: fadeAnim
+                }}
+            >
+                <Card 
+                    key={flashcard.target_word} 
+                    style={styles.card}
+                    mode="contained"
+                >
+                    <Card.Content>
+                        <Card.Cover  
+                            source={flashcard.picture_url && {uri: flashcard.picture_url}}
+                            style={styles.photo} 
+                            onLoadEnd={() => setLoading(false)}
+                        />
+                        <View style={{paddingTop: 50}}>
+                            <Text style={styles.textVocab} variant="displayLarge">{flashcard.target_word}</Text>
+                            {sideOfFlashcard === 'Back' && <Text style={styles.text} variant="displayMedium">{flashcard.Eng_meaning[0]}</Text>}
+                            <Text style={styles.text} variant="headlineMedium">{flashcard.example_sentence}</Text>
+                        </View>
+                    </Card.Content>        
+                </Card>
+            </Animated.View>
             );
         };
 
     return (
-        <View style={styles.container}>
+        <View 
+            style={styles.container}
+        >
             {!isEndOfReview ? 
-                sideOfFlashcard === 'Front' ?
-                <>
-                    {DisplayCard(flashcard)}
-                    <View style={styles.buttonGroup}>
-                        <Button mode="contained" buttonColor="skyblue" style={styles.answerButton}
-                                onPress={()=> setSideOfFlashcard("Back")}>
-                            <Text>Answer</Text>
-                        </Button>
+                    flashcard && 
+                    <View style={{flex: 1}}>
+                        <DisplayCard flashcard={flashcard} />
+                        <View style={styles.buttonGroup}>
+                                {sideOfFlashcard === 'Front' ?
+                                <Button 
+                                    mode="contained" 
+                                    style={{
+                                        ...styles.answerButton, 
+                                        borderColor: theme.colors.primary
+                                    }}
+                                    onPress={()=> setSideOfFlashcard("Back")}
+                                >
+                                    <Text 
+                                        variant="headlineSmall"
+                                        style={{
+                                            color: theme.colors.primary,
+                                            fontWeight: 'bold'
+                                        }}
+                                    >Show Answer</Text>
+                                </Button>
+                                :
+                                <>
+                                    <Button 
+                                        mode="contained" 
+                                        style={{
+                                            ...styles.goodButton,
+                                            backgroundColor: theme.colors.primary,
+                                            borderColor: theme.colors.primary,
+                                        }}
+                                        onPress={handleGoodButtonClick}
+                                    >
+                                        <Text
+                                            variant="headlineSmall"
+                                            style={{
+                                                color: "white",
+                                                fontWeight: 'bold'
+                                            }}
+                                        >Good</Text>
+                                    </Button>
+                                    <Button 
+                                        mode="contained" 
+                                        style={{
+                                            ...styles.againButton, 
+                                            backgroundColor: "transparent",
+                                            borderColor: theme.colors.primary,
+                                        }}
+                                        onPress={handleAgainButtonClick}
+                                    >
+                                        <Text
+                                            variant="headlineSmall"
+                                            style={{
+                                                color: theme.colors.primary,
+                                                fontWeight: 'bold'
+                                            }}
+                                        >Again</Text>
+                                    </Button>
+                                </>
+                                }
+                        </View>
                     </View>
-                </>
-                    :
-                <>
-                    {DisplayCard(flashcard)}
-                    <View style={styles.buttonGroup}>
-                        <Button 
-                            mode="contained" 
-                            style={styles.goodButton}
-                            buttonColor="green"
-                            onPress={handleGoodButtonClick}
-                        ><Text>Good</Text></Button>
-                        <Button 
-                            mode="contained" 
-                            style={styles.againButton}
-                            onPress={handleAgainButtonClick}
-                        ><Text>Again</Text></Button>
-                    </View>
-                </>
                 :
                 <View style={styles.endOfReview}>
-                    <Text>End of Review :)</Text>
-                    <Button
+                    <Text 
+                        variant="headlineLarge"
+                        style={{fontWeight: 'bold'}}
+                    >Review Done</Text>
+                    <TouchableOpacity
                         onPress={() => {
                             navigation.navigate("TabHome", {
                                 screen: "SRSNav",
                             })
                         }}
-                    >Back to SRS</Button>
+                    >
+                        <Button
+                            style={{
+                                marginTop: 40,
+                                padding: 10,
+                                backgroundColor: theme.colors.primary,
+                                borderRadius: 40,
+                                width: width / 2
+                            }}
+
+                        >
+                            <Text 
+                                variant="headlineSmall"
+                                style={{
+                                    color: theme.colors.tertiary,
+                                    fontWeight: 'bold'
+                                }}
+                            >
+                                OK
+                            </Text>
+                        </Button>
+                    </TouchableOpacity>
                 </View> 
             }
         </View>
@@ -156,50 +262,80 @@ export const Review = ({route}) => {
 }
 
 const styles = StyleSheet.create({
-        buttonGroup: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-around',
-            margin: 20
-        },
-        button: {
-            alignItems: 'center',
-                  },
-        container: {
-            flex: 1,
-            justifyContent: 'center',
-        },
-        answerButton: {
-            width: 100,
-        },
-        goodButton: {
-            width: 100
-        },
-        againButton: {
-            width: 100
-        },
-        text: {
+    container: {
+        flex: 1,
+        // padding: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'white'
+    },
+    card: {
+        // minWidth: '90%',
+        // borderRadius: 10,
+        // margin: 10,
+        // marginTop: 2, 
+        // flex: 1,
+        // height: '60%',
+        width: width - 50, // hard coded
+        backgroundColor: "transparent",
+    },
+    photo: {
+        // minWidth: '80%',
+        // minHeight: '50%',
+        // maxHeight: '95%',
+        // maxWidth: '95%',
+        height: height / 3,
+        backgroundColor: "transparent",
+        borderRadius: 20,
+    },
+    buttonGroup: {
+        marginBottom: 60,
+        flex: 1,
+        flexDirection: 'row',
+        // alignItems: 'stretch',
+        alignItems: 'center',
+        justifyContent: 'space-around',
+        // margin: 20
+    },
+    button: {
+        alignItems: 'center',
+    },
+    answerButton: {
+        alignSelf: 'flex-end',
+        width: width - 50,
+        padding: 5,
+        // marginBottom: 30,
+        borderRadius: 30,
+        backgroundColor: 'transparent',
+        borderStyle: 'solid',
+        borderWidth: 1.5,
+        borderColor: 'black'
+    },
+    goodButton: {
+        alignSelf: 'flex-end',
+        width: width / 2,
+        padding: 5,
+        borderRadius: 0,
+        borderStyle: 'solid',
+        borderWidth: 1.5,
+    },
+    againButton: {
+        alignSelf: 'flex-end',
+        width: width / 2,
+        padding: 5,
+        borderRadius: 0,
+        borderStyle: 'solid',
+        borderWidth: 1.5,
+    },
+    text: {
         textAlign: 'center',
-      },
-      textVocab: {
+    },
+    textVocab: {
         textAlign: 'center',
         fontWeight: "bold"
-      },
-      card: {
-        minWidth: '90%',
-        borderRadius: 10,
-        margin: 10,
-        marginTop: 2, 
-      },
-      photo: {
-        minWidth: '80%',
-        minHeight: '50%',
-        maxHeight: '95%',
-        maxWidth: '95%',
-      },
-      endOfReview: {
+    },
+    endOfReview: {
         justifyContent: 'center',
         alignItems: 'center'
-      }
-    },
-);
+    }
+});

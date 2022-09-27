@@ -252,18 +252,22 @@ export const SRS = ({route}) => {
                     {/* <Text variant="headlineMedium">Review flashcards</Text> */}
                     <Text variant="bodyLarge">New: {metrics.new}</Text>
                     <Text variant="bodyLarge">Due: {metrics.due}</Text>
-                    <Button 
-                        mode="contained" 
-                        style={styles.button}
-                        buttonColor={theme.colors.primary}
+                    <TouchableOpacity
                         disabled={flashcardsReviewable.length === 0 ? true: false}
                         onPress={()=>{
                             navigation.navigate("Review", {
                                 flashcardsAll: flashcardsReviewable
                             });
-                        }}>
-                        <Text variant="headlineSmall" style={{color: theme.colors.tertiary}}>Study</Text>
-                    </Button>
+                        }}
+                    >
+                        <Button 
+                            mode="contained" 
+                            style={styles.button}
+                            buttonColor={theme.colors.primary}
+                        >
+                            <Text variant="headlineSmall" style={{color: theme.colors.tertiary}}>Study</Text>
+                        </Button>
+                    </TouchableOpacity>
                 </View>
                 {/* <View style={styles.bottom}>
                     <Button 
@@ -315,7 +319,7 @@ const styles = StyleSheet.create({
             padding: 5
         },
         container: {
-            padding: 10,
+            // padding: 10,
             flex: 1,
             alignItems: "stretch",
         },

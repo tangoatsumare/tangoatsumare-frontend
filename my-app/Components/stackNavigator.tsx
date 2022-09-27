@@ -176,6 +176,12 @@ export const StackNav = () => {
             <RootStack.Screen 
                 name="Review" 
                 component={Review}
+                options={{
+                    headerShadowVisible: false,
+                    headerTitle: '',
+                    headerTintColor: 'black',
+                    headerStyle: {},
+                }}
             />
         </RootStack.Navigator>
     )
