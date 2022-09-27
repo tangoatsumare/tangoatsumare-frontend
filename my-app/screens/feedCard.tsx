@@ -10,6 +10,7 @@ import {
   Text,
   Chip,
   useTheme,
+  ActivityIndicator,
 } from "react-native-paper";
 import React, { useEffect, useState } from "react";
 import {
@@ -345,8 +346,10 @@ function checkIfReported (array: any) {
 
   return (
     <View style={styles.container}>
-      {flashcard && userAvatar && userName && date && likers && tags && 
+      {flashcard && userAvatar && userName && date && likers && tags ?
         <DisplayCard flashcard={flashcard}/>
+        :
+        <ActivityIndicator />
       }
     </View>
   );

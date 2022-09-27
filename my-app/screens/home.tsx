@@ -330,7 +330,7 @@ export const Home = () => {
         style={{
           // flex:1, 
           position: 'absolute',
-          top: 5,
+          top: 10,
           // marginBottom: 20,
           width
         }}
@@ -374,14 +374,14 @@ export const Home = () => {
                 {selectedTags.map(item => {
                   return (
                     <Chip key={item} style={{...styles.tag, backgroundColor: theme.colors.primary}}>
-                      <Text style={{fontSize: 10}}>{item}</Text>
+                      <Text style={{fontSize: 10, color: 'white'}}>{item}</Text>
                     </Chip>
                   );
                 })}
               </View>         
             :null}
           <Animated.ScrollView 
-              contentContainerStyle={{ marginTop: selectedTags.length !== 0 ? 20 : 50 }}
+              contentContainerStyle={{ marginTop: selectedTags.length !== 0 ? 30 : 60 }}
               ref={scrollRef}
               horizontal 
               onContentSizeChange={() => { 
@@ -478,7 +478,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white'
   },
   tagsContainer: {
-    marginTop: 50,
+    marginTop: 60,
     paddingLeft: 10,
     paddingRight: 10,
     flexDirection: 'row',

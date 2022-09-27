@@ -5,12 +5,23 @@ import React, {useState, useEffect} from "react";
 import {Text, Button, Card, Paragraph, Title, Avatar} from "react-native-paper";
 import {Image, View, StyleSheet, FlatList, TouchableOpacity, 
   Animated, Dimensions
-} from 'react-native'
-
+} from 'react-native';
+// TESTING FONTS
+import {useFonts} from 'expo-font';
+// TESTING FONTS
 
 const { width, height } = Dimensions.get('screen');
 
 export const Feed = ({item}) => {
+  // TESTING FONTS
+
+  // https://docs.expo.dev/versions/latest/sdk/font/
+  const [fontsLoaded] = useFonts({
+    'NotoSansJP': require('../assets/fonts/Noto_Sans_JP/NotoSansJP-Regular.otf'),
+
+  });
+  // TESTING FONTS
+
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
     const handleShowFeedcard = (item: any) => {
         navigation.navigate("FeedCard", {item: item})
@@ -70,11 +81,9 @@ export const Feed = ({item}) => {
                               }}
                             resizeMode="cover"
                         />
+                    {fontsLoaded && <Title style={styles.textVocab}>{item.target_word}</Title>}
                     </Card.Content>
-                    <Card.Actions>
-                    </Card.Actions>
                 </Card>
-                <Title style={styles.textVocab}>{item.target_word}</Title>
             </Animated.View>
         </TouchableOpacity>
       </View>
@@ -91,13 +100,15 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         fontSize: 15,
         marginLeft: 5,
-        marginBottom: 10,
+        // marginBottom: 10,
+        fontFamily: "NotoSansJP"
     },
     card: {
         borderRadius: 10,
-        marginLeft: 5,
-        marginRight: 5,
-        backgroundColor: "white"
+        margin: 10,
+        marginLeft: 15,
+        marginRight: 15,
+        backgroundColor: "transparent",
     },
     image: {
         backgroundColor: 'transparent'

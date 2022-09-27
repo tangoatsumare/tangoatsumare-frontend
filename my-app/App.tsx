@@ -8,7 +8,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 // import {TabNav} from "./Components/tabNav";
 import {StackNav} from './Components/stackNavigator';
 import 'react-native-gesture-handler';
-
+import { fontConfig } from "./library/fontConfig";
 export default function App() {
 
     const theme = {
@@ -21,6 +21,7 @@ export default function App() {
             secondary: '#1C1C1C',
             tertiary: '#FFFFFF',
         },
+        fonts: fontConfig // NOT WORKING YET
     };
 
     return (

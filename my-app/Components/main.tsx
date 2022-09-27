@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import {
     MD3LightTheme as DefaultTheme, Provider as PaperProvider,
 } from 'react-native-paper';
-
+import { fontConfig } from "../library/fontConfig";
 import {CamNavigator, HomeNavigator, SRSNavigator, SearchNavigator} from './rootNavigator';
 
 const theme = {
@@ -15,6 +15,7 @@ const theme = {
         secondary: '#1C1C1C',
         tertiary: '#FFFFFF',
     },
+    fonts: fontConfig // // NOT WORKING YET
 };
 
 export const HomeNav = () => {

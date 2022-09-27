@@ -73,10 +73,9 @@ export const Collection = ({item}) => {
               resizeMode="cover"
               // resizeMode="contain"
             />
-            
+            <Title style={styles.textVocab}>{item.target_word}</Title>
           </Card.Content>
         </Card>
-        <Title style={styles.textVocab}>{item.target_word}</Title>
       </Animated.View>
     </TouchableOpacity>
   );
@@ -85,16 +84,19 @@ export const Collection = ({item}) => {
 const styles = StyleSheet.create({
   collectionItem: {
     padding: 10,
+    margin: 10,
     marginLeft: 20,
     marginRight: 20,
   },
   text: {},
   textVocab: {
     fontSize: 15,
-    fontWeight: "bold"
+    fontWeight: "bold",
+    marginLeft: 10,
   },
   card: {
     borderRadius: 10,
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
+    marginBottom: 20
   },
 });
