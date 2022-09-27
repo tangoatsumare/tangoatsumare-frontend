@@ -104,7 +104,10 @@ export const StackNav = () => {
         <RootStack.Navigator initialRouteName="Login">
             <RootStack.Screen name="TabHome" options={{headerShown: false, headerTitle:"Back"}} component={TabHome} />
             <RootStack.Screen name="Settings" component={Settings}/>
-            <RootStack.Screen name="Profile" component={Profile}/>
+            <RootStack.Screen name="Profile" component={Profile} options={{headerShadowVisible: false,
+                    headerTitle: '',
+                    headerTintColor: 'black',
+                    headerStyle: {},}}/>
             <RootStack.Screen name="Login" options={{headerShown: false}} component={Login} />
             <RootStack.Screen name="Register" component={Register}/>
             <RootStack.Screen name="ProfileSetup" component={ProfileSetup}/>
