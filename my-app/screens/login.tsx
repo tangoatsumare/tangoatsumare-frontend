@@ -44,8 +44,8 @@ export const Login = () => {
         color="#333"
         animating={renderingIndicator}
       />
-      <View>
-        <Text>Hello user! Welcome back!</Text>
+      <View style={styles.inputTitle}>
+        <Text>Email</Text>
       </View>
       <View style={styles.wrapperInput}>
         <TextInput
@@ -54,6 +54,9 @@ export const Login = () => {
           value={email}
           onChangeText={(text: string) => setEmail(text)}
         />
+      </View>
+      <View style={styles.inputTitle}>
+        <Text>Password</Text>
       </View>
       <View style={styles.wrapperInput}>
         <TextInput
@@ -65,39 +68,45 @@ export const Login = () => {
         />
       </View>
       <View style={styles.btnContainer}>
-        <Button icon="login" mode="contained" style={styles.button}
+        <Button mode="contained" style={styles.button}
           onPress={handleLogin}>
-          <Text>Login</Text>
+          <Text style={{fontSize: 18}}>Login</Text>
         </Button>
-        <Text>Don't have an account?</Text>
-        <Button icon="clipboard" mode="contained" style={styles.button}
-          onPress={() => {
-            navigation.navigate("Register")
-            // navigation.navigate("ProfileSetup")
-          }}>
-          <Text>Register</Text>
-        </Button>
-      </View>
+        </View>
+        <View style={styles.signUp}>
+          <Text style={{opacity: 0.5}}>Forgot Password</Text>
+          <TouchableOpacity style={styles.button}
+            onPress={() => {
+              navigation.navigate("Register")
+              // navigation.navigate("ProfileSetup")
+            }}>
+            <Text style={{color: '#FF4F4F'}}>Sign Up</Text>
+          </TouchableOpacity>
+        </View>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
   button: {
-    alignItems: 'center',
-    margin: 5,
+    // alignItems: 'center',
+    // margin: 5,
+    padding: 5,
+    borderRadius: 25,
+    // width: '100%',
   },
   wrapperInput: {
     borderWidth: 0.5,
     borderRadius: 5,
     borderColor: 'grey',
-    marginTop: 10,
+    // marginTop: 10,
+    marginBottom: 10,
     flexDirection: 'row',
     alignItems: 'center',
   },
   input: {
     padding: 10,
-    width: '100%',
+    width: '90%',
   },
   container: {
     flex: 1,
@@ -108,8 +117,20 @@ const styles = StyleSheet.create({
   btnContainer: {
     justifyContent: 'center',
     alignContent: 'center',
-    // width: '60%',
-    marginTop: 30,
+    width: '90%',
+    marginTop: 15,
+  },
+  inputTitle: {
+    width: '89%',
+  },
+  signUp: {
+    width: '80%',
+    // backgroundColor: 'blue',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    // alignItems: 'stretch'
+    
   }
 }
 );

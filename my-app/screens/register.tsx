@@ -52,9 +52,6 @@ export const Register = () => {
 
   return (
     <View style={styles.container}>
-      <View>
-        <Text>Hello user! Wanna learn something new?</Text>
-      </View>
       <View style={styles.wrapperInput}>
         <TextInput
           style={styles.input}
