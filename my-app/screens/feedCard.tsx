@@ -75,7 +75,8 @@ export const FeedCard = ({route}) => {
             setFlashcard(item);
             setEngDef(item.Eng_meaning[0]);
             setFlashcardId(item._id);
-            const newDate = dayjs(item.created_timestamp).format('DD/MM/YYYY');
+            const newDate = dayjs(item.created_timestamp).fromNow();
+            // .format('DD/MM/YYYY');
             setDate(newDate)
             const flaggersArray = item.flagging_users
             checkIfReported(flaggersArray);
@@ -209,36 +210,48 @@ function checkIfReported (array: any) {
   const ButtonGroup = () => {
     return (
       <View style={styles.buttonGroup}>
-          { liked === true?
-            <Button icon="star">{likers.length} likes</Button>
+          { reported === true ?
+            <Button 
+              icon="flag-variant-outline"
+              labelStyle={{color: theme.colors.primary}}
+            >reported</Button>
           :
             <Button
-              icon="star"
-              onPress={like}
+              icon="flag-variant-outline"
+              onPress={report}
+              labelStyle={{color: 'black'}}
             >
-            {likers.length} likes
+              Report Inappropriate
             </Button>
           }
           { hasSRSCard ? 
-            <Button icon="bookshelf">
+            <Button 
+              icon="book-plus-multiple-outline"
+              labelStyle={{color: theme.colors.primary}}
+            >
               In deck
             </Button> 
           : 
             <Button
-              icon="bookshelf"
+              icon="book-plus-multiple-outline"
               onPress={addCardToDeck}
+              labelStyle={{color: "black"}}
             >
               Add to deck
             </Button>
           }
-          { reported === true ?
-            <Button icon="emoticon-angry-outline">reported</Button>
+          { liked === true?
+            <Button 
+              icon="butterfly-outline"
+              labelStyle={{color: theme.colors.primary}}
+            >{likers.length} likes</Button>
           :
             <Button
-              icon="emoticon-angry-outline"
-              onPress={report}
+              icon="butterfly-outline"
+              onPress={like}
+              labelStyle={{color: "black"}}
             >
-              Report Inappropriate
+            {likers.length} likes
             </Button>
           }
         </View>
@@ -262,72 +275,72 @@ function checkIfReported (array: any) {
     }, [loadingCardImg, loadingProfileImg]);
 
     return (
-      <Animated.View
-        style={{
-          // flex: 1,
-          opacity: fadeAnim,
-          backgroundColor: "white",
-          paddingLeft: 30,
-          paddingRight: 30
-        }}
-      >
-        <View style={styles.header}>
-          <View style={styles.user}>
-            <Avatar.Image
-              size={35}
-              onLoadEnd={() => {
-                setLoadingProfileImg(false)
-              }}
-              source={{ 
-                uri: userAvatar? userAvatar: 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png' 
-            }}               
-            style={styles.userLeft}
-            />
-            <View style={styles.userRight}>
-              <Text variant="bodyLarge">{userName}</Text>
-              <Text variant="bodySmall">{date}</Text>
-            </View>
-          </View>
-          <Card style={styles.card} mode="contained">
-            <Card.Content>
-              <Card.Cover
-                onLoadEnd={() => setLoadingCardImg(false)}
-                source={{
-                  uri: flashcard.picture_url
-                    ? flashcard.picture_url
-                    : "https://www.escj.org/sites/default/files/default_images/noImageUploaded.png",
+        <Animated.View
+          style={{
+            // flex: 1,
+            opacity: fadeAnim,
+            backgroundColor: "white",
+            paddingLeft: 30,
+            paddingRight: 30
+          }}
+        >
+          <View style={styles.header}>
+            <View style={styles.user}>
+              <Avatar.Image
+                size={35}
+                onLoadEnd={() => {
+                  setLoadingProfileImg(false)
                 }}
-                style={styles.image}
-                resizeMode="contain"
+                source={{ 
+                  uri: userAvatar? userAvatar: 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png' 
+              }}               
+              style={styles.userLeft}
               />
-              <ButtonGroup />
-              <View style={{paddingTop: 50}}>
-                <Text style={styles.textVocab} variant="displayLarge">{flashcard.target_word}</Text>
-                <Text style={styles.text} variant="displayMedium">{flashcard.Eng_meaning}</Text>
-                <Text style={styles.text} variant="headlineMedium">{flashcard.example_sentence}</Text>
+              <View style={styles.userRight}>
+                <Text variant="bodyLarge">{userName}</Text>
+                <Text variant="bodySmall">{date}</Text>
               </View>
-              <View style={{flexDirection: 'row'}}>
-                {tags.length > 0 ? tags.map(tag => {
-                  return (
-                    <Chip 
-                      key={tag} 
-                      style={{
-                        margin: 5, 
-                        borderRadius: 20, 
-                        backgroundColor: '#FF4F4F'
-                      }}
-                      textStyle={{
-                        color: 'white'
-                      }}
-                    >{tag}</Chip>
-                  );
-                })
-                : null}
-              </View>
-            </Card.Content>
-          </Card>
-        </View>
-      </Animated.View>
+            </View>
+            <Card style={styles.card} mode="contained">
+              <Card.Content>
+                <Card.Cover
+                  onLoadEnd={() => setLoadingCardImg(false)}
+                  source={{
+                    uri: flashcard.picture_url
+                      ? flashcard.picture_url
+                      : "https://www.escj.org/sites/default/files/default_images/noImageUploaded.png",
+                  }}
+                  style={styles.image}
+                  resizeMode="contain"
+                />
+                <ButtonGroup />
+                <View style={{paddingTop: 50}}>
+                  <Text style={styles.textVocab} variant="displayLarge">{flashcard.target_word}</Text>
+                  <Text style={styles.text} variant="displayMedium">{flashcard.Eng_meaning}</Text>
+                  <Text style={styles.text} variant="headlineMedium">{flashcard.example_sentence}</Text>
+                </View>
+                <View style={{flexDirection: 'row', paddingTop: 20}}>
+                  {tags.length > 0 ? tags.map(tag => {
+                    return (
+                      <Chip 
+                        key={tag} 
+                        style={{
+                          margin: 5, 
+                          borderRadius: 20, 
+                          backgroundColor: '#FF4F4F'
+                        }}
+                        textStyle={{
+                          color: 'white'
+                        }}
+                      >{tag}</Chip>
+                    );
+                  })
+                  : null}
+                </View>
+              </Card.Content>
+            </Card>
+          </View>
+        </Animated.View>
     );
   };
 
@@ -363,6 +376,7 @@ const styles = StyleSheet.create({
     flex: 1,
     // alignItems: 'center',
     // justifyContent: 'center',
+    backgroundColor: 'white'
   },
   segment: {},
   separator: {

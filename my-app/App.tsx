@@ -17,9 +17,9 @@ export default function App() {
         version: 3,
         colors: {
             ...DefaultTheme.colors,
-            primary: '#be1e2d',
-            secondary: '#f1c40f',
-            tertiary: '#a1b2c3'
+            primary: '#FF4F4F',
+            secondary: '#1C1C1C',
+            tertiary: '#FFFFFF',
         },
     };
 
