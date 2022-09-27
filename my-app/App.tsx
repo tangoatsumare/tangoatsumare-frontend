@@ -9,6 +9,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import {StackNav} from './Components/stackNavigator';
 import 'react-native-gesture-handler';
 import { fontConfig } from "./library/fontConfig";
+import { LogBox } from 'react-native';
+LogBox.ignoreAllLogs();
+
 export default function App() {
 
     const theme = {

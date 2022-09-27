@@ -17,7 +17,6 @@ export const SingleCard = () => {
   const theme = useTheme();
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
   const [flashcard, setFlashcard] = useState({})
-  const [imageUrl, setImageUrl] = useState("")
   const [engDef, setEngDef] = useState('')
 
   // const route = useRoute<RouteProp<Record<string, StackParamsList>, string>>();
@@ -101,36 +100,27 @@ export const SingleCard = () => {
 }
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'white'
-    },
-    text: {
-        textAlign: 'center',
-      },
-      textVocab: {
-        textAlign: 'center',
-        fontWeight: "bold"
-      },
-        card: {
-            flex: 1,
-            width: width - 50, // hard coded
-            // margin: 10,
-            backgroundColor: "transparent",
-            // borderRadius: 10,
-          },
-          photo: {
-            // flex: 1,
-            // width: '100%',
-            // minWidth: '80%',
-            // minHeight: '80%',
-            // maxHeight: '80%',
-            height: '60%',
-            // maxWidth: '95%',
-            backgroundColor: "transparent",
-            borderRadius: 20,
-          }
-      
-  })
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white'
+  },
+  text: {
+    textAlign: 'center',
+  },
+  textVocab: {
+    textAlign: 'center',
+    fontWeight: "bold"
+  },
+  card: {
+    flex: 1,
+    width: width - 50, // hard coded
+    backgroundColor: "transparent",
+  },
+  photo: {
+    height: '60%',
+    backgroundColor: "transparent",
+    borderRadius: 20,
+  }
+});
