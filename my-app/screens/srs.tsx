@@ -16,6 +16,7 @@ import {
  } from "../utils/supermemo";
 import { HTTPRequest, UserId } from "../utils/httpRequest";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 export const SRS = ({route}) => {
     const auth = getAuth();
@@ -28,12 +29,36 @@ export const SRS = ({route}) => {
     const [ flashcardsReviewable, setFlashcardsReviewable ] = useState<SRSTangoFlashcard[]>([]);
     const [ metrics, setMetrics ] = useState({
         new: 0,
-        // learning: 0,
         due: 0
     });
     const [ modalContent, setModalContent ] = useState('');
     const [ modalVisible, setModalVisible ] = useState(false);
     const [ modalSegmentButtonValue, setModalSegmentButtonValue ] = useState('all'); // all & due
+
+    // header 
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerStyle: {
+                backgroundColor: 'white'
+              },
+            headerShadowVisible: false,
+            headerRight: () => {
+                return (
+                    <TouchableOpacity 
+                        style={styles.bottom}
+                        onPress={() => {
+                            if (modalContent === 'srsFlashcards') showModal();
+                            else setModalContent('srsFlashcards');
+                        }}
+                    >
+                        <Button labelStyle={styles.flashcardBtn}>
+                            <Icon name="cards-outline" size={30} color={theme.colors.primary} />
+                        </Button>
+                    </TouchableOpacity>
+                )
+            }
+        })
+    });
 
     useEffect(() => {
         (async () => {
@@ -48,43 +73,39 @@ export const SRS = ({route}) => {
         })();
     },[isFocused]);
     
-    // useEffect(() => {
-    //     if (flashcardsAll) console.log(flashcardsAll);
-    // }, [flashcardsAll]);
-
     useEffect(() => {
         if (flashcardsReviewable) {
             const newCards = flashcardsReviewable.filter(card => card.counter === 0).length;
-            // learning cards involve the concept of a learning queue.. that involves "steps"
-            // const learningCards = flashcardsAll.filter(card => card.counter !== 0 && card.repetition === 0).length;
-            // const learningCards = 0; // TO CHANGE
             const dueCards = flashcardsReviewable.filter(card => card.counter !== 0).length;
             
             setMetrics({
                 new: newCards,
-                // learning: learningCards,
                 due: dueCards
             });
 
         }
     }, [flashcardsReviewable]);
 
-    useLayoutEffect(() => {
-        navigation.setOptions({
-            headerRight: () => {
-                    return (
-                        <Button 
-                            onPress={() => {
-                                if (modalContent === 'setting') showModal();
-                                else setModalContent('setting');
-                            }}
-                        >
-                            <Icon name="cog" color="black" size={20} />
-                        </Button>
-                    );
-            }
-        })
-    })
+    // DO NOT REMOVE
+    // Options for SRS properties. hide it from the user
+    // useLayoutEffect(() => {
+    //     navigation.setOptions({
+    //         headerRight: () => {
+    //                 return (
+    //                     <Button 
+    //                         onPress={() => {
+    //                             if (modalContent === 'setting') showModal();
+    //                             else setModalContent('setting');
+    //                         }}
+    //                     >
+    //                         <Icon name="cog" color="black" size={20} />
+    //                     </Button>
+    //                 );
+    //         }
+    //     })
+    // })
+    // DO NOT REMOVE
+
 
     // https://callstack.github.io/react-native-paper/modal.html
     const showModal = () => setModalVisible(true);
@@ -207,7 +228,10 @@ export const SRS = ({route}) => {
     }
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
+        <ScrollView 
+            style={{backgroundColor: 'white'}}
+            contentContainerStyle={styles.container}
+        >
             <Portal>
                 <Modal
                     visible={modalVisible}
@@ -225,7 +249,7 @@ export const SRS = ({route}) => {
 
             <View style={styles.container}>
                 <View style={styles.main}>
-                    <Text variant="headlineMedium">Review flashcards</Text>
+                    {/* <Text variant="headlineMedium">Review flashcards</Text> */}
                     <Text variant="bodyLarge">New: {metrics.new}</Text>
                     <Text variant="bodyLarge">Due: {metrics.due}</Text>
                     <Button 
@@ -241,7 +265,7 @@ export const SRS = ({route}) => {
                         <Text variant="headlineSmall" style={{color: theme.colors.tertiary}}>Study</Text>
                     </Button>
                 </View>
-                <View style={styles.bottom}>
+                {/* <View style={styles.bottom}>
                     <Button 
                         labelStyle={styles.flashcardBtn}
                         onPress={() => {
@@ -251,7 +275,7 @@ export const SRS = ({route}) => {
                     >
                         <Icon name="cards" size={30} color="white" />
                     </Button>
-                </View>
+                </View> */}
             </View>
         </ScrollView>
     )
@@ -320,16 +344,16 @@ const styles = StyleSheet.create({
         },
         bottom: {
             // flexDirection: 'row',
-            justifyContent: 'flex-end',
-            alignSelf: 'flex-end',
-            width: 70,
-            height: 70,
-            borderRadius: 100,
-            shadowColor: 'rgba(0,0,0,0.1)',
-            shadowOffset: { width: 3, height: 20 },
-            shadowOpacity: 0.8,
-            shadowRadius: 15,
-            backgroundColor: "rgba(0,0,0,0.5)"
+            // justifyContent: 'flex-end',
+            // alignSelf: 'flex-end',
+            // width: 70,
+            // height: 70,
+            // borderRadius: 100,
+            // shadowColor: 'rgba(0,0,0,0.1)',
+            // shadowOffset: { width: 3, height: 20 },
+            // shadowOpacity: 0.8,
+            // shadowRadius: 15,
+            // backgroundColor: "rgba(0,0,0,0.5)"
         },
         flashcardBtn: {
             color: 'black',

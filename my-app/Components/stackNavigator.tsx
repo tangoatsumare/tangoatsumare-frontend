@@ -127,13 +127,27 @@ export const StackNav = () => {
 
     return (
         <RootStack.Navigator initialRouteName="Login">
-            <RootStack.Screen name="TabHome" options={{headerShown: false, headerTitle:"Back"}} component={TabHome} />
+            <RootStack.Screen name="TabHome" 
+                options={{
+                    headerShown: false, 
+                    headerTitle:"Back"
+                }} 
+                component={TabHome} 
+            />
             <RootStack.Screen name="Settings" component={Settings}/>
             <RootStack.Screen name="Profile" component={Profile}/>
             <RootStack.Screen name="Login" options={{headerShown: false}} component={Login} />
             <RootStack.Screen name="Register" component={Register}/>
             <RootStack.Screen name="ProfileSetup" component={ProfileSetup}/>
-            <RootStack.Screen name="SRS" options={{headerTitle:"Review"}} component={SRS}/>
+            <RootStack.Screen name="SRS" 
+                options={{
+                    headerShadowVisible: false,
+                    headerTitle: '',
+                    headerTintColor: 'black',
+                    headerStyle: {},
+                }} 
+                component={SRS}
+            />
             <RootStack.Screen name="Camera" component={Camera}/>
             <RootStack.Screen name="OCR" component={OCR}/>
             <RootStack.Screen name="Collection" component={Collection}/>
@@ -159,7 +173,10 @@ export const StackNav = () => {
             />
             <RootStack.Screen name="Front" component={Front}/>
             <RootStack.Screen name="Back" component={Back}/>
-            <RootStack.Screen name="Review" component={Review}/>
+            <RootStack.Screen 
+                name="Review" 
+                component={Review}
+            />
         </RootStack.Navigator>
     )
 }

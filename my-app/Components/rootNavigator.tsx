@@ -64,7 +64,11 @@ export const SRSNavigator = () => {
                 ),
               })}    
         >
-            <Drawer.Screen name="SRS Screen" options={{headerTitle:"Review"}} component={SRS} />
+            <Drawer.Screen 
+                name="SRS Screen" 
+                options={{headerTitle:""}} 
+                component={SRS} 
+            />
         </Drawer.Navigator>
     );
 };
