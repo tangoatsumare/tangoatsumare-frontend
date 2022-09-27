@@ -29,8 +29,8 @@ export const Login = () => {
       await setRenderingIndicator(true);
       await setTimeout(() => {
         setRenderingIndicator(false);
-        navigation.navigate('TabHome');
-        // navigation.navigate('Profile');
+        // navigation.navigate('TabHome');
+        navigation.navigate('Profile');
       }, 1000);
 
     } catch(error: any) {
@@ -90,7 +90,7 @@ export const Login = () => {
 
 const styles = StyleSheet.create({
   button: {
-    alignItems: 'center',
+    // alignItems: 'center',
     // margin: 5,
     padding: 5,
     borderRadius: 25,
