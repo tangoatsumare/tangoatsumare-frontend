@@ -1,5 +1,5 @@
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
-import {HomeNav, SRSNav, CamNav, SearchNav} from "./main";
+import {HomeNav, SRSNav, CamNav} from "./main";
 import {Settings} from "../screens/settings";
 import {Profile} from "../screens/profile";
 import {Login} from "../screens/login";
@@ -9,8 +9,7 @@ import {Camera} from "../screens/camera";
 import { OCR } from "../screens/OCR";
 import { Review } from "../screens/review";
 import { ProfileSetup } from "../screens/profileSetup";
-import React from 'react';
-import {createMaterialBottomTabNavigator} from "@react-navigation/material-bottom-tabs";
+import React, {useEffect, useState} from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Collection } from "./collection";
 import { SingleCard } from "./card";
@@ -18,11 +17,53 @@ import { Front } from "../screens/front";
 import { Back } from "../screens/back";
 import { FeedCard } from "../screens/feedCard";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { HTTPRequest, UserId } from "../utils/httpRequest";
+import { getAuth } from "firebase/auth";
+import { useIsFocused } from "@react-navigation/native";
+import { 
+    SRSTangoFlashcard,
+    getReviewableSRSFlashcards
+ } from "../utils/supermemo";
 
-// const Tab = createMaterialBottomTabNavigator();
 const Tab = createBottomTabNavigator();
 
 export const TabHome = () => {
+    const auth = getAuth();
+    const userId: UserId = auth.currentUser?.uid;
+    const isFocused = useIsFocused();
+    const [flashcardsAll, setFlashcardsAll] = useState<SRSTangoFlashcard[]>([]);
+    const [ flashcardsReviewable, setFlashcardsReviewable ] = useState<SRSTangoFlashcard[]>([]);
+    const [ metrics, setMetrics ] = useState({
+        new: 0,
+        due: 0
+    });
+
+    useEffect(() => {
+        (async () => {
+            if (isFocused && userId) {
+                let flashcards: SRSTangoFlashcard[] = await HTTPRequest.getSRSFlashcardsByUser(userId);
+                setFlashcardsAll(flashcards);
+
+                // Updated to accomolate for deletion
+                flashcards = flashcards.filter(card => !card.Flashcard[0].created_by?.includes("delete"));
+                setFlashcardsReviewable(getReviewableSRSFlashcards(flashcards));
+            } 
+        })();
+    },[isFocused]);
+
+    useEffect(() => {
+        if (flashcardsReviewable) {
+            const newCards = flashcardsReviewable.filter(card => card.counter === 0).length;
+            const dueCards = flashcardsReviewable.filter(card => card.counter !== 0).length;
+            
+            setMetrics({
+                new: newCards,
+                due: dueCards
+            });
+
+        }
+    }, [flashcardsReviewable]);
+
     return (
         <Tab.Navigator
             initialRouteName="Home"
@@ -31,8 +72,7 @@ export const TabHome = () => {
                 tabBarActiveTintColor: '#FF4F4F', // hard coded
                 tabBarStyle: {
                     backgroundColor: "#FFFFFF", // hard coded
-                    borderTopWidth: 0,
-                    // height: 100
+                    borderTopWidth: 0
                 },
                 tabBarIcon: ({focused, color, size}) => {
                     let iconName;
@@ -45,16 +85,7 @@ export const TabHome = () => {
                     } 
                     return <MaterialCommunityIcons name={iconName} size={30} color={color} />;
                   },
-            })}
-            // shifting={true}
-            // sceneAnimationEnabled={false}
-            // barStyle={{ 
-            //     backgroundColor: '#FFFFFF',
-            //     // height: 80,
-            // }}
-            // labeled={false} // hide labels
-            // activeColor={theme.colors.primary}
-            
+            })}   
         >
             <Tab.Screen
                 name="Home"
@@ -62,9 +93,6 @@ export const TabHome = () => {
                 options={{
                     // https://stackoverflow.com/questions/68674747/header-in-react-navigation-bottom-tabs
                     headerShown: false,
-                    // tabBarIcon: ({ color, size }) => (
-                    //     <MaterialCommunityIcons name="home-account" color={color} size={size} />
-                    // ),
                 }}
             />
             <Tab.Screen
@@ -73,11 +101,11 @@ export const TabHome = () => {
                 options={{
                     headerShown: false,
                     title: 'Review',
-                    // tabBarIcon: ({ color, size }) => (
-                    //     <MaterialCommunityIcons name="card-multiple-outline" color={color} size={size} />
-                    // ),
                     // https://reactnavigation.org/docs/tab-based-navigation#add-badges-to-icons
-                    tabBarBadge: "todo", // TODO: Show the ready to review cards here
+                    tabBarBadge: metrics ? 
+                        metrics.new + metrics.due === 0 ?
+                         undefined : metrics.new + metrics.due
+                         : undefined, // TODO: Show the ready to review cards here
                     tabBarBadgeStyle: {}
                 }}
             />
@@ -86,9 +114,6 @@ export const TabHome = () => {
                 component={CamNav}
                 options={{
                     headerShown: false,
-                    // tabBarIcon: ({ color, size }) => (
-                    //     <MaterialCommunityIcons name="camera" color={color} size={size} />
-                    // ),
                 }}
             />
         </Tab.Navigator>
@@ -135,7 +160,6 @@ export const StackNav = () => {
             <RootStack.Screen name="Front" component={Front}/>
             <RootStack.Screen name="Back" component={Back}/>
             <RootStack.Screen name="Review" component={Review}/>
-            {/* <RootStack.Screen name="Search" component={Search}/> */}
         </RootStack.Navigator>
     )
 }

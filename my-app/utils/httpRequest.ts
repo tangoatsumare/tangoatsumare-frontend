@@ -5,6 +5,7 @@ const USERS_URL = `https://tangoatsumare-api.herokuapp.com/api/users/`;
 const USER_BY_UID_URL = `https://tangoatsumare-api.herokuapp.com/api/usersuid/`;
 const FLASHCARDS_URL = `https://tangoatsumare-api.herokuapp.com/api/flashcards/`;
 const FLASHCARDS_BY_USER_URL = `https://tangoatsumare-api.herokuapp.com/api/flashcardsby/`;
+const FLASHCARD_BY_FLASHCARDID_URL = `https://tangoatsumare-api.herokuapp.com/api/flashcards/`;
 const SRS_FLASHCARDS_BY_USER_URL = `https://tangoatsumare-api.herokuapp.com/api/cardflashjoinuid/`;
 const USERSTOCARDS_URL = `https://tangoatsumare-api.herokuapp.com/api/userstocards/`;
 const TAGS_URL = `https://tangoatsumare-api.herokuapp.com/api/tags`;
@@ -19,6 +20,7 @@ export interface UsersToCardsSRSProps {
 }
 
 export type UserId = string | undefined
+export type FlashcardId = string | undefined
 
 const HTTPRequest = (() => {
     const getUsers = () => {
@@ -57,6 +59,13 @@ const HTTPRequest = (() => {
         });
     }
 
+    const updateFlashcardProperties = async (flashcardId: FlashcardId, body: object) => {
+        console.log(body);
+        await axios.patch(FLASHCARD_BY_FLASHCARDID_URL + flashcardId, {...body})
+        .then(res => console.log("success"))
+        .catch(err => console.log(err));
+    };
+
     // PATCH request to update the user_to_flashcard scheduling table
     const updateFlashcardsSRSProperties = async (body: UsersToCardsSRSProps[]) => {
         await axios.patch(USERSTOCARDS_URL, body)
@@ -82,6 +91,7 @@ const HTTPRequest = (() => {
         getFlashcards,
         getFlashcardsByUser,
         getSRSFlashcardsByUser,
+        updateFlashcardProperties,
         updateFlashcardsSRSProperties,
         addSRSCard,
         getTags

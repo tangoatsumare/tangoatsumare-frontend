@@ -44,7 +44,6 @@ export const FeedCard = ({route}) => {
   const [imageUrl, setImageUrl] = useState("");
   const [engDef, setEngDef] = useState("");
   const [hasSRSCard, setHasSRSCard] = useState(false);
-//   const [userSRSCards, setUserSRSCards] = useState<any[]>([]);
 //make a variable and just check once on load
   const [flaggingUsers, setFlaggingUsers] = useState<any[]>([]);
   //make a variable and just check once on load
@@ -58,16 +57,11 @@ export const FeedCard = ({route}) => {
   const [date, setDate] = useState("");
   const [tags, setTags] = useState<string[]>([]);
 
-  // const route = useRoute<RouteProp<Record<string, StackParamsList>, string>>();
-  // const route = useRoute<RouteProp<StackParamsList, "Card">>();
   const {item} = route?.params;
-  // console.log(item._id);
   const auth = getAuth();
   const userId = auth.currentUser?.uid;
-  // let userId;
   let currentUserId;
   const isFocused = useIsFocused();
-
 
   useEffect(() => {
     if (item) {
@@ -98,8 +92,6 @@ export const FeedCard = ({route}) => {
             setUser(userName, avatar);
 
             const tagsData = await HTTPRequest.getTags(); // fetching hashtag data
-            // console.log(item.tags);
-            // console.log(tagsData);
             const tagsOfCard: string[] = [];
             for (const tag of item.tags) {
               const result = tagsData.find(data => data._id === tag).tag;
@@ -157,21 +149,18 @@ function checkIfReported (array: any) {
   const like = async () => {
     const likersArray = likers;
     likersArray.push(userId);
-    // await HTTPRequest.updateFlashCardProperties({ likers: likersArray });
-    await axios.patch(`https://tangoatsumare-api.herokuapp.com/api/flashcards/${flashcardId}`, { 
-        likers: likersArray
-     })
-        .then(res => alert("liked"))
+    await HTTPRequest.updateFlashcardProperties(flashcardId, { likers: likersArray })
+        .then(res => {
+          console.log('liked');
+          setLiked(true);
+          })
         .catch(err => console.log(err));
-    setLiked(true);
   };
 
-//Adding to users SRS DECK
-
+  //Adding to users SRS DECK
 
    //a function to add the card to the users SRS deck if the user has not already added it
    const addCardToDeck = async () => {
-    alert("add to deck");
     await HTTPRequest.addSRSCard({
       flashcard_id: flashcardId,
       uid: userId,
@@ -180,8 +169,12 @@ function checkIfReported (array: any) {
       repetition: 0,
       efactor: 2.5,
       due_date: dayjs(Date.now()).toISOString(),
-    });
-    setHasSRSCard(true)
+    }).then(res => {
+      console.log("added to deck");
+      setHasSRSCard(true)
+    }).catch(err => {
+      console.log(err);
+    })
   };
 
 //Reporting inappropriate cards
@@ -191,70 +184,75 @@ function checkIfReported (array: any) {
     const reporters = flaggingUsers;
     reporters.push(userId);
     if (reporters.length >= 3){
-        await axios.patch(`https://tangoatsumare-api.herokuapp.com/api/flashcards/${flashcardId}`, { 
-            flagging_users: reporters,
-            flagged_inappropriate: true
-         }) 
-         .then(res => alert("reported"))
-         .catch(err => console.log(err));
-     setReported(true);
-    } else {
-        await axios.patch(`https://tangoatsumare-api.herokuapp.com/api/flashcards/${flashcardId}`, { 
-            flagging_users: reporters
-         })
-            .then(res => alert("reported"))
-            .catch(err => console.log(err));
+      await HTTPRequest.updateFlashcardProperties(flashcardId, { 
+        flagging_users: reporters,
+        flagged_inappropriate: true
+      })
+      .then(res => {
+      console.log("reported");
         setReported(true);
+      })
+      .catch(err => console.log(err));
+    } else {
+      await HTTPRequest.updateFlashcardProperties(flashcardId, { 
+        flagging_users: reporters
+      })
+      .then(res => {
+        console.log("reported");
+        setReported(true);
+      })
+      .catch(err => console.log(err));
     }
   };
  
   const ButtonGroup = () => {
     return (
       <View style={styles.buttonGroup}>
-          { reported === true ?
+          <TouchableOpacity
+            onPress={!reported? report: () => {}}
+            disabled={reported ? true: false}
+          >
             <Button 
               icon="flag-variant-outline"
-              labelStyle={{color: theme.colors.primary}}
-            >reported</Button>
-          :
-            <Button
-              icon="flag-variant-outline"
-              onPress={report}
-              labelStyle={{color: 'black'}}
+              labelStyle={{color: reported? theme.colors.primary: 'black'}}
             >
-              Report Inappropriate
+              <Text
+                style={{color: reported? theme.colors.primary: 'black'}}
+              >
+                {reported? "reported": "Report inappropriate"}
+              </Text>
             </Button>
-          }
-          { hasSRSCard ? 
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={!hasSRSCard? addCardToDeck: () => {}}
+            disabled={hasSRSCard ? true: false}
+          >
             <Button 
               icon="book-plus-multiple-outline"
-              labelStyle={{color: theme.colors.primary}}
+              labelStyle={{color: hasSRSCard? theme.colors.primary: 'black'}}
             >
-              In deck
-            </Button> 
-          : 
-            <Button
-              icon="book-plus-multiple-outline"
-              onPress={addCardToDeck}
-              labelStyle={{color: "black"}}
-            >
-              Add to deck
+              <Text
+                style={{color: hasSRSCard? theme.colors.primary: 'black'}}
+              >
+                {hasSRSCard? "In deck": "Add to deck"}
+              </Text>
             </Button>
-          }
-          { liked === true?
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={!liked? like: () => {}}
+            disabled={liked ? true: false}
+          >
             <Button 
               icon="butterfly-outline"
-              labelStyle={{color: theme.colors.primary}}
-            >{likers.length} likes</Button>
-          :
-            <Button
-              icon="butterfly-outline"
-              onPress={like}
-              labelStyle={{color: "black"}}
+              labelStyle={{color: liked? theme.colors.primary: 'black'}}
             >
-            {likers.length} likes
+              <Text
+                style={{color: liked? theme.colors.primary: 'black'}}
+              >
+                {likers.length} likes
+              </Text>
             </Button>
-          }
+          </TouchableOpacity>
         </View>
     );
   }
@@ -346,7 +344,7 @@ function checkIfReported (array: any) {
 
   return (
     <View style={styles.container}>
-      {flashcard && userAvatar && userName && date && likers && tags ?
+      {flashcard && userAvatar && userName && date && tags ?
         <DisplayCard flashcard={flashcard}/>
         :
         <ActivityIndicator />
