@@ -2,7 +2,7 @@ import { useNavigation} from "@react-navigation/core";
 import { StackNavigationProp} from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 import React, { useEffect, useState, useLayoutEffect } from "react";
-import {ScrollView, View, StyleSheet, FlatList} from 'react-native'
+import {ScrollView, View, StyleSheet, FlatList, Dimensions} from 'react-native'
 import {TextInput, Text, Button, Modal, Portal, Card, Title, Paragraph, SegmentedButtons} from "react-native-paper";
 import { useIsFocused } from "@react-navigation/native";
 import { useTheme } from 'react-native-paper';
@@ -17,6 +17,8 @@ import {
 import { HTTPRequest, UserId } from "../utils/httpRequest";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { TouchableOpacity } from "react-native-gesture-handler";
+
+const { width, height } = Dimensions.get('screen');
 
 export const SRS = ({route}) => {
     const auth = getAuth();
@@ -122,6 +124,8 @@ export const SRS = ({route}) => {
         }
     }, [modalContent]);
 
+    // DO NOT REMOVE
+    // Options for SRS properties. hide it from the user
     const SettingModalContent = () => {
         return (
             <>
@@ -162,6 +166,7 @@ export const SRS = ({route}) => {
             </>
         );
     }
+    // DO NOT REMOVE
 
     const SRSFlashcardsModalContent = () => {
         return (
@@ -169,23 +174,27 @@ export const SRS = ({route}) => {
                 <SegmentedButtons 
                     value={modalSegmentButtonValue}
                     onValueChange={setModalSegmentButtonValue}
+                    style={{
+                        marginBottom: 30,
+                        
+                    }}
+                    
                     buttons={[
                     {
                         value: 'all',
                         label: 'All',
-                        icon: 'newspaper-variant-multiple-outline',
+                        // icon: 'newspaper-variant-multiple-outline',
                         style: styles.segmentButton
                     },
                     {
                         value: 'due',
                         label: 'Due',
-                        icon: 'newspaper-variant-outline',
+                        // icon: 'newspaper-variant-outline',
                         style: styles.segmentButton
                     },
                     ]}
                 />
                 <FlatList
-                    contentContainerStyle={{}}
                     data={modalSegmentButtonValue === 'all' ? 
                             flashcardsAll :
                         modalSegmentButtonValue === 'due' ? 
@@ -193,7 +202,11 @@ export const SRS = ({route}) => {
                     keyExtractor={(item) => item._id}
                     renderItem={({item}) => {
                         return (
-                            <Card style={styles.card} mode="contained" theme={theme}>
+                            <Card 
+                                style={styles.card} 
+                                mode="contained" 
+                                // theme={theme}
+                            >
                                 <Card.Content
                                     style={styles.cardContent}
                                     >
@@ -238,7 +251,13 @@ export const SRS = ({route}) => {
                     onDismiss={hideModal}
                     contentContainerStyle={styles.modal}
                 >
-                    <Button icon="close" onPress={hideModal}>close</Button>
+                    <TouchableOpacity
+                        onPress={hideModal}
+                        style={{alignSelf: "flex-end"}}
+                    >
+                        <Button icon="close">close</Button>
+                    </TouchableOpacity>
+
                     {modalContent === 'setting' ? 
                         <SettingModalContent /> :
                         modalContent === 'srsFlashcards' ?
@@ -287,7 +306,8 @@ export const SRS = ({route}) => {
 
 const styles = StyleSheet.create({
         card: {
-            margin: 5
+            margin: 5,
+            backgroundColor: "transparent"
         },
         cardContent: {
             flexDirection: 'row',
@@ -337,7 +357,7 @@ const styles = StyleSheet.create({
             backgroundColor: 'white',
             padding: 20,
             margin: 20,
-            height: 500,
+            height: height / 1.5,
             borderRadius: 20
         },
         main: {

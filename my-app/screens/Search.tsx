@@ -240,6 +240,7 @@ export const SearchBar = (props: SearchBarProps) => {
                     iconColor="rgba(0,0,0,0.5)"
                     icon="close" 
                     onPress={() => {
+                        setSelectedTags([]);
                         setText('');
                         setTextInputOnFocus(false);
                         setPressed(true);
