@@ -231,14 +231,14 @@ export const SRS = ({route}) => {
                     <Button 
                         mode="contained" 
                         style={styles.button}
-                        buttonColor={theme.colors.secondary}
+                        buttonColor={theme.colors.primary}
                         disabled={flashcardsReviewable.length === 0 ? true: false}
                         onPress={()=>{
                             navigation.navigate("Review", {
                                 flashcardsAll: flashcardsReviewable
                             });
                         }}>
-                        <Text variant="headlineSmall">Study</Text>
+                        <Text variant="headlineSmall" style={{color: theme.colors.tertiary}}>Study</Text>
                     </Button>
                 </View>
                 <View style={styles.bottom}>

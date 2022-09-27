@@ -2,20 +2,22 @@ import { useNavigation } from "@react-navigation/core";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 import { useIsFocused } from "@react-navigation/native";
-import React, { useEffect, useLayoutEffect, useState, useRef } from "react";
-import { Keyboard, Dimensions } from 'react-native';
+import React, { useEffect, useLayoutEffect, useState, useRef, createRef, forwardRef, useCallback } from "react";
+import { Keyboard, Dimensions, Animated, findNodeHandle, Image } from 'react-native';
 import { View, StyleSheet, FlatList, TouchableOpacity, ScrollView } from 'react-native'
-import { SegmentedButtons, Text, Button, Card, Paragraph, Title, Avatar, Divider, Chip } from "react-native-paper";
+import { 
+  ActivityIndicator, Text, Button, Card, Paragraph, Title, Avatar, Divider, Chip, Searchbar 
+} from "react-native-paper";
 import { useTheme } from 'react-native-paper';
-// import { Collection } from "../Components/collection";
-// import { Feed } from "../Components/feed";
 import { HTTPRequest } from "../utils/httpRequest";
 import { SearchBar, SearchBody } from '../screens/Search';
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { getAuth } from 'firebase/auth';
+import { Collection } from "../Components/collection";
+import { Feed } from "../Components/feed";
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('screen');
 
 export interface Tag {
   _id: string,
@@ -23,13 +25,35 @@ export interface Tag {
   flashcards: string[]
 }
 
-type SegmentedButtonsValue = 'feed' | 'collection'
+// NEW
+// implementation of animated tab indicator
+// https://www.youtube.com/watch?v=ZiSN9uik6OY&t=464s
+const views = {
+  feed: 'Feed',
+  collection: 'Collection'
+};
+
+const data = Object.keys(views).map((i) => ({
+  key: i,
+  title: views[i],
+  ref: createRef()
+}));
 
 export const Home = () => {
+  // for animated indicator
+  let scrollX = useRef(new Animated.Value(0)).current;
+  const scrollRef = useRef();
+  const onItemPress = useCallback(itemIndex => {
+    if (itemIndex === 0) {
+      scrollRef.current?.scrollTo({y:0});
+    } else if (itemIndex === 1) {
+      scrollRef.current?.scrollToEnd();
+    }
+  });
+
   const theme = useTheme();
   dayjs.extend(relativeTime);
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
-  const [value, setValue] = useState<SegmentedButtonsValue>('feed'); // segmented button's value: feed / collection
   const [text, setText] = useState<string>('');
   const [textInputOnFocus, setTextInputOnFocus] = useState<boolean>(false);
   const [flashcardsMaster, setFlashcardsMaster] = useState<object[]>([]);
@@ -48,14 +72,15 @@ export const Home = () => {
   const auth = getAuth();
   const userId = auth.currentUser?.uid;
 
-  const scrollRef = useRef();
+  const [loading, setLoading] = useState(true);
 
   // setting the header section
   useLayoutEffect(() => {
     navigation.setOptions({
       headerStyle: {
-        backgroundColor: 'black'
+        backgroundColor: 'white' // TO CHANGE: per figma variable
       },
+      headerShadowVisible: false,
       headerTitle: () => (
         <SearchBar 
           text={text} 
@@ -77,28 +102,30 @@ export const Home = () => {
           tagsToFlashcards={tagsToFlashcards}
           tags={tags}
           setTags={setTags}
+          scrollRef={scrollRef}
         />
       ),
       headerRight: () => {
-        if (textInputOnFocus) {
+        // if (textInputOnFocus) {
+        //   return (
+        //     <Button 
+        //         mode="text" 
+        //         onPress={cancelSearch}
+        //         style={{marginLeft: 5}}
+        //     >
+        //       <Text variant="labelLarge" style={{color: 'black'}}>cancel</Text>
+        //       </Button>
+        //   );
+        // } else 
+        if (!textInputOnFocus && submitIsClick) {
           return (
-            <Button 
-                mode="text" 
-                onPress={cancelSearch}
-                style={{marginLeft: 5}}
-            >
-              <Text variant="labelLarge" style={{color: 'white'}}>cancel</Text>
-              </Button>
-          );
-        } else if (!textInputOnFocus && submitIsClick) {
-          return (
-            <Button 
+            <TouchableOpacity 
                 mode="text" 
                 onPress={resetHomeScreen}
-                style={{marginLeft: 5}}
+                style={{marginRight: 15}} // Hard coded
             >
-              <Text variant="labelLarge" style={{color: 'white'}}>reset</Text>
-              </Button>
+              <Text variant="labelLarge" style={{color: 'black'}}>reset</Text>
+              </TouchableOpacity>
           );
         }
       }
@@ -130,19 +157,8 @@ export const Home = () => {
 
               // remove the deleted cards from the flashcards
               // cards with delete keyword in its created_by field are cards that deleted by their owners
-              flashcardsAll = flashcardsAll.filter((card: any) => !card.created_by.includes("delete"));
               //remove flagged cards
               flashcardsAll = flashcardsAll.filter((card: any) => (!card.flagged_inappropriate));
-
-
-              // for (const card of flashcardsAll) {
-              //     const result = usersAll.find((user: any) => user.uuid === card.created_by);
-              //     if (result) {
-              //         card.created_by_username = result.user_name; // replace uid with username
-              //         card.avatar_url = result.avatar_url; // add field
-              //     }
-              //     card.created_timestamp = dayjs(card.created_timestamp).fromNow(); // https://day.js.org/docs/en/plugin/relative-time
-              // }
   
               flashcardsAll = filterOutDeletedFlashcardsFromFlashcards(flashcardsAll);
           
@@ -151,49 +167,13 @@ export const Home = () => {
               const formattedFlashcards = formatFlashcardRelatedUserDetails(flashcardsAll, usersAll);
               const result: any[] = formattedFlashcards.reverse();
 
-              // <---- TO TEST AND DEBUG ---->
-              // mock data for testing the hashtags
-              // per Schema,
-              // each tag from the tagsData has a flashcards array field, containing flashcard_id 
-              
-              // Uncomment the code to test them
-
-              // Test 1: pick the first flashcard from the pool, pick the first hashtag from the pool
-              // seed that flashcard id into the tag's flashcard array
-              // const testFlashcard = flashcardsAll[0];
-              // console.log(testFlashcard._id)
-              // tagsData[0].flashcards.push(testFlashcard._id);
-              // End of Test 1
-
-              // // Test 2: pick 1 card. Seed 2 tags into it
-              // const testFlashcard = flashcardsAll[0];
-              // tagsData[0].flashcards.push(testFlashcard._id);
-              // tagsData[1].flashcards.push(testFlashcard._id);
-              // // End of Test 2
-
-              // // Test 3: pick 2 cards. Seed the same tag into them
-              // const testFlashcard1 = flashcardsAll[0];
-              // const testFlashcard2 = flashcardsAll[1];
-              // tagsData[0].flashcards.push(testFlashcard1._id);
-              // tagsData[0].flashcards.push(testFlashcard2._id);
-              // // End of Test 3
-
-              // Test 4: pick 2 cards. Seed 2 different tags into them
-              // const testFlashcard1 = flashcardsAll[2];
-              // const testFlashcard2 = flashcardsAll[3];
-              // tagsData[2].flashcards.push(testFlashcard1._id);
-              // tagsData[2].flashcards.push(testFlashcard2._id);
-              // tagsData[3].flashcards.push(testFlashcard1._id);
-              // tagsData[3].flashcards.push(testFlashcard2._id);
-              // End of Test 4
-
               // setting states
               setTags(tagsData);
               setTagsToFlashcards(getTagsToFlashcardsIdObject(tagsData));
               setFlashcardsMaster(result);
               setFlashcardsFeed(result);
               setFlashcardsCollection(result.filter(flashcard => flashcard["created_by"] === userId));
-              
+              setLoading(false);
           } catch (err) {
               console.log(err);
           }
@@ -210,17 +190,6 @@ export const Home = () => {
     }
   },[ flashcardsCurated, textInputOnFocus ]);
 
-  useEffect(() => {
-    if (tagsToFlashcards) {
-      console.log(tagsToFlashcards);
-    }
-  }, [tagsToFlashcards]);
-
-  const cancelSearch = () => {
-    setText('');
-    clearKeyboard();
-  };
-
   const clearKeyboard = () => {
     Keyboard.dismiss();
     setTextInputOnFocus(false);
@@ -233,14 +202,6 @@ export const Home = () => {
     setSubmitIsClick(false);
     setFlashcardsFeed(flashcardsMaster);
     setFlashcardsCollection(flashcardsMaster.filter(flashcard => flashcard["created_by"] === userId));
-  };
-
-  const scrollToLeft = () => {
-    scrollRef.current?.scrollTo({y:0, animated: true})
-  };
-
-  const scrollToRight = () => {
-    scrollRef.current?.scrollToEnd({ animated: true});
   };
 
   // reshape the object so it is easier to work with
@@ -262,7 +223,9 @@ export const Home = () => {
           card.created_by_username = result.user_name; // replace uid with username
           card.avatar_url = result.avatar_url; // add field
       }
-      card.created_timestamp = dayjs(card.created_timestamp).fromNow(); // https://day.js.org/docs/en/plugin/relative-time
+      // card.created_timestamp = dayjs(card.created_timestamp)
+        // .fromNow(); 
+      // https://day.js.org/docs/en/plugin/relative-time
     }
     return formattedCards;
   };
@@ -271,26 +234,6 @@ export const Home = () => {
     // cards with delete keyword in its created_by field are cards that deleted by their owners
     return cards.filter((card: any) => !card.created_by.includes("delete"));
   }
-
-  const handleShowFlashcard = (flashcardID: string) => {
-    navigation.navigate("Card", {id: flashcardID})
-    console.log(flashcardID);
-  }
-
-  const handleShowFeedcard = (flashcardID: string) => {
-    navigation.navigate("FeedCard", {id: flashcardID})
-    console.log(flashcardID);
-  }
-
-
-  const handleScroll = (e: object) => {
-    const currentScrollPosition = e.nativeEvent.contentOffset.x;
-    if (currentScrollPosition === 0) {
-      setValue('feed');
-    } else if (currentScrollPosition === width) {
-      setValue('collection')
-    }
-  };
 
   const handleEditSubmit = () => {
     if (text || selectedTags.length !== 0) {
@@ -306,125 +249,159 @@ export const Home = () => {
     }
 };
 
-  const Feed = ({item}) => {
+  const Tab = forwardRef(({item, onItemPress}, ref) => {
     return (
-      <View style={styles.item}>
-        <TouchableOpacity 
-            onPress={() => { handleShowFeedcard(item._id) }}
+      <TouchableOpacity onPress={onItemPress}>
+        <View ref={ref}>
+          <Text 
+            style={{
+              color: 'black', 
+              fontSize: 40 / data.length, 
+              fontWeight: '600', // TO CHANGE: per Figma variable
+              // textTransform: 'uppercase'
+            }}
+          >{item.title}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  });
+  
+  // useEffect(() => {
+  //   if (!textInputOnFocus && scrollRef.current) {
+  //     scrollRef.current.scrollToEnd();
+  //   }
+  // }, [textInputOnFocus, scrollRef.current]);
+
+  const Indicator = ({measures, scrollX}) => {
+    const inputRange = data.map((_, i) => i * width);
+    const indicatorWidth = scrollX.interpolate({
+      inputRange,
+      outputRange: measures.map(measure => measure.width),
+    });
+    const translateX = scrollX.interpolate({
+      inputRange,
+      outputRange: measures.map(measure => measure.x),
+    });
+
+    return (
+      <Animated.View
+        style={{
+          position: 'absolute',
+          height: 4,
+          width: indicatorWidth,
+          left: 0,
+          backgroundColor: theme.colors.primary,
+          bottom: -10,
+          transform: [{
+            translateX
+          }]
+        }}
+      />
+    );
+  }
+  
+  const Tabs = ({data, scrollX, onItemPress}) => {
+    const [measures, setMeasures] = useState([]);
+    const containerRef = useRef();
+    // TO FIX: this useEffect needs to fire after the main components are mounted
+      
+    useEffect(() => {
+      if (containerRef.current && scrollRef.current) {
+        let m = [];
+        data.forEach(item => {
+          item.ref.current.measureLayout(
+            containerRef.current, 
+            (x, y, width, height) => {
+              m.push({
+                x, y, width, height
+              });
+  
+              if (m.length === data.length) {
+                setMeasures(m);
+              }
+            }
+          )
+        })
+      }
+    }, [containerRef.current, scrollRef.current]);
+  
+    return (
+      <View 
+        style={{
+          // flex:1, 
+          position: 'absolute',
+          top: 10,
+          // marginBottom: 20,
+          width
+        }}
+      >
+        <View
+          ref={containerRef}
+          style={{
+            justifyContent: 'space-evenly',
+            flex: 1,
+            flexDirection: 'row',
+          }}
         >
-            <View style={styles.header}>
-                <View style={styles.user}>
-                    {/* <Avatar.Image 
-                    size={35} 
-                    source={{ 
-                        uri: item.avatar_url? item.avatar_url: 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png' 
-                    }} 
-                    style={styles.userLeft}/> */}
-                    {/* <View style={styles.userRight}>
-                        <Text variant="bodyLarge">{item.created_by_username}</Text>
-                        <Text variant="bodySmall">{item.created_timestamp}</Text>
-                    </View> */}
-                </View>
-                <Card style={styles.card}>
-                    <Card.Content>
-                        <Card.Cover 
-                            source={{
-                                uri: item.picture_url ? item.picture_url : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'
-                            }} 
-                            style={styles.image}
-                            resizeMode="contain"
-                        />
-                        {/* <Paragraph style={styles.text}>Sentence: {item.example_sentence}</Paragraph> */}
-                    </Card.Content>
-                    <Card.Actions>
-                    </Card.Actions>
-                </Card>
-                <Title style={styles.textVocab}>{item.target_word}</Title>
-            </View>
-        </TouchableOpacity>
-        {/* <View style={styles.buttonGroup}>
-            <Button icon="butterfly">
-                views
-            </Button>
-            <Button icon="star">
-                rating
-            </Button>
-            <Button icon="bookshelf">
-                Add to deck
-            </Button>
-            <Button icon="emoticon-angry-outline">
-                report
-            </Button>
-        </View> */}
+          {data.map((item, index) => {
+            return <Tab key={item.key} item={item} ref={item.ref} onItemPress={() => onItemPress(index)} />;
+          })}
+          { 
+            measures.length > 0 && 
+            <Indicator measures={measures} scrollX={scrollX} />
+          }
+        </View>
       </View>
     );
   };
 
-  const Collection = ({item}) => {
-    return (
-      <TouchableOpacity 
-        onPress={() => { handleShowFlashcard(item._id) }}
-        style={styles.collectionItem}
-      >
-        <Card key={item.target_word} style={styles.card}>
-              <Card.Content>
-              <Card.Cover   source={{uri: item.picture_url ? item.picture_url : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}} />
-              <Title style={styles.textVocab}>{item.target_word}</Title>
-              <Paragraph style={styles.text}>Sentence: {item.example_sentence}</Paragraph>
-              </Card.Content>
-              <Card.Actions>
-        
-          </Card.Actions>
-          </Card>
-      </TouchableOpacity>
-    );
+  const [currentView, setCurrentView] = useState("feed");
+  const handleScroll = (event) => {
+    if (event.nativeEvent.contentOffset.x === width) {
+      setCurrentView("collection")
+    } else if (event.nativeEvent.contentOffset.x === 0) {
+      setCurrentView("feed");
+    }
+    // console.log(event.nativeEvent.contentOffset.x);
   };
 
   return (
     <View style={styles.master}>
       { !textInputOnFocus && flashcardsFeed && flashcardsCollection ? 
-        <View>
-          <SegmentedButtons
-            value={value}
-            onValueChange={setValue}
-            buttons={[
-              {
-                value: 'feed',
-                label: 'Feed',
-                onPress: scrollToLeft
-              },
-              {
-                value: 'collection',
-                label: 'Collection',
-                onPress: scrollToRight
-              },
-            ]}
-            style={styles.segment}
-          /> 
-          <Divider />
-          <View style={styles.tagsContainer}>
+        <View> 
             {selectedTags.length !== 0 ? 
-              selectedTags.map(item => {
-                return (
-                  <Chip key={item} style={{...styles.tag, backgroundColor: theme.colors.secondary}}>
-                    <Text style={{fontSize: 10}}>{item}</Text>
-                  </Chip>
-                );
-              })
+              <View style={styles.tagsContainer}>
+                {selectedTags.map(item => {
+                  return (
+                    <Chip key={item} style={{...styles.tag, backgroundColor: theme.colors.primary}}>
+                      <Text style={{fontSize: 10, color: 'white'}}>{item}</Text>
+                    </Chip>
+                  );
+                })}
+              </View>         
             :null}
-          </View>
-          <ScrollView 
+          <Animated.ScrollView 
+              contentContainerStyle={{ marginTop: selectedTags.length !== 0 ? 30 : 60 }}
+              ref={scrollRef}
               horizontal 
-              snapToInterval={width} 
+              onContentSizeChange={() => { 
+                // after search bar text input is not focused, 
+                // force a scroll to the end if current view is collection
+                if (currentView === 'collection') scrollRef.current.scrollToEnd()
+              }}
+              onScroll={
+                Animated.event(
+                [{nativeEvent: {contentOffset: {x: scrollX}}}],
+                {
+                  useNativeDriver: false,
+                  listener: event => {
+                      handleScroll(event);
+                  }
+                })
+              }
+              pagingEnabled={true}
               decelerationRate="fast" 
               showsHorizontalScrollIndicator={false}              
-              ref={scrollRef}
-              // https://stackoverflow.com/questions/29310553/is-it-possible-to-keep-a-scrollview-scrolled-to-the-bottom
-              // onContentSizeChange={scrollToRight}
-              // https://stackoverflow.com/questions/29503252/get-current-scroll-position-of-scrollview-in-react-native
-              onScroll={handleScroll}
-              onScrollEndDrag={handleScroll}
-              scrollEventThrottle={16}
           >
           {flashcardsFeed.length > 0 ?
             <FlatList style={styles.container}
@@ -436,9 +413,26 @@ export const Home = () => {
                   <Feed item={item} />
                 )
               }
-              contentContainerStyle={{paddingBottom: 200}}
+              contentContainerStyle={{paddingBottom: 50}}
+              showsVerticalScrollIndicator={false}
             />
-            : <Text style={styles.container}>{submitIsClick ? "result not found." : "no entry"}</Text>
+            : 
+              <View style={{
+                    width: width,
+                    height: "100%",
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'center'
+              }}>
+                {submitIsClick ? 
+                  loading ? 
+                    <ActivityIndicator /> : 
+                    <Text>result not found.</Text> : 
+                  loading ? 
+                    <ActivityIndicator /> : 
+                    <Text>no entry</Text>
+                }
+              </View>
           }
             {flashcardsCollection.length > 0 ? 
               <FlatList style={styles.container}
@@ -450,11 +444,13 @@ export const Home = () => {
                   }
                   // workaround for the last item of flatlist not showing properly
                   // https://thewebdev.info/2022/02/19/how-to-fix-the-react-native-flatlist-last-item-not-visible-issue/
-                  contentContainerStyle={{paddingBottom: 200}}
+                  contentContainerStyle={{paddingBottom: 50}}
+                  showsVerticalScrollIndicator={false}
                 />
             : <Text style={styles.container}>{submitIsClick ? "result not found." : "no entry"}</Text>
           }
-        </ScrollView>
+        </Animated.ScrollView>
+        <Tabs scrollX={scrollX} data={data} onItemPress={onItemPress}/>
     </View>
         :
         <SearchBody 
@@ -478,10 +474,13 @@ export const Home = () => {
 
 const styles = StyleSheet.create({
   master: {
-    flex: 1
+    flex: 1,
+    backgroundColor: 'white'
   },
   tagsContainer: {
-    padding: 10,
+    marginTop: 60,
+    paddingLeft: 10,
+    paddingRight: 10,
     flexDirection: 'row',
     flexWrap: 'wrap',
     width: width,
@@ -493,67 +492,8 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     alignItems: 'center'
   },
-  button: {
-    alignItems: 'center',
-  },
   container: {
     width: width,
-    flex: 1
+    flex: 1,
   },
-  segment: {
-    paddingTop: 10,
-    paddingBottom: 10,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  item: {
-    // padding: 10,
-    width: width / 2,
-    // borderBottomWidth: 0.2,
-    // borderBottomColor: 'grey'
-  },
-  collectionItem: {
-    padding: 10,
-  },
-  header: {
-
-  },
-  user: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'flex-start',
-      marginBottom: 10,
-      marginTop: 10
-  },
-  userLeft: {
-      marginRight: 10
-  },
-  userRight: {
-      alignItems: 'flex-start'
-  },
-  username: {
-
-  },
-  buttonGroup: {
-    flexDirection: 'row'
-  },
-  text: {
-
-  },
-  textVocab: {
-      textAlign: 'center',
-      fontWeight: "bold"
-  },
-  card: {
-      borderRadius: 10,
-      marginLeft: 20,
-      marginRight: 20
-  },
-  image: {
-      backgroundColor: 'transparent'
-  },
-  separator: {
-      height: 0.2,
-      backgroundColor: "grey"
-  }
-})
+});

@@ -1,116 +1,102 @@
 import { useNavigation} from "@react-navigation/core";
 import { StackNavigationProp} from '@react-navigation/stack';
-import { useIsFocused } from "@react-navigation/native";
-import { StackParamsList } from "../library/routeProp";
-import {Button, Card, Paragraph, Title} from "react-native-paper";
-
+import { ParamListBase } from '@react-navigation/native'
+import {Button, Text, Card, Paragraph, Title} from "react-native-paper";
 import React, { useEffect, useState } from "react";
-import {View, Text, StyleSheet, FlatList, TouchableOpacity} from 'react-native'
-import axios from "axios";
-import { HTTPRequest } from "../utils/httpRequest";
-import { getAuth } from 'firebase/auth';
+import {View, StyleSheet, FlatList, TouchableOpacity, Image, Animated} from 'react-native'
 
-export const Collection = (props: any) => {
-
-  const auth = getAuth();
-  const userId = auth.currentUser?.uid;
-
-  const navigation = useNavigation<StackNavigationProp<StackParamsList>>();
-  // const [flashcards, setFlashcards] = useState([]);
-  const { flashcards, setFlashcards } = props;
-  const isFocused = useIsFocused();
-
-  useEffect(() => {
-    // why using "isFocused"
-    // https://stackoverflow.com/questions/60182942/useeffect-not-called-in-react-native-when-back-to-screen
-    (async () => {
-      if (isFocused) {
-        try {
-          const flashcards = await HTTPRequest.getFlashcardsByUser(userId);
-          setFlashcards(flashcards.reverse());
-        } catch (err) {
-          console.log(err);
-        }
-      }
-    })();
-  }, [isFocused]);
-
-  const handleShowFlashcard = (flashcardID: string) => {
-    navigation.navigate("Card", {id: flashcardID})
-    console.log(flashcardID)
+export const Collection = ({item}) => {
+  const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
+  const handleShowFlashcard = (item: any) => {
+    navigation.navigate("Card", {item: item})
+    console.log(item._id);
   }
 
-  const displayFlashcard = (flashcards: readonly any[] | null | undefined) => {
-      return (
-          <FlatList
-            // inverted
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{}}
-            // ItemSeparatorComponent={() => <View style={styles.separator} />}
-            data={flashcards ? flashcards: null}
-            keyExtractor={(flashcard, index) => index.toString()}
-            renderItem={({item}) => {
-              return (
-                <TouchableOpacity 
-                  onPress={() => { handleShowFlashcard(item._id) }}
-                  style={styles.item}
-                >
-                  <Card key={item.target_word} style={styles.card}>
-                        <Card.Content>
-                        <Card.Cover   source={{uri: item.picture_url ? item.picture_url : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}} />
-                        <Title style={styles.textVocab}>{item.target_word}</Title>
-                        <Paragraph style={styles.text}>Sentence: {item.example_sentence}</Paragraph>
-                        </Card.Content>
-                        <Card.Actions>
-                  
-                    </Card.Actions>
-                    </Card>
-                </TouchableOpacity>
-          );
-        }
-      }
-      />
-      );
+  const [imgHeight, setImgHeight] = useState<number>();
+
+  const [loading, setLoading] = useState(true);
+
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+
+  // https://www.youtube.com/watch?v=Jj9NaKkknis
+  useEffect(() => {
+    if (!loading) {
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true
+      }).start();
     }
+  }, [loading]);
+
+  useEffect(() => {
+    if (item.picture_url) {
+      Image.getSize(item.picture_url, (width, height) => {
+        setImgHeight(height);
+      });
+    }
+  }, [item]);
 
   return (
-    <View style={styles.container}>
-      {displayFlashcard(flashcards)}
-    </View>
-  )
-}
+    <TouchableOpacity 
+      onPress={() => { handleShowFlashcard(item) }}
+      style={styles.collectionItem}
+    >
+      <Animated.View
+        style={{opacity: fadeAnim}}
+      >
+        <Card 
+          key={item.target_word} 
+          style={styles.card}
+          mode="contained"
+        >
+          <Card.Content
+            style={{
+              paddingHorizontal: 0,
+              paddingVertical: 0,
+              height: imgHeight
+            }}
+            // https://stackoverflow.com/questions/61511559/how-can-i-resize-an-image-in-a-react-paper-card-cover-to-fit-the-height
+          >
+            <Card.Cover 
+              source={{
+                uri: item.picture_url ? 
+                      item.picture_url : 
+                      'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'
+              }}
+              onLoadEnd={() => setLoading(false)}
+              style={{
+                height: imgHeight,
+                backgroundColor: "transparent",
+                borderRadius: 20
+              }}
+              resizeMode="cover"
+              // resizeMode="contain"
+            />
+            <Title style={styles.textVocab}>{item.target_word}</Title>
+          </Card.Content>
+        </Card>
+      </Animated.View>
+    </TouchableOpacity>
+  );
+};
 
 const styles = StyleSheet.create({
-        item: {
-          borderBottomWidth: 0.2,
-          borderBottomColor: 'grey'
-        },
-        button: {
-            alignItems: 'center',
-        },
-        container: {
-            // margin: 10
-            // alignItems: 'center',
-            // justifyContent: 'center',
-        },
-        segment: {
-
-        },
-          separator: {
-            height: 0.2,
-            backgroundColor: "grey"
-          },
-          text: {
-            textAlign: 'center',
-          },
-          textVocab: {
-            textAlign: 'center',
-            fontWeight: "bold"
-          },
-          card: {
-            borderRadius: 10,
-            margin: 10,
-            // marginTop: 2, 
-          },
-    }
-);
+  collectionItem: {
+    padding: 10,
+    margin: 10,
+    marginLeft: 20,
+    marginRight: 20,
+  },
+  text: {},
+  textVocab: {
+    fontSize: 15,
+    fontWeight: "bold",
+    marginLeft: 10,
+  },
+  card: {
+    borderRadius: 10,
+    backgroundColor: "transparent",
+    marginBottom: 20
+  },
+});

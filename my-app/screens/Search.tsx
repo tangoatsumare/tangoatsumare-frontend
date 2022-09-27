@@ -2,14 +2,15 @@ import { useNavigation } from "@react-navigation/core";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 import { useEffect, useRef, useState } from 'react';
-import {ScrollView, View, StyleSheet, FlatList} from 'react-native';
-import { Button, Divider, Text, TextInput, Searchbar, Card, Avatar, Chip } from "react-native-paper";
+import { Animated, ScrollView, View, StyleSheet, FlatList, TextInput} from 'react-native';
+import { Button, Divider, Text,  Searchbar, Card, Avatar, Chip, TextInput as PaperTextInput} from "react-native-paper";
 import { Keyboard, Dimensions } from 'react-native';
 import { HTTPRequest } from '../utils/httpRequest';
 import { useTheme } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/FontAwesome';
+// import * as MaterialDesignIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Tag } from './home';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface SearchBarProps {
     text: string,
@@ -51,6 +52,7 @@ interface SearchBodyProps {
 const { width } = Dimensions.get('window');
 
 export const SearchBar = (props: SearchBarProps) => {
+    const theme = useTheme();
     const inputRef = useRef();
     const { 
         text, 
@@ -181,30 +183,44 @@ export const SearchBar = (props: SearchBarProps) => {
 
     return (
         <View style={{
-            flex: 1,
-            marginTop: 5,
-            marginBottom: 5
+            flexDirection: 'row',
+            justifyContent: "space-evenly",
+            alignItems: 'center',
+            backgroundColor: textInputOnFocus ? theme.colors.tertiary: 'rgba(0,0,0,0.1)',
+            borderColor: textInputOnFocus ? theme.colors.primary: 'rgba(0,0,0,0.1)',
+            borderWidth: textInputOnFocus ? 0.5: 0,
+            borderRadius: 30,
+            width: width / 1.5, // ratio that the search bar takes up the page
+            height: 30
         }}>
+            <PaperTextInput.Icon 
+                icon="magnify" 
+                // disabled={true}
+                iconColor={textInputOnFocus ? theme.colors.primary: "rgba(0,0,0,0.5)"}
+                style={{
+                    marginLeft: 20 // hard coded
+                }}
+                />
             <TextInput 
                 ref={inputRef}
                 style={{
                     flex: 1, 
-                    justifyContent: 'center',
-                    maxWidth: width / 2,
-                    width: width / 2
+                    marginLeft: 40,
+                    marginRight: 40,
+                    alignSelf: 'center',
+                    width: "auto",
+                    fontSize:  15
                 }}
-                mode="outlined"
-                // TO FIX
-                // issue with japanese typing getting messed up due to the state changes
-                // https://github.com/facebook/react-native/issues/19339
+                // // issue with japanese typing getting messed up due to the state changes
+                // // https://github.com/facebook/react-native/issues/19339
 
-                // the following reactive code works except for Language such as Japanese
-                // value={text}
+                // // the following reactive code works except for Language such as Japanese
+                // // value={text}
                 // onChangeText={text => setText(text)}
-                placeholder="search"
+                placeholder="Search Tango"
                 value={pressed || resetIsClick ? '': null}
-                // value={text}
-                // value={pressed || resetIsClick ? '': text}
+                // // value={text}
+                // // value={pressed || resetIsClick ? '': text}
                 onChangeText={(text) => {
                     setText(text); // save it in a state
                     if (pressed) {
@@ -213,19 +229,24 @@ export const SearchBar = (props: SearchBarProps) => {
                 }}
                 onSubmitEditing={handleEditSubmit}
                 onFocus={() => setTextInputOnFocus(true)}
-                // onBlur={() => console.log('byebye')} // trigger during blur event
-                left={<TextInput.Icon icon="magnify" />}
-                right={textInputOnFocus? 
-                    <TextInput.Icon 
-                        icon="close-circle" 
-                        onPress={() => {
-                            setText('');
-                            setPressed(true);
-                            Keyboard.dismiss();
-                        }}
-                    />: null}
+                onBlur={() => setPressed(false)} // trigger during blur event
             />
-
+            {textInputOnFocus ? 
+                <PaperTextInput.Icon
+                    style={{
+                        marginLeft: width + 80,  // Hard coded
+                    }}
+                    size={20}
+                    iconColor="rgba(0,0,0,0.5)"
+                    icon="close" 
+                    onPress={() => {
+                        setText('');
+                        setTextInputOnFocus(false);
+                        setPressed(true);
+                        Keyboard.dismiss();
+                    }}
+                />
+            : null}
         </View>
     );
 };
@@ -256,7 +277,6 @@ export const SearchBody = (props: SearchBodyProps) => {
     } = props;
     const [tagsModified, setTagsModified ] = useState<modifiedTag[]>([]);
 
-
     useEffect(() => {
         (async () => {
             if (textInputOnFocus && tags) {
@@ -270,8 +290,8 @@ export const SearchBody = (props: SearchBodyProps) => {
         })();
     }, [textInputOnFocus, tags]);
 
-    const handleShowFlashcard = (flashcardID: string) => {
-        navigation.navigate("FeedCard", {id: flashcardID})
+    const handleShowFlashcard = (item: any) => {
+        navigation.navigate("FeedCard", {item: item})
         // console.log(flashcardID);
     };
 
@@ -314,78 +334,117 @@ export const SearchBody = (props: SearchBodyProps) => {
         }
     }, [selectedTags]);
 
-    // useEffect(() => {
-    //     if (hashTagSearchMode) {
-    //         console.log(selectedTags);
-    //     }
-    // }, [hashTagSearchMode]);
+    const SearchResultCard = ({item}) => {
+        const [loading, setLoading] = useState(true);
+        const fadeAnim = useRef(new Animated.Value(0)).current;
+    
+        useEffect(() => {
+          if (!loading) {
+            Animated.timing(fadeAnim, {
+              toValue: 1,
+              duration: 300,
+              useNativeDriver: true
+            }).start();
+          }
+        }, [loading]);
+
+        return (
+            <TouchableOpacity 
+            style={{marginBottom: 5}} key={item._id}
+            onPress={() => handleShowFlashcard(item)}
+            >
+                <Animated.View
+                    style={{opacity: fadeAnim}}
+                >
+                    <Card
+                        mode="contained"
+                        style={{backgroundColor: "transparent"}}
+                    >
+                        <Card.Title 
+                            title={item.target_word} 
+                            titleVariant="headlineSmall"
+                            subtitle={item.example_sentence}
+                            left={(props) => (
+                                <Avatar.Image {...props} 
+                                    source={{uri:item.picture_url}} 
+                                    onLoadEnd={() => setLoading(false)}
+                                    style={{backgroundColor: 'transparent'}}
+                                />
+                            )}
+                        />
+                        <Card.Content>
+                        </Card.Content>
+                    </Card>
+                </Animated.View>
+            </TouchableOpacity>
+        );
+    };
 
     return (
-        <ScrollView contentContainerStyle={styles.mainContainer}>
+        <View style={styles.mainContainer}>
             <View style={styles.topContainer}>
-                <Text variant="headlineSmall">Tags</Text>
+                {/* <Text variant="headlineSmall">Tags</Text> */}
                 <View style={styles.tagsContainer}>
                     {tagsModified.length > 0 ?
                     tagsModified.map(item => {
                         return (
                             <Chip
                                 key={item._id} 
-                                style={item.isClicked? {...styles.tagButton, backgroundColor:theme.colors.secondary}: styles.tagButton }
+                                style={item.isClicked? 
+                                    {...styles.tagButton, backgroundColor:theme.colors.secondary}
+                                    : {...styles.tagButton, backgroundColor: theme.colors.primary }
+                                }
                                 mode="flat"
                                 selected={item.isClicked}
                                 onPress={() => handleTagClick(item)}
+                                selectedColor={theme.colors.tertiary}
                             >
-                                <Text variant='bodyMedium'>
-                                    #{item.tag}
-                                    {/* <Text variant='labelSmall'> {"(0)"}</Text> */}
+                                <Text 
+                                    variant='bodyMedium'
+                                    style={
+                                        // item.isClicked? 
+                                        {color: theme.colors.tertiary}
+                                        // : 
+                                        // {color: theme.colors.secondary}
+                                    }
+                                >
+                                    {item.tag}
                                 </Text>
                             </Chip>
                         );
                     })
                     : null}
                 </View>
-                <Divider bold={true} />
             </View>
-            <ScrollView 
-                contentContainerStyle={styles.bottomContainer}
-            >
-                <View style={styles.resultsContainer}>
-                    <Text variant="headlineSmall">Results</Text>
-                    {flashcardsCurated && flashcardsCurated.length > 0 &&
-                        flashcardsCurated.map(card => {
-                            return (
-                                <View style={{marginBottom: 5}} key={card._id}>
-                                    <Card
-                                        onPress={() => handleShowFlashcard(card._id)}
-                                    >
-                                        <Card.Title 
-                                            title={card.target_word} 
-                                            subtitle={card.example_sentence}
-                                            left={(props) => <Avatar.Image {...props} source={{uri:card.picture_url}} />}
-                                        />
-                                        <Card.Content>
-                                        </Card.Content>
-                                    </Card>
-                                </View>
-                            );
-                        })
-                    }
-                </View>
+            <View style={styles.bottomContainer}>
+                {flashcardsCurated && flashcardsCurated.length > 0 ?
+                    <FlatList 
+                        data={flashcardsCurated}
+                        keyExtractor={(item) => item._id}
+                        renderItem={({item}) => (
+                            <SearchResultCard item={item} />
+                        )
+                        }
+                    />
+                :
+                    <View style={{flex: 1}}></View> // empty placeholder to fill the div when flatlist is empty
+                }
                 {text !== '' || hashTagSearchMode ? 
-                    <TouchableOpacity 
-                        style={styles.searchButtonContainer}
-                        onPress={handleEditSubmit}
-                    >
-                        <Button
+                    <View style={styles.searchButtonContainer}>
+                        <TouchableOpacity 
                             style={styles.searchButton}
+                            onPress={handleEditSubmit}
                         >
-                            <Icon name="search" size={20} color="white" />
-                        </Button> 
-                    </TouchableOpacity>
+                            <Icon 
+                                name="magnify" 
+                                size={35} 
+                                color="white"
+                            />
+                        </TouchableOpacity>
+                    </View>
                 : null}
-            </ScrollView>
-        </ScrollView>
-
+                </View>
+            </View>
     );
 }
 
@@ -440,6 +499,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         color: 'black',
-        padding: 10
+        // padding: 10,
+        // fontSize: 30
     }
 });
