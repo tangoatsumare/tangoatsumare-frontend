@@ -338,10 +338,12 @@ export const OCR = ({ route, navigation }: OCRProps) => {
     }, [cloudStoragePath]);
 
     // read layout from the DOM and synchronously re-render
+    // remove header and back button when card is submitted
     React.useLayoutEffect(() => {
         if (cardSubmissionBtnIsClick) {
             navigation.setOptions({
-                headerTitle: ""
+                headerTitle: "",
+                headerLeft: () => <></>
             });
         }
     });
