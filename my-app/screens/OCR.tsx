@@ -3,7 +3,7 @@ import {
     Image, StyleSheet, TextInput, View, ScrollView, TouchableOpacity, ImageBackground,
     Dimensions, Pressable, Animated
 } from 'react-native';
-import { Button, Text, Chip } from 'react-native-paper';
+import { Button, Text, Chip, ActivityIndicator } from 'react-native-paper';
 import React, { useState, useEffect } from 'react';
 import { sendImageToCloudVisionApi } from '../utils/flashcard';
 import app from '../firebase';
@@ -58,6 +58,8 @@ export const OCR = ({ route, navigation }: OCRProps) => {
     const [ allTagInfo, setAllTagInfo ] = useState<any>();
     const [ selectedTagsList, setSelectedTagsList ] = useState<any>([]);
     const [ numOfTags, setNumOfTags ] = useState<any>(0);
+
+    const [imgLoading, setImgLoading] = useState(true);
 
     // send to cloud vision once components are mounted
     useEffect(() => {
@@ -369,6 +371,7 @@ export const OCR = ({ route, navigation }: OCRProps) => {
                     style={{
                         height: "100%",
                     }}
+                    onLoadEnd={() => setImgLoading(false)}
                     resizeMode="contain"
                 />
                 </Animated.View>
@@ -389,116 +392,83 @@ export const OCR = ({ route, navigation }: OCRProps) => {
                     backgroundColor: "white",
                 }}
             >
-                { !cardSubmissionBtnIsClick ? 
-                <>
-                    <View 
-                        style={{
-                            flex: 1, 
-                        }}
-                    >
-                        <CardImage image={image} />  
+                { !cardSubmissionBtnIsClick ?
+                    tags ?
+                    <>
                         <View 
-                            style={{...styles.responseContainer, flex: 0}}
-                        > 
-                            <TextInput
-                                style={sentenceEditMode ? 
-                                    { 
-                                        borderColor: theme.colors.primary,
-                                        width: width - 50,
-                                        height: height / 4,
-                                        fontSize: 30, // hard coded
-                                        borderRadius: 20,
-                                        borderStyle: 'solid',
-                                        borderWidth: 0.5,
-                                        padding: 10,
-                                        margin: 20,
-                                    } : 
-                                    {...styles.responseText, 
-                                        borderColor: theme.colors.secondary,
-                                        borderStyle: 'solid',
-                                        borderWidth: 0.5,
-                                        padding: 10,
-                                        borderRadius: 20,
-                                        margin: 20,
-                                        width: width - 50,
-                                        height: height / 4,
-                                        fontSize: 30, // hard coded
-                                    }}
-                                onSelectionChange={
-                                    // sentenceEditMode ?
-                                    (e) => handleSelectionChange(e) 
-                                    // : 
-                                    // () => {}
-                                }
-                                selectTextOnFocus={sentenceEditMode ? true : false}
-                                onChangeText={(text) => setResponseText(text)}
-                                editable={sentenceEditMode ? true : false}
-                                multiline={true}
-                            >
-                                {responseText}
-                            </TextInput>
-                            <Chip 
-                                mode="flat"
-                                style={{
-                                    backgroundColor: sentenceEditMode ? theme.colors.primary: theme.colors.tertiary,
-                                    borderRadius: 20,
-                                    borderWidth: 1,
-                                    borderColor: sentenceEditMode ? theme.colors.tertiary: theme.colors.primary,
-                                    alignSelf: 'flex-end',
-                                    marginRight: 20,
-                                    justifyContent: 'center'
-                                }}
-                                onPress={() => setSentenceEditMode((prev) => !prev)}
-                            >
-                                <Text 
-                                    style={{
-                                        fontSize: 10,
-                                        textAlign: 'center',
-                                        fontWeight: 'bold',
-                                        color: sentenceEditMode ? theme.colors.tertiary: theme.colors.primary,
-                                    }}
-                                >
-                                    {sentenceEditMode ? "Done" : "Edit Sentence"}
-                                </Text>
-                            </Chip>
-                        </View>                        
-                    </View>
-                    <View style={{...styles.userTextSelection, flex: 0}}>
-                        <TextInput 
-                            style={{ 
-                                // https://stackoverflow.com/questions/36444874/adding-border-only-to-the-one-side-of-the-text-component-in-react-native-ios
-                                marginLeft: 20,
-                                alignSelf: 'flex-start',
-                                borderLeftWidth: 3,
-                                borderLeftColor: theme.colors.primary,
-                                borderStyle: 'solid',
-                                paddingLeft: 10,
+                            style={{
+                                flex: 1, 
                             }}
-                            value={"Selected word :"}
-                            editable={false}
-                        />
-                        <View style={{height: 50}}>
-                            { !selectedText ? 
-                                <Text 
-                                    variant='labelSmall'
-                                    style={{
-                                        color: 'rgba(0,0,0,0.3)',
-                                        padding: 10
-                                    }}
+                        >
+                            <CardImage image={image} />  
+                            <View 
+                                style={{...styles.responseContainer, flex: 0}}
+                            > 
+                                <TextInput
+                                    style={sentenceEditMode ? 
+                                        { 
+                                            borderColor: theme.colors.primary,
+                                            width: width - 50,
+                                            height: height / 4,
+                                            fontSize: 30, // hard coded
+                                            borderRadius: 20,
+                                            borderStyle: 'solid',
+                                            borderWidth: 0.5,
+                                            padding: 10,
+                                            margin: 20,
+                                        } : 
+                                        {...styles.responseText, 
+                                            borderColor: theme.colors.secondary,
+                                            borderStyle: 'solid',
+                                            borderWidth: 0.5,
+                                            padding: 10,
+                                            borderRadius: 20,
+                                            margin: 20,
+                                            width: width - 50,
+                                            height: height / 4,
+                                            fontSize: 30, // hard coded
+                                        }}
+                                    onSelectionChange={
+                                        // sentenceEditMode ?
+                                        (e) => handleSelectionChange(e) 
+                                        // : 
+                                        // () => {}
+                                    }
+                                    selectTextOnFocus={sentenceEditMode ? true : false}
+                                    onChangeText={(text) => setResponseText(text)}
+                                    editable={sentenceEditMode ? true : false}
+                                    multiline={true}
                                 >
-                                    User your finger to select a word from the above sentence</Text>
-                                :
-                                <Text
-                                    variant="displaySmall"
+                                    {responseText}
+                                </TextInput>
+                                <Chip 
+                                    mode="flat"
                                     style={{
-                                        padding: 10
+                                        backgroundColor: sentenceEditMode ? theme.colors.primary: theme.colors.tertiary,
+                                        borderRadius: 20,
+                                        borderWidth: 1,
+                                        borderColor: sentenceEditMode ? theme.colors.tertiary: theme.colors.primary,
+                                        alignSelf: 'flex-end',
+                                        marginRight: 30,
+                                        justifyContent: 'center'
                                     }}
-                                >{selectedText}</Text>
-                            }
+                                    onPress={() => setSentenceEditMode((prev) => !prev)}
+                                >
+                                    <Text 
+                                        style={{
+                                            fontSize: 10,
+                                            textAlign: 'center',
+                                            fontWeight: 'bold',
+                                            color: sentenceEditMode ? theme.colors.tertiary: theme.colors.primary,
+                                        }}
+                                    >
+                                        {sentenceEditMode ? "Done" : "Edit Sentence"}
+                                    </Text>
+                                </Chip>
+                            </View>                        
                         </View>
-                    </View>
-                    <View style={{flex: 0, alignItems: 'center', marginTop: 25}}>
-                        <TextInput 
+                        <View style={{...styles.userTextSelection, flex: 0}}>
+                            <TextInput 
                                 style={{ 
                                     // https://stackoverflow.com/questions/36444874/adding-border-only-to-the-one-side-of-the-text-component-in-react-native-ios
                                     marginLeft: 20,
@@ -506,9 +476,9 @@ export const OCR = ({ route, navigation }: OCRProps) => {
                                     borderLeftWidth: 3,
                                     borderLeftColor: theme.colors.primary,
                                     borderStyle: 'solid',
-                                    paddingLeft: 10
+                                    paddingLeft: 10,
                                 }}
-                                value={"Dictionary result :"}
+                                value={"Selected word :"}
                                 editable={false}
                             />
                             <View style={{height: 50}}>
@@ -519,42 +489,78 @@ export const OCR = ({ route, navigation }: OCRProps) => {
                                             color: 'rgba(0,0,0,0.3)',
                                             padding: 10
                                         }}
-                                    >User your finger to select a word from the above sentence</Text>
+                                    >
+                                        User your finger to select a word from the above sentence</Text>
                                     :
-                                    <Text 
+                                    <Text
                                         variant="displaySmall"
                                         style={{
                                             padding: 10
-                                        }}   
-                                    >{resultFromDictionaryLookup}</Text>
+                                        }}
+                                    >{selectedText}</Text>
                                 }
                             </View>
-                    </View>
-
-                    {/* 🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡 */}
-                    <View style={{flex: 0, alignItems: 'center', marginTop: 25}}>
-                        <TextInput 
-                            style={{ 
-                                // https://stackoverflow.com/questions/36444874/adding-border-only-to-the-one-side-of-the-text-component-in-react-native-ios
-                                marginLeft: 20,
-                                alignSelf: 'flex-start',
-                                borderLeftWidth: 3,
-                                borderLeftColor: theme.colors.primary,
-                                borderStyle: 'solid',
-                                paddingLeft: 10
-                            }}
-                            value={"Select Tags :"}
-                            editable={false}
-                        />
-                        <View style={styles.tagBtnContainer}>
-                            {/* {handleTagCreation()} */}
-                            <HandleTagCreation />
                         </View>
-                    </View>
+                        <View style={{flex: 0, alignItems: 'center', marginTop: 25}}>
+                            <TextInput 
+                                    style={{ 
+                                        // https://stackoverflow.com/questions/36444874/adding-border-only-to-the-one-side-of-the-text-component-in-react-native-ios
+                                        marginLeft: 20,
+                                        alignSelf: 'flex-start',
+                                        borderLeftWidth: 3,
+                                        borderLeftColor: theme.colors.primary,
+                                        borderStyle: 'solid',
+                                        paddingLeft: 10
+                                    }}
+                                    value={"Dictionary result :"}
+                                    editable={false}
+                                />
+                                <View style={{height: 50}}>
+                                    { !selectedText ? 
+                                        <Text 
+                                            variant='labelSmall'
+                                            style={{
+                                                color: 'rgba(0,0,0,0.3)',
+                                                padding: 10
+                                            }}
+                                        >User your finger to select a word from the above sentence</Text>
+                                        :
+                                        <Text 
+                                            variant="displaySmall"
+                                            style={{
+                                                padding: 10
+                                            }}   
+                                        >{resultFromDictionaryLookup}</Text>
+                                    }
+                                </View>
+                        </View>
 
-                    {/* 🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡 */}
+                        {/* 🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡 */}
+                        <View style={{flex: 0, alignItems: 'center', marginTop: 25}}>
+                            <TextInput 
+                                style={{ 
+                                    // https://stackoverflow.com/questions/36444874/adding-border-only-to-the-one-side-of-the-text-component-in-react-native-ios
+                                    marginLeft: 20,
+                                    alignSelf: 'flex-start',
+                                    borderLeftWidth: 3,
+                                    borderLeftColor: theme.colors.primary,
+                                    borderStyle: 'solid',
+                                    paddingLeft: 10
+                                }}
+                                value={"Select Tags :"}
+                                editable={false}
+                            />
+                            <View style={styles.tagBtnContainer}>
+                                {/* {handleTagCreation()} */}
+                                <HandleTagCreation />
+                            </View>
+                        </View>
 
-                </>
+                        {/* 🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡 */}
+
+                    </>
+                    : <ActivityIndicator /> 
+
                     :
                 !cardIsSubmitted && !cardSubmissionError ? 
                     <Text 

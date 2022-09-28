@@ -77,7 +77,7 @@ export const Home = () => {
   const [navigateTo, setNavigateTo] = useState({item: null}); 
   // from search view: navigate to feed card, reset navigateTo state
   useEffect(() => {
-      if (selectedTags.length === 0 && text == '' && !textInputOnFocus && navigateTo.item) {
+      if (selectedTags.length === 0 && text == '' && !textInputOnFocus && navigateTo.item !== null) {
           navigation.navigate("FeedCard", navigateTo);
           setNavigateTo({item: null});
       }
@@ -172,6 +172,7 @@ export const Home = () => {
               setFlashcardsFeed(result);
               setFlashcardsCollection(result.filter(flashcard => flashcard["created_by"] === userId));
               setLoading(false);
+              setNavigateTo({item: null}); // reset navigateTo
           } catch (err) {
               console.log(err);
           }
