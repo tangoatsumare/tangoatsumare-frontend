@@ -13,6 +13,8 @@ import { LogBox } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 LogBox.ignoreAllLogs();
 
+SplashScreen.preventAutoHideAsync();
+
 export default function App() {
 
   const [appIsReady, setAppIsReady] = useState(false);
@@ -20,7 +22,7 @@ export default function App() {
   useEffect(() => {
     async function prepare() {
       try {
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 1000));
       } catch (e) {
         console.warn(e);
       } finally {
