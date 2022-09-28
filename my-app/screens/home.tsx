@@ -74,6 +74,15 @@ export const Home = () => {
 
   const [loading, setLoading] = useState(true);
 
+  const [navigateTo, setNavigateTo] = useState({item: null}); 
+  // from search view: navigate to feed card, reset navigateTo state
+  useEffect(() => {
+      if (selectedTags.length === 0 && text == '' && !textInputOnFocus && navigateTo.item) {
+          navigation.navigate("FeedCard", navigateTo);
+          setNavigateTo({item: null});
+      }
+  }, [selectedTags, text, textInputOnFocus, navigateTo]);
+
   // setting the header section
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -106,17 +115,6 @@ export const Home = () => {
         />
       ),
       headerRight: () => {
-        // if (textInputOnFocus) {
-        //   return (
-        //     <Button 
-        //         mode="text" 
-        //         onPress={cancelSearch}
-        //         style={{marginLeft: 5}}
-        //     >
-        //       <Text variant="labelLarge" style={{color: 'black'}}>cancel</Text>
-        //       </Button>
-        //   );
-        // } else 
         if (!textInputOnFocus && submitIsClick) {
           return (
             <TouchableOpacity 
@@ -265,12 +263,6 @@ export const Home = () => {
       </TouchableOpacity>
     );
   });
-  
-  // useEffect(() => {
-  //   if (!textInputOnFocus && scrollRef.current) {
-  //     scrollRef.current.scrollToEnd();
-  //   }
-  // }, [textInputOnFocus, scrollRef.current]);
 
   const Indicator = ({measures, scrollX}) => {
     const inputRange = data.map((_, i) => i * width);
@@ -328,10 +320,8 @@ export const Home = () => {
     return (
       <View 
         style={{
-          // flex:1, 
           position: 'absolute',
           top: 10,
-          // marginBottom: 20,
           width
         }}
       >
@@ -358,11 +348,12 @@ export const Home = () => {
   const [currentView, setCurrentView] = useState("feed");
   const handleScroll = (event) => {
     if (event.nativeEvent.contentOffset.x === width) {
-      setCurrentView("collection")
+      setCurrentView("collection") 
+      // this state update is causing this Home Component to refresh, 
+      // causing the tab indicator to render.. not desirable
     } else if (event.nativeEvent.contentOffset.x === 0) {
-      setCurrentView("feed");
+      setCurrentView("feed"); // this is causing the tab indicator to render.. not desirable
     }
-    // console.log(event.nativeEvent.contentOffset.x);
   };
 
   const CreateYourFirstCard = () => {
@@ -422,6 +413,18 @@ export const Home = () => {
     );
   }
 
+  const [ scrollContentChanged, setScrollContentChanged ] = useState(false);
+  useEffect(() => {
+    if (scrollContentChanged && currentView === 'collection') {
+      console.log('hi');
+      scrollRef.current.scrollToEnd();
+    }
+  }, [scrollContentChanged, currentView]);
+  
+  useEffect(() => {
+    if (scrollContentChanged) setScrollContentChanged(false);
+  }, [scrollContentChanged]);
+
   return (
     <View style={styles.master}>
       { !textInputOnFocus && flashcardsFeed && flashcardsCollection ? 
@@ -444,7 +447,8 @@ export const Home = () => {
               onContentSizeChange={() => { 
                 // after search bar text input is not focused, 
                 // force a scroll to the end if current view is collection
-                if (currentView === 'collection') scrollRef.current.scrollToEnd()
+                // only fire if user is coming back from the search view to the collection/feed view
+                setScrollContentChanged(true);
               }}
               onScroll={
                 Animated.event(
@@ -529,6 +533,8 @@ export const Home = () => {
           setSelectedTags={setSelectedTags}
           tags={tags}
           setTags={setTags}
+          navigateTo={navigateTo}
+          setNavigateTo={setNavigateTo}
         /> 
       }
   </View>
