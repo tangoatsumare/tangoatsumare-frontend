@@ -298,15 +298,16 @@ export const SearchBody = (props: SearchBodyProps) => {
 
     const handleShowFlashcard = (item: any) => {
         // reset the home screen before navigating to the feed card
+        setTextInputOnFocus(false);
+        Keyboard.dismiss();
+        setSelectedTags([]);
+        setText('');
+
         setNavigateTo((prev) => {
             const result = {...prev};
             result.item = item;
             return result;
         });
-
-        setSelectedTags([]);
-        setText('');
-        setTextInputOnFocus(false);
         // navigation.navigate("FeedCard", {item: item})
         // console.log(flashcardID);
     };
