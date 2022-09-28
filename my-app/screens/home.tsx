@@ -172,7 +172,7 @@ export const Home = () => {
               setFlashcardsFeed(result);
               setFlashcardsCollection(result.filter(flashcard => flashcard["created_by"] === userId));
               setLoading(false);
-              setNavigateTo({item: null}); // reset navigateTo
+              // setNavigateTo({item: null}); // reset navigateTo
           } catch (err) {
               console.log(err);
           }
