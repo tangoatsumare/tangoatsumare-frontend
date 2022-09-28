@@ -370,6 +370,7 @@ export const SearchBody = (props: SearchBodyProps) => {
             <TouchableOpacity 
             style={{marginBottom: 5}} key={item._id}
             onPress={() => handleShowFlashcard(item)}
+            activeOpacity={1}
             >
                 <Animated.View
                     style={{opacity: fadeAnim}}

@@ -41,6 +41,7 @@ export const Collection = ({item}) => {
     <TouchableOpacity 
       onPress={() => { handleShowFlashcard(item) }}
       style={styles.collectionItem}
+      activeOpacity={1}
     >
       <Animated.View
         style={{opacity: fadeAnim}}

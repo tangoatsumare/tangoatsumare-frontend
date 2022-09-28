@@ -56,6 +56,7 @@ export const Feed = ({item}) => {
       <View style={styles.item}>
         <TouchableOpacity 
             onPress={() => { handleShowFeedcard(item) }}
+            activeOpacity={1}
         >
             <Animated.View 
               style={{

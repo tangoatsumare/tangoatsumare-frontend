@@ -380,13 +380,15 @@ export const OCR = ({ route, navigation }: OCRProps) => {
     }
 
     return (
-        <ScrollView 
-            contentContainerStyle={{
+        <View 
+            style={{
                 ...styles.container,
+                flex:1, alignItems: 'center'
             }}
+            // contentContainerStyle={{}}
             bounces={false}
         >
-            <View
+            <ScrollView
                 style={{
                     flex: 1,
                     backgroundColor: "white",
@@ -401,8 +403,8 @@ export const OCR = ({ route, navigation }: OCRProps) => {
                             }}
                         >
                             <CardImage image={image} />  
-                            <View 
-                                style={{...styles.responseContainer, flex: 0}}
+                            <ScrollView 
+                                style={{...styles.responseContainer, flex: 1}}
                             > 
                                 <TextInput
                                     style={sentenceEditMode ? 
@@ -450,7 +452,8 @@ export const OCR = ({ route, navigation }: OCRProps) => {
                                         borderColor: sentenceEditMode ? theme.colors.tertiary: theme.colors.primary,
                                         alignSelf: 'flex-end',
                                         marginRight: 30,
-                                        justifyContent: 'center'
+                                        justifyContent: 'center',
+                                        // flex: 1
                                     }}
                                     onPress={() => setSentenceEditMode((prev) => !prev)}
                                 >
@@ -465,7 +468,7 @@ export const OCR = ({ route, navigation }: OCRProps) => {
                                         {sentenceEditMode ? "Done" : "Edit Sentence"}
                                     </Text>
                                 </Chip>
-                            </View>                        
+                            </ScrollView>                        
                         </View>
                         <View style={{...styles.userTextSelection, flex: 0}}>
                             <TextInput 
@@ -575,7 +578,14 @@ export const OCR = ({ route, navigation }: OCRProps) => {
                     >Making a new card...</Text>
                          : 
                     cardIsSubmitted && !cardSubmissionError ?
-                    <View style={styles.submissionContainer}>
+                    <ScrollView style={styles.submissionContainer}
+                        contentContainerStyle={{
+                            marginTop: height / 4, // hard code
+                            flex: 1,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                    >
                         <Icon name="check-circle" size={150}></Icon>
                         <Text variant="displaySmall" style={{fontWeight: 'bold'}}>Submitted!</Text>
                         <TouchableOpacity
@@ -610,7 +620,7 @@ export const OCR = ({ route, navigation }: OCRProps) => {
                         </TouchableOpacity>
 
 
-                    </View> :
+                    </ScrollView> :
                     <View>
                         <Text>Oh no.. something went wrong!</Text>
                         <Text>Try again or contact the dev team 🙇 </Text>
@@ -629,7 +639,7 @@ export const OCR = ({ route, navigation }: OCRProps) => {
                         >OK</Button>
                     </View>
                 }
-            </View>
+            </ScrollView>
             { !cardSubmissionBtnIsClick &&
                 <TouchableOpacity
                     onPress={submitFlashCard}
@@ -658,7 +668,7 @@ export const OCR = ({ route, navigation }: OCRProps) => {
                     </Button>
                 </TouchableOpacity>
             }
-        </ScrollView>
+        </View>
     );
 };
 
@@ -666,7 +676,6 @@ const styles = StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: 'white',
-      alignItems: 'center',
     //   justifyContent: 'center',
     },
     button: {
@@ -707,8 +716,7 @@ const styles = StyleSheet.create({
     // },
     submissionContainer: {
         flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
+
     },
     tagBtnContainer: {
         paddingTop: 5,
