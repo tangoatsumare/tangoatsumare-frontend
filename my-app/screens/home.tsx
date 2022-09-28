@@ -365,6 +365,63 @@ export const Home = () => {
     // console.log(event.nativeEvent.contentOffset.x);
   };
 
+  const CreateYourFirstCard = () => {
+    return (
+      <View style={{
+        ...styles.container, 
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+      <Text
+        variant="bodyLarge"
+      >
+        Create your first Tango Flashcard
+      </Text>
+      <TouchableOpacity
+        onPress={() => 
+          navigation.navigate("Camera")
+        }
+        style={{
+          marginTop: 20
+        }}
+      >
+        <Button 
+          mode="contained"
+          style={{
+            width: width / 2,
+            padding: 5,
+            borderRadius: 30,
+            backgroundColor: theme.colors.primary,
+            borderStyle: 'solid',
+            borderWidth: 1.5,
+            borderColor: theme.colors.primary
+          }}
+        >
+          <Text
+            variant="bodyLarge"
+            style={{color: theme.colors.tertiary}}
+          >Create</Text>
+        </Button>
+      </TouchableOpacity>
+    </View>
+    );
+  }
+
+  const NoSearchResultFound = () => {
+    return (
+      <View
+        style={{
+          ...styles.container, 
+          marginTop: 100, // hard coded
+          alignItems: 'center'
+        }}
+      >
+        <Text
+        >result not found.</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.master}>
       { !textInputOnFocus && flashcardsFeed && flashcardsCollection ? 
@@ -427,10 +484,11 @@ export const Home = () => {
                 {submitIsClick ? 
                   loading ? 
                     <ActivityIndicator /> : 
-                    <Text>result not found.</Text> : 
+                    <NoSearchResultFound />
+                    : 
                   loading ? 
                     <ActivityIndicator /> : 
-                    <Text>no entry</Text>
+                    <CreateYourFirstCard />
                 }
               </View>
           }
@@ -447,7 +505,12 @@ export const Home = () => {
                   contentContainerStyle={{paddingBottom: 50}}
                   showsVerticalScrollIndicator={false}
                 />
-            : <Text style={styles.container}>{submitIsClick ? "result not found." : "no entry"}</Text>
+            : 
+              submitIsClick ? 
+                <NoSearchResultFound />
+                 :  
+                 <CreateYourFirstCard />
+                                 
           }
         </Animated.ScrollView>
         <Tabs scrollX={scrollX} data={data} onItemPress={onItemPress}/>
