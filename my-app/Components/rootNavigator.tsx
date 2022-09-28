@@ -93,7 +93,14 @@ export const CamNavigator = () => {
                 ),
               })}
         >
-            <Drawer.Screen name="Camera Screen" options={{headerTitle:"Camera"}} component={Camera} />
+            <Drawer.Screen 
+                name="Camera Screen" 
+                options={{
+                    headerTitle:"",
+                    headerShadowVisible: false
+                }} 
+                component={Camera} 
+            />
         </Drawer.Navigator>
     );
 };
