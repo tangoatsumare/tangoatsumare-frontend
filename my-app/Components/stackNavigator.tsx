@@ -105,7 +105,7 @@ export const TabHome = () => {
                     tabBarBadge: metrics ? 
                         metrics.new + metrics.due === 0 ?
                          undefined : metrics.new + metrics.due
-                         : undefined, // TODO: Show the ready to review cards here
+                         : undefined,
                     tabBarBadgeStyle: {}
                 }}
             />
@@ -151,9 +151,27 @@ export const StackNav = () => {
                 }} 
                 component={SRS}
             />
-            <RootStack.Screen name="Camera" component={Camera}/>
-            <RootStack.Screen name="OCR" component={OCR}/>
-            <RootStack.Screen name="Collection" component={Collection}/>
+            <RootStack.Screen 
+                name="Camera" 
+                component={Camera}
+                options={{
+                    headerShadowVisible: false,
+                    headerTitle: '',
+                    headerTintColor: 'black',
+                    headerStyle: {},
+                }}
+            />
+            <RootStack.Screen 
+                name="OCR" 
+                component={OCR}
+                options={{
+                    headerShadowVisible: false,
+                    headerTitle: 'Select a word to learn',
+                    headerTintColor: 'black',
+                    headerStyle: {},
+                }}
+            />
+            {/* <RootStack.Screen name="Collection" component={Collection}/> */}
             <RootStack.Screen 
                 name="Card" 
                 component={SingleCard} 
@@ -174,8 +192,8 @@ export const StackNav = () => {
                     headerStyle: {},
                 }}
             />
-            <RootStack.Screen name="Front" component={Front}/>
-            <RootStack.Screen name="Back" component={Back}/>
+            {/* <RootStack.Screen name="Front" component={Front}/>
+            <RootStack.Screen name="Back" component={Back}/> */}
             <RootStack.Screen 
                 name="Review" 
                 component={Review}

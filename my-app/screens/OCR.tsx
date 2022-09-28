@@ -1,6 +1,9 @@
 // import { useNavigation} from "@react-navigation/core";
-import { Image, StyleSheet, TextInput, View, ScrollView, TouchableOpacity, ImageBackground } from 'react-native';
-import { Button, Text, Chip } from 'react-native-paper';
+import { 
+    Image, StyleSheet, TextInput, View, ScrollView, TouchableOpacity, ImageBackground,
+    Dimensions, Pressable, Animated
+} from 'react-native';
+import { Button, Text, Chip, ActivityIndicator } from 'react-native-paper';
 import React, { useState, useEffect } from 'react';
 import { sendImageToCloudVisionApi } from '../utils/flashcard';
 import app from '../firebase';
@@ -19,7 +22,8 @@ import axios from 'axios';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import dayjs from 'dayjs';
 import { initializeSRSFlashcard, TangoFlashcard } from '../utils/supermemo';
-import Icon from 'react-native-vector-icons/Feather';
+import Icon from 'react-native-vector-icons/Octicons';
+import {useTheme} from 'react-native-paper';
 
 interface OCRProps {
     route: any;
@@ -30,8 +34,10 @@ interface Tag {
     [key: string]: any;
 }
 
+const {width, height} = Dimensions.get('screen');
 
 export const OCR = ({ route, navigation }: OCRProps) => {
+    const theme = useTheme();
     const auth = getAuth();
     const userId = auth.currentUser?.uid;
     const storage = getStorage(app);
@@ -52,6 +58,8 @@ export const OCR = ({ route, navigation }: OCRProps) => {
     const [ allTagInfo, setAllTagInfo ] = useState<any>();
     const [ selectedTagsList, setSelectedTagsList ] = useState<any>([]);
     const [ numOfTags, setNumOfTags ] = useState<any>(0);
+
+    const [imgLoading, setImgLoading] = useState(true);
 
     // send to cloud vision once components are mounted
     useEffect(() => {
@@ -114,41 +122,48 @@ export const OCR = ({ route, navigation }: OCRProps) => {
 
     // 🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡
 
-    const handleTagCreation = () => {
-
+    const HandleTagCreation = () => {
         // ⏭⏭⏭⏭⏭⏭ NEXT change color on press
-        if (tags) {
-            return Object.keys(tags).map((tag) => {
-                return (
-                    <Button mode="contained" key={tag} 
-                    labelStyle={{color: 'white'}}
-                    style={tags[tag] ? {...styles.tagButtons, backgroundColor: '#FF4F4F'} : styles.tagButtons}
-                    // selected={tags[tag]} //need to change this to something else or useeffect for this ?
-                    onPress={() => {
-                        
-                        console.log(`${tag} pressed`);
-                        console.log("tags[tag] boolean check before: ", tags[tag]);
-                        if (tags[tag] === false) {
-                            tags[tag] = true;
-                            setSelectedTagsList([...selectedTagsList, tag])
-                            setNumOfTags(numOfTags+1);
-                            // console.log("tag: ", tag);
-                        } else {
-                            tags[tag] = false;
-                            const tempTagsList = selectedTagsList
-                            const tagIndex = tempTagsList.indexOf(tag);
-                            if (tagIndex > -1) tempTagsList.splice(tagIndex, 1);
-                            setSelectedTagsList(tempTagsList)
-                            setNumOfTags(numOfTags-1);
-                        }
-                        console.log("tags[tag] boolean check after: ", tags[tag]);
-                    }}
-                    >
-                        {tag}
-                    </Button>
-                )
-            })
-        }
+        return (
+            tags ?
+                Object.keys(tags).map((tag) => {
+                    return (
+                        <Button mode="contained" key={tag} 
+                        labelStyle={{color: 'white'}}
+                        style={tags[tag] ? {...styles.tagButtons, backgroundColor: theme.colors.primary} : styles.tagButtons}
+                        // selected={tags[tag]} //need to change this to something else or useeffect for this ?
+                        onPress={() => {
+                            
+                            console.log(`${tag} pressed`);
+                            console.log("tags[tag] boolean check before: ", tags[tag]);
+                            if (tags[tag] === false) {
+                                tags[tag] = true;
+                                setSelectedTagsList([...selectedTagsList, tag])
+                                setNumOfTags(numOfTags+1);
+                                // console.log("tag: ", tag);
+                            } else {
+                                tags[tag] = false;
+                                const tempTagsList = selectedTagsList
+                                const tagIndex = tempTagsList.indexOf(tag);
+                                if (tagIndex > -1) tempTagsList.splice(tagIndex, 1);
+                                setSelectedTagsList(tempTagsList)
+                                setNumOfTags(numOfTags-1);
+                            }
+                            console.log("tags[tag] boolean check after: ", tags[tag]);
+                        }}
+                        >
+                            <Text 
+                                variant='labelMedium' 
+                                style={{
+                                    color: theme.colors.tertiary,
+                                    fontWeight: 'bold'
+                                }}
+                            >{tag}</Text>
+                        </Button>
+                    )
+                })
+            : null
+        )
     }
 
     // useEffect(() => {
@@ -223,7 +238,6 @@ export const OCR = ({ route, navigation }: OCRProps) => {
     const submitFlashCard = async (): Promise<void> => {
         try {
             if (selectedText && responseText && resultFromDictionaryLookup) {
-                // await uploadToFirebaseCloudStorage();
                 console.log('ok')
                 setCardSubmissionBtnIsClick(true);
             } else console.log('hmmm....');
@@ -281,13 +295,6 @@ export const OCR = ({ route, navigation }: OCRProps) => {
                     const SRSFlashcard = initializeSRSFlashcard(flashcard);
                     console.log(SRSFlashcard);
 
-                    // uid -> userId
-                    // flashcard_id -> return value from the flashcards POST request (type: ObjectId)
-                    // interval -> from SRSFlashcard
-                    // efactor -> from SRSFlashcard
-                    // repetition -> from SRSFlashcard
-                    // due_date -> from SRSFlashcard
-
                     const requestBodyForUsersToCards = {
                         uid: userId,
                         flashcard_id: responseJson._id,
@@ -333,110 +340,276 @@ export const OCR = ({ route, navigation }: OCRProps) => {
     }, [cloudStoragePath]);
 
     // read layout from the DOM and synchronously re-render
+    // remove header and back button when card is submitted
     React.useLayoutEffect(() => {
-        navigation.setOptions({
-            headerRight: () => {
-                if (!cardSubmissionBtnIsClick) {
-                    return (
-                        <Button 
-                            onPress={submitFlashCard}
-                        >
-                            <Icon name="send" size={20} color="black"></Icon>
-                        </Button>
-                    );
-                }
-            }
-        })
-    })
+        if (cardSubmissionBtnIsClick) {
+            navigation.setOptions({
+                headerTitle: "",
+                headerLeft: () => <></>
+            });
+        }
+    });
+
+    const CardImage = ({image}) => {
+        return (
+            // {/* https://reactnative.dev/docs/pressable */}
+            <Pressable
+                onPress={() => console.log("completed a press")}
+                onLongPress={()=> console.log("long pressed")}
+                style={({ pressed }) => [
+                    {
+                    height: pressed
+                        ? 150
+                        : 100,
+                        
+                    },
+                ]}
+                >
+                <Animated.View>
+                <Image 
+                    source={{ uri: image ? image : ""}} 
+                    style={{
+                        height: "100%",
+                    }}
+                    onLoadEnd={() => setImgLoading(false)}
+                    resizeMode="contain"
+                />
+                </Animated.View>
+            </Pressable>
+        );
+    }
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
-            <ImageBackground
-                source={require("../assets/wallpaper1.png")}
+        <ScrollView 
+            contentContainerStyle={{
+                ...styles.container,
+            }}
+            bounces={false}
+        >
+            <View
                 style={{
                     flex: 1,
                     backgroundColor: "white",
-                    alignItems: 'center',
-                    // justifyContent: 'center',
                 }}
-                resizeMode="contain"
             >
-                { !cardSubmissionBtnIsClick ? 
-                <>
-                    <Image 
-                        source={{ uri: image ? image : ""}} 
-                        style={styles.image}
-                        resizeMode="contain"
-                    />
-                    <View 
-                        style={styles.responseContainer}
-                    >
-                        <View style={styles.responseTitleContainer}>
-                            <Text 
-                                // style={styles.responseTitle}
-                                variant="labelMedium"
-                            >Select a word to learn</Text>
-                            <Chip 
-                                icon={sentenceEditMode ? "check-bold" : "cog"}
-                                // textColor={sentenceEditMode ? "green" : "purple"}
-                                mode="flat"
-                                style={styles.editButton}
-                                onPress={() => setSentenceEditMode((prev) => !prev)}
-                            >
-                                {sentenceEditMode ? "done" : "edit"}
-                            </Chip>
-                        </View>
-                        <TextInput
-                            style={sentenceEditMode ? styles.responseTextEditMode : styles.responseText}
-                            onSelectionChange={handleSelectionChange}
-                            onChangeText={(text) => setResponseText(text)}
-                            editable={sentenceEditMode ? true : false}
-                            multiline={true}
+                { !cardSubmissionBtnIsClick ?
+                    tags ?
+                    <>
+                        <View 
+                            style={{
+                                flex: 1, 
+                            }}
                         >
-                            {responseText}
-                        </TextInput>
-                    </View>
-                    <View style={styles.userTextSelection}>
-                        <Text variant="labelMedium">You've selected</Text>
-                        <Text 
-                            style={styles.responseText}
-                            variant="displayMedium"
-                        >{selectedText}</Text>
-                    </View>
-                    <Text variant="labelMedium">Defintion</Text>
-                    <Text 
-                        style={styles.lookupText}
-                        variant="displayMedium"
-                    >{resultFromDictionaryLookup}</Text>
+                            <CardImage image={image} />  
+                            <View 
+                                style={{...styles.responseContainer, flex: 0}}
+                            > 
+                                <TextInput
+                                    style={sentenceEditMode ? 
+                                        { 
+                                            borderColor: theme.colors.primary,
+                                            width: width - 50,
+                                            height: height / 4,
+                                            fontSize: 30, // hard coded
+                                            borderRadius: 20,
+                                            borderStyle: 'solid',
+                                            borderWidth: 0.5,
+                                            padding: 10,
+                                            margin: 20,
+                                        } : 
+                                        {...styles.responseText, 
+                                            borderColor: theme.colors.secondary,
+                                            borderStyle: 'solid',
+                                            borderWidth: 0.5,
+                                            padding: 10,
+                                            borderRadius: 20,
+                                            margin: 20,
+                                            width: width - 50,
+                                            height: height / 4,
+                                            fontSize: 30, // hard coded
+                                        }}
+                                    onSelectionChange={
+                                        // sentenceEditMode ?
+                                        (e) => handleSelectionChange(e) 
+                                        // : 
+                                        // () => {}
+                                    }
+                                    selectTextOnFocus={sentenceEditMode ? true : false}
+                                    onChangeText={(text) => setResponseText(text)}
+                                    editable={sentenceEditMode ? true : false}
+                                    multiline={true}
+                                >
+                                    {responseText}
+                                </TextInput>
+                                <Chip 
+                                    mode="flat"
+                                    style={{
+                                        backgroundColor: sentenceEditMode ? theme.colors.primary: theme.colors.tertiary,
+                                        borderRadius: 20,
+                                        borderWidth: 1,
+                                        borderColor: sentenceEditMode ? theme.colors.tertiary: theme.colors.primary,
+                                        alignSelf: 'flex-end',
+                                        marginRight: 30,
+                                        justifyContent: 'center'
+                                    }}
+                                    onPress={() => setSentenceEditMode((prev) => !prev)}
+                                >
+                                    <Text 
+                                        style={{
+                                            fontSize: 10,
+                                            textAlign: 'center',
+                                            fontWeight: 'bold',
+                                            color: sentenceEditMode ? theme.colors.tertiary: theme.colors.primary,
+                                        }}
+                                    >
+                                        {sentenceEditMode ? "Done" : "Edit Sentence"}
+                                    </Text>
+                                </Chip>
+                            </View>                        
+                        </View>
+                        <View style={{...styles.userTextSelection, flex: 0}}>
+                            <TextInput 
+                                style={{ 
+                                    // https://stackoverflow.com/questions/36444874/adding-border-only-to-the-one-side-of-the-text-component-in-react-native-ios
+                                    marginLeft: 20,
+                                    alignSelf: 'flex-start',
+                                    borderLeftWidth: 3,
+                                    borderLeftColor: theme.colors.primary,
+                                    borderStyle: 'solid',
+                                    paddingLeft: 10,
+                                }}
+                                value={"Selected word :"}
+                                editable={false}
+                            />
+                            <View style={{height: 50}}>
+                                { !selectedText ? 
+                                    <Text 
+                                        variant='labelSmall'
+                                        style={{
+                                            color: 'rgba(0,0,0,0.3)',
+                                            padding: 10
+                                        }}
+                                    >
+                                        User your finger to select a word from the above sentence</Text>
+                                    :
+                                    <Text
+                                        variant="displaySmall"
+                                        style={{
+                                            padding: 10
+                                        }}
+                                    >{selectedText}</Text>
+                                }
+                            </View>
+                        </View>
+                        <View style={{flex: 0, alignItems: 'center', marginTop: 25}}>
+                            <TextInput 
+                                    style={{ 
+                                        // https://stackoverflow.com/questions/36444874/adding-border-only-to-the-one-side-of-the-text-component-in-react-native-ios
+                                        marginLeft: 20,
+                                        alignSelf: 'flex-start',
+                                        borderLeftWidth: 3,
+                                        borderLeftColor: theme.colors.primary,
+                                        borderStyle: 'solid',
+                                        paddingLeft: 10
+                                    }}
+                                    value={"Dictionary result :"}
+                                    editable={false}
+                                />
+                                <View style={{height: 50}}>
+                                    { !selectedText ? 
+                                        <Text 
+                                            variant='labelSmall'
+                                            style={{
+                                                color: 'rgba(0,0,0,0.3)',
+                                                padding: 10
+                                            }}
+                                        >User your finger to select a word from the above sentence</Text>
+                                        :
+                                        <Text 
+                                            variant="displaySmall"
+                                            style={{
+                                                padding: 10
+                                            }}   
+                                        >{resultFromDictionaryLookup}</Text>
+                                    }
+                                </View>
+                        </View>
 
-                    {/* 🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡 */}
+                        {/* 🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡 */}
+                        <View style={{flex: 0, alignItems: 'center', marginTop: 25}}>
+                            <TextInput 
+                                style={{ 
+                                    // https://stackoverflow.com/questions/36444874/adding-border-only-to-the-one-side-of-the-text-component-in-react-native-ios
+                                    marginLeft: 20,
+                                    alignSelf: 'flex-start',
+                                    borderLeftWidth: 3,
+                                    borderLeftColor: theme.colors.primary,
+                                    borderStyle: 'solid',
+                                    paddingLeft: 10
+                                }}
+                                value={"Select Tags :"}
+                                editable={false}
+                            />
+                            <View style={styles.tagBtnContainer}>
+                                {/* {handleTagCreation()} */}
+                                <HandleTagCreation />
+                            </View>
+                        </View>
 
-                    <Text style={styles.tagBtnContainer}>
-                        {handleTagCreation()}
-                    </Text>
+                        {/* 🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡 */}
 
-                    {/* 🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡 */}
+                    </>
+                    : <ActivityIndicator /> 
 
-                </>
                     :
                 !cardIsSubmitted && !cardSubmissionError ? 
-                    <Text>executing card submission</Text> : 
+                    <Text 
+                        variant="bodyMedium" 
+                        style={{
+                            flex: 1, 
+                            // alignItems: 'center', 
+                            // justifyContent: 'center', 
+                            fontWeight: 'bold',
+                            marginTop: height / 2.5 // hard coded
+                        }}
+                    >Making a new card...</Text>
+                         : 
                     cardIsSubmitted && !cardSubmissionError ?
                     <View style={styles.submissionContainer}>
-                        <Text>Submit successfully!</Text>
-                        <Button
-                            icon="check-circle-outline" 
-                            labelStyle={{fontSize: 150}}
-                            textColor="green"
-                        >{null}</Button>
-                        <Button 
-                            mode="outlined"
-                            textColor="black"
-                            style={styles.button}
-                                onPress={()=>{
-                                    navigation.navigate("Home")
+                        <Icon name="check-circle" size={150}></Icon>
+                        <Text variant="displaySmall" style={{fontWeight: 'bold'}}>Submitted!</Text>
+                        <TouchableOpacity
+                            onPress={()=>{
+                                navigation.navigate("TabHome")
+                            }}
+                        >
+                            <Button 
+                                mode="contained-tonal" 
+                                // icon="check-circle-outline" 
+                                // labelStyle={{fontSize: 150}}
+                                // textColor="green"
+                                style={{
+                                    marginTop: 30,
+                                    width: width / 2,
+                                    borderRadius: 30,
+                                    borderWidth: 1,
+                                    borderStyle: 'solid',
+                                    borderColor: theme.colors.primary,
+                                    backgroundColor: theme.colors.primary,
+                                    marginBottom: 30 // hard code
                                 }}
-                        >Return Home</Button>
+                            >
+                                <Text 
+                                    variant="bodyLarge"
+                                    style={{
+                                        color: theme.colors.tertiary, 
+                                        fontWeight: 'bold'
+                                    }}
+                                    >OK</Text>
+                            </Button>
+                        </TouchableOpacity>
+
+
                     </View> :
                     <View>
                         <Text>Oh no.. something went wrong!</Text>
@@ -451,12 +624,40 @@ export const OCR = ({ route, navigation }: OCRProps) => {
                             textColor="black"
                             style={styles.button}
                                 onPress={()=>{
-                                    navigation.navigate("Home")
+                                    navigation.navigate("TabHome")
                                 }}
-                        >Return Home</Button>
+                        >OK</Button>
                     </View>
                 }
-            </ImageBackground>
+            </View>
+            { !cardSubmissionBtnIsClick &&
+                <TouchableOpacity
+                    onPress={submitFlashCard}
+                    disabled={selectedText && responseText && resultFromDictionaryLookup? false : true}
+                >
+                    <Button 
+                        mode="contained-tonal" 
+                        style={{
+                            marginTop: 30,
+                            width: width / 2,
+                            borderRadius: 30,
+                            borderWidth: 1,
+                            borderStyle: 'solid',
+                            borderColor: selectedText && responseText && resultFromDictionaryLookup? theme.colors.primary: 'lightgrey',
+                            backgroundColor: selectedText && responseText && resultFromDictionaryLookup? theme.colors.primary: 'lightgrey',
+                            marginBottom: 30 // hard code
+                        }}
+                        >
+                        <Text 
+                            variant="bodyLarge"
+                            style={{
+                                color: theme.colors.tertiary, 
+                                fontWeight: 'bold'
+                            }}
+                            >Submit</Text>
+                    </Button>
+                </TouchableOpacity>
+            }
         </ScrollView>
     );
 };
@@ -464,26 +665,15 @@ export const OCR = ({ route, navigation }: OCRProps) => {
 const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#fff',
+      backgroundColor: 'white',
       alignItems: 'center',
-      justifyContent: 'center',
-    },
-    image: {
-        width: 305,
-        height: 159,
-        margin: 20
+    //   justifyContent: 'center',
     },
     button: {
         margin: 20,
     },
     responseContainer: {
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    responseTitleContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between'
+        flex: 1,
     },
     responseTitle: {
         backgroundColor: 'rgba(0,0,0,0.1)',
@@ -495,20 +685,13 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         overflow: 'hidden'
     },
-    editButton: {
-        color: 'black',
-        marginLeft: 20
-    },
+    // editButton: {
+    //     color: 'black',
+    //     marginLeft: 20
+    // },
     responseText: {
         fontSize: 20,
-        margin: 20
-    },
-    responseTextEditMode: {
-        borderStyle: 'solid',
-        borderWidth: 1,
-        padding: 10,
-        borderRadius: 10,
-        margin: 20
+        margin: 20,
     },
     userTextSelection: {
         alignItems: 'center',
@@ -518,38 +701,29 @@ const styles = StyleSheet.create({
     dictionaryLookup: {
         fontSize: 30,
     },
-    lookupText: {
-        fontSize: 20,
-        padding: 20
-    },
+    // lookupText: {
+    //     fontSize: 20,
+    //     padding: 20
+    // },
     submissionContainer: {
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
     },
     tagBtnContainer: {
-        flex: 0,
-        justifyContent: 'center',
-        alignContent: 'center',
-        // alignItems: 'center',
-        // flexDirection: 'row',
-        // justifyContent: 'space-between',
-        // flexWrap: 'wrap',
-        // alignItems: 'flex-start',
-        // backgroundColor: 'yellow',
-        // width: 350,
-        
+        paddingTop: 5,
+        paddingLeft: 20,
+        paddingRight: 20,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'flex-start',
+        // alignContent: 'center',
     },
     tagButtons: {
-        // width: '50%',
-        // fontSize: 50,
-        // alignItems: 'center',
-        // justifyContent: 'center',
-        // color: 'black',
-        // padding: 10
         backgroundColor: 'lightgray',
-        
+        borderRadius: 20,
+        margin: 2,
+        // height: 30
     }
-
   });
   

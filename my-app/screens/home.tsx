@@ -74,6 +74,15 @@ export const Home = () => {
 
   const [loading, setLoading] = useState(true);
 
+  const [navigateTo, setNavigateTo] = useState({item: null}); 
+  // from search view: navigate to feed card, reset navigateTo state
+  useEffect(() => {
+      if (selectedTags.length === 0 && text == '' && !textInputOnFocus && navigateTo.item !== null) {
+          navigation.navigate("FeedCard", navigateTo);
+          setNavigateTo({item: null});
+      }
+  }, [selectedTags, text, textInputOnFocus, navigateTo]);
+
   // setting the header section
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -106,17 +115,6 @@ export const Home = () => {
         />
       ),
       headerRight: () => {
-        // if (textInputOnFocus) {
-        //   return (
-        //     <Button 
-        //         mode="text" 
-        //         onPress={cancelSearch}
-        //         style={{marginLeft: 5}}
-        //     >
-        //       <Text variant="labelLarge" style={{color: 'black'}}>cancel</Text>
-        //       </Button>
-        //   );
-        // } else 
         if (!textInputOnFocus && submitIsClick) {
           return (
             <TouchableOpacity 
@@ -174,6 +172,7 @@ export const Home = () => {
               setFlashcardsFeed(result);
               setFlashcardsCollection(result.filter(flashcard => flashcard["created_by"] === userId));
               setLoading(false);
+              setNavigateTo({item: null}); // reset navigateTo
           } catch (err) {
               console.log(err);
           }
@@ -265,12 +264,6 @@ export const Home = () => {
       </TouchableOpacity>
     );
   });
-  
-  // useEffect(() => {
-  //   if (!textInputOnFocus && scrollRef.current) {
-  //     scrollRef.current.scrollToEnd();
-  //   }
-  // }, [textInputOnFocus, scrollRef.current]);
 
   const Indicator = ({measures, scrollX}) => {
     const inputRange = data.map((_, i) => i * width);
@@ -328,10 +321,8 @@ export const Home = () => {
     return (
       <View 
         style={{
-          // flex:1, 
           position: 'absolute',
           top: 10,
-          // marginBottom: 20,
           width
         }}
       >
@@ -358,12 +349,82 @@ export const Home = () => {
   const [currentView, setCurrentView] = useState("feed");
   const handleScroll = (event) => {
     if (event.nativeEvent.contentOffset.x === width) {
-      setCurrentView("collection")
+      setCurrentView("collection") 
+      // this state update is causing this Home Component to refresh, 
+      // causing the tab indicator to render.. not desirable
     } else if (event.nativeEvent.contentOffset.x === 0) {
-      setCurrentView("feed");
+      setCurrentView("feed"); // this is causing the tab indicator to render.. not desirable
     }
-    // console.log(event.nativeEvent.contentOffset.x);
   };
+
+  const CreateYourFirstCard = () => {
+    return (
+      <View style={{
+        ...styles.container, 
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+      <Text
+        variant="bodyLarge"
+      >
+        Create your first Tango Flashcard
+      </Text>
+      <TouchableOpacity
+        onPress={() => 
+          navigation.navigate("Camera")
+        }
+        style={{
+          marginTop: 20
+        }}
+      >
+        <Button 
+          mode="contained"
+          style={{
+            width: width / 2,
+            padding: 5,
+            borderRadius: 30,
+            backgroundColor: theme.colors.primary,
+            borderStyle: 'solid',
+            borderWidth: 1.5,
+            borderColor: theme.colors.primary
+          }}
+        >
+          <Text
+            variant="bodyLarge"
+            style={{color: theme.colors.tertiary}}
+          >Create</Text>
+        </Button>
+      </TouchableOpacity>
+    </View>
+    );
+  }
+
+  const NoSearchResultFound = () => {
+    return (
+      <View
+        style={{
+          ...styles.container, 
+          marginTop: 100, // hard coded
+          alignItems: 'center'
+        }}
+      >
+        <Text
+        >result not found.</Text>
+      </View>
+    );
+  }
+
+  const [ scrollContentChanged, setScrollContentChanged ] = useState(false);
+  useEffect(() => {
+    if (scrollContentChanged && currentView === 'collection') {
+      console.log('hi');
+      scrollRef.current.scrollToEnd();
+    }
+  }, [scrollContentChanged, currentView]);
+  
+  useEffect(() => {
+    if (scrollContentChanged) setScrollContentChanged(false);
+  }, [scrollContentChanged]);
 
   return (
     <View style={styles.master}>
@@ -387,7 +448,8 @@ export const Home = () => {
               onContentSizeChange={() => { 
                 // after search bar text input is not focused, 
                 // force a scroll to the end if current view is collection
-                if (currentView === 'collection') scrollRef.current.scrollToEnd()
+                // only fire if user is coming back from the search view to the collection/feed view
+                setScrollContentChanged(true);
               }}
               onScroll={
                 Animated.event(
@@ -427,10 +489,11 @@ export const Home = () => {
                 {submitIsClick ? 
                   loading ? 
                     <ActivityIndicator /> : 
-                    <Text>result not found.</Text> : 
+                    <NoSearchResultFound />
+                    : 
                   loading ? 
                     <ActivityIndicator /> : 
-                    <Text>no entry</Text>
+                    <CreateYourFirstCard />
                 }
               </View>
           }
@@ -447,7 +510,12 @@ export const Home = () => {
                   contentContainerStyle={{paddingBottom: 50}}
                   showsVerticalScrollIndicator={false}
                 />
-            : <Text style={styles.container}>{submitIsClick ? "result not found." : "no entry"}</Text>
+            : 
+              submitIsClick ? 
+                <NoSearchResultFound />
+                 :  
+                 <CreateYourFirstCard />
+                                 
           }
         </Animated.ScrollView>
         <Tabs scrollX={scrollX} data={data} onItemPress={onItemPress}/>
@@ -466,6 +534,8 @@ export const Home = () => {
           setSelectedTags={setSelectedTags}
           tags={tags}
           setTags={setTags}
+          navigateTo={navigateTo}
+          setNavigateTo={setNavigateTo}
         /> 
       }
   </View>
