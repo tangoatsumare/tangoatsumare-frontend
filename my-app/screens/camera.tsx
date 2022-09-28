@@ -3,12 +3,16 @@ import { StackNavigationProp} from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 
 import React, { useState } from 'react';
-import { StyleSheet, View, Image, ImageBackground } from 'react-native';
+import { StyleSheet, View, Image, ImageBackground, Dimensions } from 'react-native';
 import {Text, Button, Divider} from "react-native-paper";
 import * as ImagePicker from 'expo-image-picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { TouchableOpacity } from "react-native-gesture-handler";
+import { useTheme } from "react-native-paper";
+const {width, height} = Dimensions.get('screen');
 
 export const Camera = () => {
+    const theme = useTheme();
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
     const [image, setImage] = useState<string>(""); // typescript?
@@ -52,37 +56,99 @@ export const Camera = () => {
 
     return (
         <View style={styles.container}>
-            <ImageBackground
-                source={require("../assets/wallpaper2.png")}
+            <View
+                // source={require("../assets/wallpaper2.png")}
                 style={{flex: 1, backgroundColor: "white"}}
-                resizeMode="contain"
+                // resizeMode="contain"
             >
                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
                     {image && <Image source={{ uri: image }} style={{ width: 300, height: 300 }} resizeMode="contain"/>}
-                    {image ? <Button 
-                        mode="contained-tonal" 
-                        style={styles.button}
-                        disabled={image ? false : true}
-                        onPress={()=>{
-                            if (image) {
-                                navigation.navigate("OCR", {
-                                    image_uri: image,
-                                    image_base64: base64
-                                })
-                                setImage('');
-                            }
-                        }}
-                    >
-                        <Text variant="bodyLarge">continue creation</Text>
-                    </Button> :
                     <>
-                        <Text variant="headlineMedium">Choose a picture</Text>
-                        <Text variant="bodyMedium">and generate a tango flashcard</Text>
+                        <TouchableOpacity
+                            onPress={openCamera}
+                            style={{
+                                borderWidth: 1,
+                                borderStyle: 'solid',
+                                borderRadius: 30,
+                                borderColor: theme.colors.primary,
+                                backgroundColor: 'transparent',
+                                width: width / 2
+                            }}
+                        >
+                            <Button 
+                                icon="camera-outline"
+                            >
+                                <Text 
+                                    variant="labelLarge"
+                                    style={{
+                                        color: theme.colors.primary,
+                                        fontWeight: 'bold'
+                                    }}
+                                >Open Camera</Text>
+                            </Button>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={pickImage}
+                            style={{
+                                marginTop: 30,
+                                borderWidth: 1,
+                                borderStyle: 'solid',
+                                borderRadius: 30,
+                                borderColor: theme.colors.primary,
+                                backgroundColor: 'transparent',
+                                width: width / 2
+                            }}
+                        >
+                            <Button 
+                                icon="image-multiple"
+                            >
+                                <Text 
+                                    variant="labelLarge"
+                                    style={{
+                                        color: theme.colors.primary,
+                                        fontWeight: 'bold'
+                                    }}
+                                >Select an Image</Text>
+                            </Button>
+                        </TouchableOpacity>
                     </>
-
-                    }
+                    {image && 
+                    <TouchableOpacity
+                    disabled={image ? false : true}
+                    onPress={()=>{
+                        if (image) {
+                            navigation.navigate("OCR", {
+                                image_uri: image,
+                                image_base64: base64
+                            })
+                            setImage('');
+                        }
+                    }}
+                    >
+                        <Button 
+                            mode="contained-tonal" 
+                            style={{
+                                marginTop: 30,
+                                width: width / 2,
+                                borderRadius: 30,
+                                borderWidth: 1,
+                                borderStyle: 'solid',
+                                borderColor: theme.colors.primary,
+                                backgroundColor: theme.colors.primary,
+                            }}
+                            >
+                            <Text 
+                                variant="bodyLarge"
+                                style={{
+                                    color: theme.colors.tertiary, 
+                                    fontWeight: 'bold'
+                                }}
+                                >continue creation</Text>
+                        </Button>
+                    </TouchableOpacity>
+                    } 
                 </View>
-                <View style={styles.buttonGroup}>
+                {/* <View style={styles.buttonGroup}>
                     <Button onPress={openCamera} labelStyle={styles.functionButton}>
                         <Icon name="camera" size={25} />
                     </Button>
@@ -90,19 +156,14 @@ export const Camera = () => {
                     <Button onPress={pickImage} labelStyle={styles.functionButton}>
                         <Icon name="folder-open" size={25} />
                     </Button>
-                </View>
-            </ImageBackground>
+                </View> */}
+            </View>
         </View>
     )
 }
 
 const styles = StyleSheet.create({
-        button: {
-            margin: 20,
-            width: 200,
-            borderRadius: 40,
-            padding: 5
-        },
+        button: {},
         container: {
             flex: 1,
             // alignItems: 'center',
