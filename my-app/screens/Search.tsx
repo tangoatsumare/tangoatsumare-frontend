@@ -46,7 +46,7 @@ interface SearchBodyProps {
     selectedTags: string[],
     setSelectedTags: any,
     tags: Tag[],
-    setTags: any
+    setTags: any,
 }
 
 const { width } = Dimensions.get('window');
@@ -73,7 +73,7 @@ export const SearchBar = (props: SearchBarProps) => {
         setSelectedTags,
         tagsToFlashcards,
         tags,
-        setTags
+        setTags,
     } = props;
 
     const [pressed, setPressed] = useState(false);
@@ -274,7 +274,9 @@ export const SearchBody = (props: SearchBodyProps) => {
         selectedTags,
         setSelectedTags,
         tags,
-        setTags
+        setTags,
+        navigateTo,
+        setNavigateTo
     } = props;
     const [tagsModified, setTagsModified ] = useState<modifiedTag[]>([]);
 
@@ -291,10 +293,24 @@ export const SearchBody = (props: SearchBodyProps) => {
         })();
     }, [textInputOnFocus, tags]);
 
+
+
+
     const handleShowFlashcard = (item: any) => {
-        navigation.navigate("FeedCard", {item: item})
+        // reset the home screen before navigating to the feed card
+        setNavigateTo((prev) => {
+            const result = {...prev};
+            result.item = item;
+            return result;
+        });
+
+        setSelectedTags([]);
+        setText('');
+        setTextInputOnFocus(false);
+        // navigation.navigate("FeedCard", {item: item})
         // console.log(flashcardID);
     };
+
 
     const handleTagClick = (tag: modifiedTag) => {
         if (tagsModified) {           

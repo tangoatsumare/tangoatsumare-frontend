@@ -219,7 +219,7 @@ function checkIfReported (array: any) {
               <Text
                 style={{color: reported? theme.colors.primary: 'black'}}
               >
-                {reported? "reported": "Report inappropriate"}
+                {reported? "reported": "Report"}
               </Text>
             </Button>
           </TouchableOpacity>
@@ -403,6 +403,7 @@ const styles = StyleSheet.create({
   },
   buttonGroup: {
     flexDirection: "row",
+    // flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'center'
   },
