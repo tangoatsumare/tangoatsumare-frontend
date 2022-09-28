@@ -62,7 +62,7 @@ export const Camera = () => {
                 // resizeMode="contain"
             >
                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                    {image && <Image source={{ uri: image }} style={{ width: 300, height: 300 }} resizeMode="contain"/>}
+                    {image && <Image source={{ uri: image }} style={{ width: 300, height: 300, marginBottom: 50 }} resizeMode="contain"/>}
                     <>
                         <TouchableOpacity
                             onPress={openCamera}
