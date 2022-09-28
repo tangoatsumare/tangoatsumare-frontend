@@ -5,8 +5,9 @@ import { ParamListBase } from '@react-navigation/native'
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native'
+import { View, Text, StyleSheet, TextInput, TouchableOpacity,  } from 'react-native'
 import { Button } from "react-native-paper";
+import {ActivityIndicator} from 'react-native-paper';
 
 export const Login = () => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
