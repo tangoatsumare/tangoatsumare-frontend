@@ -11,6 +11,9 @@ import 'react-native-gesture-handler';
 import { fontConfig } from "./library/fontConfig";
 import { LogBox } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
+
+import { TangoProvider } from './contexts/TangoContext';
+
 LogBox.ignoreAllLogs();
 
 SplashScreen.preventAutoHideAsync();
@@ -59,7 +62,9 @@ export default function App() {
     <SafeAreaProvider onLayout={onLayoutRootView}>
       <PaperProvider theme={theme}>
         <NavigationContainer independent={true}>
-          <StackNav />
+          <TangoProvider>
+            <StackNav />
+          </TangoProvider>
         </NavigationContainer>
       </PaperProvider>
     </SafeAreaProvider>

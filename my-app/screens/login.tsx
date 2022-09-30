@@ -4,12 +4,22 @@ import { ParamListBase } from '@react-navigation/native'
 //import { getFirebaseAuth } from '../firebase';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity,  } from 'react-native'
 import { Button } from "react-native-paper";
 import {ActivityIndicator} from 'react-native-paper';
 
+import { useTangoContext } from "../contexts/TangoContext";
+
+
 export const Login = () => {
+  const { flashcards, test } = useTangoContext();
+
+  useEffect(() => {
+    console.log(flashcards);
+    // console.log({test});
+  },[flashcards]);
+
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
   const auth = getAuth();
