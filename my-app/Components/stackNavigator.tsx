@@ -25,11 +25,22 @@ import {
     getReviewableSRSFlashcards
  } from "../utils/supermemo";
 
+import { useTangoContext } from "../contexts/TangoContext";
+
 const Tab = createBottomTabNavigator();
 
 export const TabHome = () => {
-    const auth = getAuth();
-    const userId: UserId = auth.currentUser?.uid;
+  // NEW - using Tango Context
+  const {
+    flashcards,
+    setFlashcards,
+    // flashcardsOfCurrentUser,
+    SRSFlashcardsOfCurrentUser,
+    currentUser,
+  } = useTangoContext();
+
+    // const auth = getAuth();
+    // const userId: UserId = auth.currentUser?.uid;
     const isFocused = useIsFocused();
     const [flashcardsAll, setFlashcardsAll] = useState<SRSTangoFlashcard[]>([]);
     const [ flashcardsReviewable, setFlashcardsReviewable ] = useState<SRSTangoFlashcard[]>([]);
@@ -40,13 +51,13 @@ export const TabHome = () => {
 
     useEffect(() => {
         (async () => {
-            if (isFocused && userId) {
-                let flashcards: SRSTangoFlashcard[] = await HTTPRequest.getSRSFlashcardsByUser(userId);
-                setFlashcardsAll(flashcards);
+            if (isFocused && currentUser.uid) {
+                // let flashcards: SRSTangoFlashcard[] = await HTTPRequest.getSRSFlashcardsByUser(userId);
+                setFlashcardsAll(SRSFlashcardsOfCurrentUser);
 
                 // Updated to accomolate for deletion
-                flashcards = flashcards.filter(card => !card.Flashcard[0].created_by?.includes("delete"));
-                setFlashcardsReviewable(getReviewableSRSFlashcards(flashcards));
+                // flashcards = flashcards.filter(card => !card.Flashcard[0].created_by?.includes("delete"));
+                setFlashcardsReviewable(getReviewableSRSFlashcards(SRSFlashcardsOfCurrentUser));
             } 
         })();
     },[isFocused]);

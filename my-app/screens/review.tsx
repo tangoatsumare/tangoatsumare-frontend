@@ -3,7 +3,7 @@ import { StackNavigationProp} from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 import React, { useEffect, useState, useRef, useLayoutEffect } from "react";
 import { View, StyleSheet, Dimensions, Animated, TouchableOpacity } from 'react-native'
-import { Button, Card, Text, Title } from "react-native-paper";
+import { ActivityIndicator, Button, Card, Text, Title } from "react-native-paper";
 import { 
     setFlashcardAsGood,
     setFlashcardAsAgain,
@@ -12,9 +12,22 @@ import { UsersToCardsSRSProps, HTTPRequest } from "../utils/httpRequest";
 import { getAuth } from 'firebase/auth';
 import { useTheme } from "react-native-paper";
 
+import { useTangoContext } from "../contexts/TangoContext";
+
 const {width, height} = Dimensions.get('screen');
 
 export const Review = ({route}) => {
+  // NEW - using Tango Context
+  const {
+    // flashcards,
+    // setFlashcards,
+    // flashcardsOfCurrentUser,
+    // SRSFlashcardsOfCurrentUser,
+    updateSRSFlashcards,
+    // currentUser,
+  } = useTangoContext();
+
+
     const theme = useTheme();
     const auth = getAuth();
     const userId = auth.currentUser?.uid;
@@ -30,6 +43,8 @@ export const Review = ({route}) => {
     
     const [ isEndOfReview, setIsEndOfReview ] = useState<boolean>(false);
     const isFirst = useRef(true);
+
+    const [SRSFlashcardsUpdated, setSRSFlashcardsUpdated] = useState(false);
 
     // header 
     useLayoutEffect(() => {
@@ -103,12 +118,16 @@ export const Review = ({route}) => {
                     requestBody.push(item);
                 }            
     
-                await HTTPRequest.updateFlashcardsSRSProperties(requestBody);
+                await updateSRSFlashcards(requestBody);
+                setSRSFlashcardsUpdated(true);
             }
         })();
     }, [isEndOfReview]);
 
-    
+    useEffect(() => {
+        console.log({SRSFlashcardsUpdated});
+    }, [SRSFlashcardsUpdated]);
+
     const DisplayCard = ({flashcard}: any) => {
         const [loading, setLoading] = useState(true);
         const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -159,7 +178,7 @@ export const Review = ({route}) => {
         <View 
             style={styles.container}
         >
-            {!isEndOfReview ? 
+            {!isEndOfReview && !SRSFlashcardsUpdated ? 
                     flashcard && 
                     <View style={{flex: 1}}>
                         <DisplayCard flashcard={flashcard} />
@@ -221,6 +240,8 @@ export const Review = ({route}) => {
                                 }
                         </View>
                     </View>
+                : !SRSFlashcardsUpdated ?
+                    <ActivityIndicator />
                 :
                 <View style={styles.endOfReview}>
                     <Text 

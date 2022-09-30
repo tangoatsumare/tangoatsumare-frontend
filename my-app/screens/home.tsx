@@ -54,6 +54,10 @@ export const Home = () => {
     currentUser,
   } = useTangoContext();
 
+  // useEffect(() => {
+  //   console.log(flashcardsOfCurrentUser)
+  // }, []);
+
   // for animated indicator
   let scrollX = useRef(new Animated.Value(0)).current;
   const scrollRef = useRef();
@@ -185,7 +189,7 @@ export const Home = () => {
               setFlashcardsMaster(flashcards);
               setFlashcardsFeed(flashcards);
               setFlashcardsCollection(flashcardsOfCurrentUser);
-              setLoading(false);
+              // setLoading(false);
               // setNavigateTo({item: null}); // reset navigateTo
           } catch (err) {
               console.log(err);
@@ -193,6 +197,12 @@ export const Home = () => {
         }
       })();
   }, [isFocused]);
+
+  useEffect(() => {
+    if (tags && tagsToFlashcards && flashcardsMaster && flashcardsFeed && flashcardsCollection) {
+      setLoading(false);
+    }
+  }, [tags, tagsToFlashcards, flashcardsMaster, flashcardsFeed, flashcardsCollection]);
 
   // update the home collection/feed states when the search is submitted
   useEffect(() => {

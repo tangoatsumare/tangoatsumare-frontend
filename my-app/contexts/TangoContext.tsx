@@ -31,6 +31,12 @@ export function TangoProvider({ children }) {
     // then set the states of current user's set of flashcards
     const auth = getAuth();
     const [flashcardsOfCurrentUser, setFlashcardsOfCurrentUser] = useState([]);
+    const [SRSFlashcardsOfCurrentUser, setSRSFlashcardsOfCurrentUser] = useState([]);
+
+    async function updateSRSFlashcards(requestBody) {
+        await HTTPRequest.updateFlashcardsSRSProperties(requestBody);
+        setSRSFlashcardsOfCurrentUser(await HTTPRequest.getSRSFlashcardsByUser(currentUser.uid));
+    }
 
     function signup(email, password) {
         return createUserWithEmailAndPassword(auth, email, password);
@@ -75,7 +81,10 @@ export function TangoProvider({ children }) {
 
     useEffect(() => {
         if (currentUser && flashcards) {
-            setFlashcardsOfCurrentUser(flashcards.filter(flashcard => flashcard["created_by"] === currentUser.uid));
+            (async () => {
+                setFlashcardsOfCurrentUser(flashcards.filter(flashcard => flashcard["created_by"] === currentUser.uid));
+                setSRSFlashcardsOfCurrentUser(await HTTPRequest.getSRSFlashcardsByUser(currentUser.uid));
+            })();
         }
     }, [currentUser, flashcards]);
 
@@ -93,7 +102,8 @@ export function TangoProvider({ children }) {
         tags,
         setTags,
         flashcardsOfCurrentUser,
-
+        SRSFlashcardsOfCurrentUser,
+        updateSRSFlashcards,
         currentUser,
         login,
         signup,

@@ -18,11 +18,22 @@ import { HTTPRequest, UserId } from "../utils/httpRequest";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { TouchableOpacity } from "react-native-gesture-handler";
 
+import { useTangoContext } from "../contexts/TangoContext";
+
 const { width, height } = Dimensions.get('screen');
 
 export const SRS = ({route}) => {
-    const auth = getAuth();
-    const userId: UserId = auth.currentUser?.uid;
+  // NEW - using Tango Context
+  const {
+    flashcards,
+    setFlashcards,
+    // flashcardsOfCurrentUser,
+    SRSFlashcardsOfCurrentUser,
+    currentUser,
+  } = useTangoContext();
+
+    // const auth = getAuth();
+    // const userId: UserId = auth.currentUser?.uid;
     const theme = useTheme();
     const isFocused = useIsFocused();
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
@@ -64,13 +75,14 @@ export const SRS = ({route}) => {
 
     useEffect(() => {
         (async () => {
-            if (isFocused && userId) {
-                let flashcards: SRSTangoFlashcard[] = await HTTPRequest.getSRSFlashcardsByUser(userId);
-                setFlashcardsAll(flashcards);
+            if (isFocused && currentUser) {
+                // let flashcards: SRSTangoFlashcard[] = await HTTPRequest.getSRSFlashcardsByUser(userId);
+                console.log("hihi");
+                setFlashcardsAll(SRSFlashcardsOfCurrentUser);
 
                 // Updated to accomolate for deletion
-                flashcards = flashcards.filter(card => !card.Flashcard[0].created_by?.includes("delete"));
-                setFlashcardsReviewable(getReviewableSRSFlashcards(flashcards));
+                // flashcards = flashcards.filter(card => !card.Flashcard[0].created_by?.includes("delete"));
+                setFlashcardsReviewable(getReviewableSRSFlashcards(SRSFlashcardsOfCurrentUser));
             } 
         })();
     },[isFocused]);

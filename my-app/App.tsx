@@ -61,11 +61,11 @@ export default function App() {
   return (
     <SafeAreaProvider onLayout={onLayoutRootView}>
       <PaperProvider theme={theme}>
-        <NavigationContainer independent={true}>
-          <TangoProvider>
+        <TangoProvider>
+          <NavigationContainer independent={true}>
             <StackNav />
-          </TangoProvider>
-        </NavigationContainer>
+          </NavigationContainer>
+        </TangoProvider>
       </PaperProvider>
     </SafeAreaProvider>
   );
