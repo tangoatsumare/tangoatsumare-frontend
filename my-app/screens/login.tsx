@@ -13,12 +13,12 @@ import { useTangoContext } from "../contexts/TangoContext";
 
 
 export const Login = () => {
-  const { flashcards, test } = useTangoContext();
+  const { flashcards, login } = useTangoContext();
 
   useEffect(() => {
     console.log(flashcards);
-    // console.log({test});
-  },[flashcards]);
+    
+  },[]);
 
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
@@ -36,7 +36,8 @@ export const Login = () => {
     }
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      // await signInWithEmailAndPassword(auth, email, password);
+      await login(email, password); // NEW
       await setRenderingIndicator(true);
       await setTimeout(() => {
         setRenderingIndicator(false);

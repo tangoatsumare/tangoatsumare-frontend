@@ -17,6 +17,8 @@ import { getAuth } from 'firebase/auth';
 import { Collection } from "../Components/collection";
 import { Feed } from "../Components/feed";
 
+import { useTangoContext } from "../contexts/TangoContext";
+
 const { width, height } = Dimensions.get('screen');
 
 export interface Tag {
@@ -40,6 +42,18 @@ const data = Object.keys(views).map((i) => ({
 }));
 
 export const Home = () => {
+  // NEW - using Tango Context
+  const {
+    flashcards,
+    setFlashcards,
+    users,
+    setUsers,
+    tags,
+    setTags,
+    flashcardsOfCurrentUser,
+    currentUser,
+  } = useTangoContext();
+
   // for animated indicator
   let scrollX = useRef(new Animated.Value(0)).current;
   const scrollRef = useRef();
@@ -63,7 +77,7 @@ export const Home = () => {
   const [resetIsClick, setResetIsClick] = useState<boolean>(false);
   const [submitIsClick, setSubmitIsClick] = useState<boolean>(false);
 
-  const [tags, setTags] = useState<Tag[]>([]);
+  // const [tags, setTags] = useState<Tag[]>([]);
   const [tagsToFlashcards, setTagsToFlashcards] = useState<object>({});
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [hashTagSearchMode, setHashTagSearchMode] = useState<boolean>(false);
@@ -149,28 +163,28 @@ export const Home = () => {
           try {
               console.log("it is focused now. HTTP request will be sent to backend");
 
-              let flashcardsAll = await HTTPRequest.getFlashcards();
-              const usersAll = await HTTPRequest.getUsers();
-              const tagsData = await HTTPRequest.getTags(); // fetching hashtag data
+              // let flashcardsAll = await HTTPRequest.getFlashcards();
+              // const usersAll = await HTTPRequest.getUsers();
+              // const tagsData = await HTTPRequest.getTags(); // fetching hashtag data
 
               // remove the deleted cards from the flashcards
               // cards with delete keyword in its created_by field are cards that deleted by their owners
               //remove flagged cards
-              flashcardsAll = flashcardsAll.filter((card: any) => (!card.flagged_inappropriate));
+              // flashcardsAll = flashcardsAll.filter((card: any) => (!card.flagged_inappropriate));
   
-              flashcardsAll = filterOutDeletedFlashcardsFromFlashcards(flashcardsAll);
+              // flashcardsAll = filterOutDeletedFlashcardsFromFlashcards(flashcardsAll);
           
-              // TODO: filter by flags
+              // // TODO: filter by flags
 
-              const formattedFlashcards = formatFlashcardRelatedUserDetails(flashcardsAll, usersAll);
-              const result: any[] = formattedFlashcards.reverse();
+              // const formattedFlashcards = formatFlashcardRelatedUserDetails(flashcardsAll, usersAll);
+              // const result: any[] = formattedFlashcards.reverse();
 
               // setting states
-              setTags(tagsData);
-              setTagsToFlashcards(getTagsToFlashcardsIdObject(tagsData));
-              setFlashcardsMaster(result);
-              setFlashcardsFeed(result);
-              setFlashcardsCollection(result.filter(flashcard => flashcard["created_by"] === userId));
+              setTags(tags);
+              setTagsToFlashcards(getTagsToFlashcardsIdObject(tags));
+              setFlashcardsMaster(flashcards);
+              setFlashcardsFeed(flashcards);
+              setFlashcardsCollection(flashcardsOfCurrentUser);
               setLoading(false);
               // setNavigateTo({item: null}); // reset navigateTo
           } catch (err) {
