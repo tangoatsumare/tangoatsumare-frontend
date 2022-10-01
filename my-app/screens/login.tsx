@@ -9,16 +9,12 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity,  } from 'react-nat
 import { Button } from "react-native-paper";
 import {ActivityIndicator} from 'react-native-paper';
 
-import { useTangoContext } from "../contexts/TangoContext";
+// import { useTangoContext } from "../contexts/TangoContext";
+import { useAuthContext } from "../contexts/AuthContext";
 
 
 export const Login = () => {
-  const { flashcards, login, currentUser, flashcardsOfCurrentUser } = useTangoContext();
-
-  useEffect(() => {
-    console.log(flashcards);
-    
-  },[]);
+  const { login, currentUser } = useAuthContext();
 
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
   const [email, setEmail] = useState<string>('');
@@ -48,11 +44,11 @@ export const Login = () => {
 
   // TESTING
   useEffect(() => {
-    if (currentUser && flashcardsOfCurrentUser) {
+    if (currentUser) {
       setRenderingIndicator(false);
       navigation.navigate('TabHome');
     }
-  }, [currentUser, flashcardsOfCurrentUser]);
+  }, [currentUser]);
 
   return (
     <View style={styles.container}>

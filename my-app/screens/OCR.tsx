@@ -26,6 +26,7 @@ import Icon from 'react-native-vector-icons/Octicons';
 import {useTheme} from 'react-native-paper';
 
 import { useTangoContext } from "../contexts/TangoContext";
+import { useAuthContext } from "../contexts/AuthContext";
 
 interface OCRProps {
     route: any;
@@ -40,9 +41,9 @@ const {width, height} = Dimensions.get('screen');
 
 export const OCR = ({ route, navigation }: OCRProps) => {
     const { updateAppStates } = useTangoContext();
+    const { currentUser } = useAuthContext();
     const theme = useTheme();
-    const auth = getAuth();
-    const userId = auth.currentUser?.uid;
+    const userId = currentUser.uid;
     const storage = getStorage(app);
     const { image_uri, image_base64 } = route.params;
     const [ image, setImage ] = useState<string>(image_uri);

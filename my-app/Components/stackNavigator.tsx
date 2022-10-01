@@ -11,31 +11,15 @@ import { Review } from "../screens/review";
 import { ProfileSetup } from "../screens/profileSetup";
 import React, {useEffect, useState} from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Collection } from "./collection";
 import { SingleCard } from "./card";
-import { Front } from "../screens/front";
-import { Back } from "../screens/back";
 import { FeedCard } from "../screens/feedCard";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { HTTPRequest, UserId } from "../utils/httpRequest";
-import { getAuth } from "firebase/auth";
-import { useIsFocused } from "@react-navigation/native";
-import { 
-    SRSTangoFlashcard,
-    getReviewableSRSFlashcards
- } from "../utils/supermemo";
-
 import { useTangoContext } from "../contexts/TangoContext";
 
 const Tab = createBottomTabNavigator();
 
 export const TabHome = () => {
-  // NEW - using Tango Context
-  const {
-    SRSFlashcardsOfCurrentUser,
-    currentUser,
-    metrics
-  } = useTangoContext();
+  const { metrics } = useTangoContext();
 
     return (
         <Tab.Navigator
@@ -93,7 +77,6 @@ export const TabHome = () => {
     );
 };
 
-
 const RootStack = createNativeStackNavigator();
 
 export const StackNav = () => {
@@ -144,7 +127,6 @@ export const StackNav = () => {
                     headerStyle: {},
                 }}
             />
-            {/* <RootStack.Screen name="Collection" component={Collection}/> */}
             <RootStack.Screen 
                 name="Card" 
                 component={SingleCard} 
@@ -165,8 +147,6 @@ export const StackNav = () => {
                     headerStyle: {},
                 }}
             />
-            {/* <RootStack.Screen name="Front" component={Front}/>
-            <RootStack.Screen name="Back" component={Back}/> */}
             <RootStack.Screen 
                 name="Review" 
                 component={Review}

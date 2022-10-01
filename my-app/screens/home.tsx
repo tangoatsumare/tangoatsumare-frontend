@@ -1,7 +1,6 @@
 import { useNavigation } from "@react-navigation/core";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
-import { useIsFocused } from "@react-navigation/native";
 import React, { useEffect, useLayoutEffect, useState, useRef, createRef, forwardRef, useCallback } from "react";
 import { Keyboard, Dimensions, Animated, findNodeHandle, Image } from 'react-native';
 import { View, StyleSheet, FlatList, TouchableOpacity, ScrollView } from 'react-native'
@@ -9,15 +8,14 @@ import {
   ActivityIndicator, Text, Button, Card, Paragraph, Title, Avatar, Divider, Chip, Searchbar 
 } from "react-native-paper";
 import { useTheme } from 'react-native-paper';
-import { HTTPRequest } from "../utils/httpRequest";
 import { SearchBar, SearchBody } from '../screens/Search';
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { getAuth } from 'firebase/auth';
 import { Collection } from "../Components/collection";
 import { Feed } from "../Components/feed";
 
 import { useTangoContext } from "../contexts/TangoContext";
+import { useAuthContext } from "../contexts/AuthContext";
 
 const { width, height } = Dimensions.get('screen');
 
@@ -42,17 +40,11 @@ const data = Object.keys(views).map((i) => ({
 }));
 
 export const Home = () => {
+  const { currentUser } = useAuthContext();
   const {
-    flashcards,
-    setFlashcards,
-    users,
-    setUsers,
     tags,
     setTags,
-    flashcardsOfCurrentUser,
-    currentUser,
     flashcardsMaster,
-    setFlashcardsMaster,
     flashcardsCurated,
     setFlashcardsCurated,
     flashcardsCollection,
@@ -60,7 +52,6 @@ export const Home = () => {
     flashcardsFeed,
     setFlashcardsFeed,
     tagsToFlashcards,
-    setTagsToFlashcards,
     loading
   } = useTangoContext();
 
@@ -80,24 +71,11 @@ export const Home = () => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
   const [text, setText] = useState<string>('');
   const [textInputOnFocus, setTextInputOnFocus] = useState<boolean>(false);
-  // const [flashcardsMaster, setFlashcardsMaster] = useState<object[]>([]);
-  // const [flashcardsCurated, setFlashcardsCurated] = useState<object[]>([]);
-  // const [flashcardsCollection, setFlashcardsCollection] = useState<object[]>([]);
-  // const [flashcardsFeed, setFlashcardsFeed] = useState<object[]>([]);
   const [resetIsClick, setResetIsClick] = useState<boolean>(false);
   const [submitIsClick, setSubmitIsClick] = useState<boolean>(false);
-
-  // const [tags, setTags] = useState<Tag[]>([]);
-  // const [tagsToFlashcards, setTagsToFlashcards] = useState<object>({});
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [hashTagSearchMode, setHashTagSearchMode] = useState<boolean>(false);
-
-  const isFocused = useIsFocused();
-  // const auth = getAuth();
-  // const userId = auth.currentUser?.uid;
-
-  // const [loading, setLoading] = useState(true);
-
+  const [currentView, setCurrentView] = useState("feed");
   const [navigateTo, setNavigateTo] = useState({item: null}); 
   // from search view: navigate to feed card, reset navigateTo state
   useEffect(() => {
@@ -167,63 +145,6 @@ export const Home = () => {
     }
   }, [textInputOnFocus]);
 
-  const [tangoDataLoaded, setTangoDataLoaded] = useState(false);
-
-  useEffect(() => {
-    if (tags && flashcards
-      // .length > 0 && flashcardsOfCurrentUser.length > 0
-      ) { // TO REVIEW
-      setTangoDataLoaded(true);
-    }
-  }, [tags, flashcards, flashcardsOfCurrentUser]);
-
-  // useEffect(() => {
-  //     (async () => {
-  //       if (tangoDataLoaded) {
-  //         try {
-  //             console.log("it is focused now.");
-
-  //             // setting states
-  //             // setTags(tags);
-  //             // console.log(flashcards);
-  //             // console.log(flashcardsOfCurrentUser);
-  //             // setTagsToFlashcards(getTagsToFlashcardsIdObject(tags));
-  //             // setFlashcardsMaster(() => [...flashcards]);
-  //             // setFlashcardsFeed(() => [...flashcards]);
-  //             // setFlashcardsCollection(() => [...flashcardsOfCurrentUser]);
-  //             // setLoading(false);
-  //             // setNavigateTo({item: null}); // reset navigateTo
-  //         } catch (err) {
-  //             console.log(err);
-  //         }
-  //       }
-  //     })();
-  // }, [
-  //   tangoDataLoaded
-  // ]);
-
-  // useEffect(() => {
-  //   if (
-  //     // tangoDataLoaded && 
-  //     flashcards.length === 0) {
-  //     console.log("heeeei");
-  //     setLoading(false);
-  //   }
-  //   else if (
-  //     // tangoDataLoaded &&
-  //     // tags && tagsToFlashcards && 
-  //     flashcardsMaster.length > 0 && 
-  //     flashcardsFeed.length > 0 
-  //     && flashcardsCollection.length > 0) {
-  //     // flashcards.length > 0 && flashcardsOfCurrentUser) {
-  //     // console.log(flashcardsCollection)
-  //     // console.log(flashcardsFeed);
-  //     setLoading(false);
-  //   }
-  // }, [
-  //   // tangoDataLoaded
-  //   , tags, tagsToFlashcards, flashcardsMaster, flashcardsFeed, flashcardsCollection, flashcards, flashcardsOfCurrentUser]);
-
   // update the home collection/feed states when the search is submitted
   useEffect(() => {
     if (flashcardsCurated && !textInputOnFocus) {
@@ -246,37 +167,6 @@ export const Home = () => {
     setFlashcardsFeed(flashcardsMaster);
     setFlashcardsCollection(flashcardsMaster.filter(flashcard => flashcard["created_by"] === currentUser.uid));
   };
-
-  // reshape the object so it is easier to work with
-  const getTagsToFlashcardsIdObject = (tags: Tag[]): object => {
-    const tagsToFlashcardsId = {};
-    for (const tag of tags) {
-      // https://stackoverflow.com/questions/11508463/javascript-set-object-key-by-variable
-        tagsToFlashcardsId[tag.tag] = tag.flashcards;
-
-    }
-    return tagsToFlashcardsId;
-  }
-
-  const formatFlashcardRelatedUserDetails = (cards: any[], users: any[]): any[] => {
-    const formattedCards = [...cards];
-    for (const card of cards) {
-      const result = users.find((user: any) => user.uuid === card.created_by);
-      if (result) {
-          card.created_by_username = result.user_name; // replace uid with username
-          card.avatar_url = result.avatar_url; // add field
-      }
-      // card.created_timestamp = dayjs(card.created_timestamp)
-        // .fromNow(); 
-      // https://day.js.org/docs/en/plugin/relative-time
-    }
-    return formattedCards;
-  };
-
-  const filterOutDeletedFlashcardsFromFlashcards = (cards: any[]): any[] => {
-    // cards with delete keyword in its created_by field are cards that deleted by their owners
-    return cards.filter((card: any) => !card.created_by.includes("delete"));
-  }
 
   const handleEditSubmit = () => {
     if (text || selectedTags.length !== 0) {
@@ -390,7 +280,6 @@ export const Home = () => {
     );
   };
 
-  const [currentView, setCurrentView] = useState("feed");
   const handleScroll = (event) => {
     if (event.nativeEvent.contentOffset.x === width) {
       setCurrentView("collection") 
@@ -485,79 +374,11 @@ export const Home = () => {
       :null
     );
   }
-
-  // const FeedList = () => {
-  //   return (
-  //     tangoDataLoaded && flashcardsFeed.length > 0 ?
-  //       <FlatList style={styles.container}
-  //         data={flashcardsFeed}
-  //         numColumns={2}
-  //         key={'_'}
-  //         keyExtractor={(item) => "_" + item._id}
-  //         renderItem={({item}) => (       
-  //             <Feed item={item} />
-  //           )
-  //         }
-  //         contentContainerStyle={{paddingBottom: 50}}
-  //         showsVerticalScrollIndicator={false}
-  //       />
-  //       : 
-  //         <View style={{
-  //               width: width,
-  //               height: "100%",
-  //               flex: 1,
-  //               alignItems: 'center',
-  //               justifyContent: 'center'
-  //         }}>
-  //           {submitIsClick ? 
-  //             loading ? 
-  //               <ActivityIndicator /> : 
-  //               <NoSearchResultFound />
-  //               : 
-  //             loading ? 
-  //               <ActivityIndicator /> : 
-  //               <CreateYourFirstCard />
-  //           }
-  //         </View>
-      
-  //   );
-  // }
-
-
-  // const CollectionList = () => {
-  //   return (
-  //     tangoDataLoaded && flashcardsCollection.length > 0 ? 
-  //       <FlatList style={styles.container}
-  //           data={flashcardsCollection}
-  //           keyExtractor={(item) => item._id}
-  //           renderItem={({item}) => (
-  //               <Collection item={item} />
-  //             )
-  //           }
-  //           // workaround for the last item of flatlist not showing properly
-  //           // https://thewebdev.info/2022/02/19/how-to-fix-the-react-native-flatlist-last-item-not-visible-issue/
-  //           contentContainerStyle={{paddingBottom: 50}}
-  //           showsVerticalScrollIndicator={false}
-  //         />
-  //     : 
-  //       submitIsClick ? 
-  //         <NoSearchResultFound />
-  //          :  
-  //          <CreateYourFirstCard />
-  //   );
-  // }
-
   return (
-    // <Text>{flashcardsFeed.length}</Text>
-    // <Text>{flashcards.length}</Text>
-
     <View style={styles.master}>
-      { !textInputOnFocus 
-      // && tangoDataLoaded 
-      && flashcardsFeed && flashcardsCollection ? 
+      { !textInputOnFocus && flashcardsFeed && flashcardsCollection ? 
         <View> 
             <Tags />
-            {/* <Text>{flashcardsFeed.length}</Text> */}
           <Animated.ScrollView 
               contentContainerStyle={{ marginTop: selectedTags.length !== 0 ? 30 : 60 }}
               ref={scrollRef}
@@ -582,10 +403,7 @@ export const Home = () => {
               decelerationRate="fast" 
               showsHorizontalScrollIndicator={false}              
           >
-            {/* <FeedList /> */}
-           { 
-          //  tangoDataLoaded && 
-           flashcardsFeed.length > 0 ?
+           { flashcardsFeed.length > 0 ?
         <FlatList style={styles.container}
           data={flashcardsFeed}
           numColumns={2}
@@ -617,10 +435,7 @@ export const Home = () => {
             }
           </View>
       }
-            {/* <CollectionList /> */}
-            {
-                    // tangoDataLoaded && 
-                    flashcardsCollection.length > 0 ? 
+            { flashcardsCollection.length > 0 ? 
                     <FlatList style={styles.container}
                         data={flashcardsCollection}
                         keyExtractor={(item) => item._id}

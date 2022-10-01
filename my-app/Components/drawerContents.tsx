@@ -17,7 +17,7 @@ import { ParamListBase } from "@react-navigation/native";
 import { getAuth } from 'firebase/auth';
 import axios from 'axios';
 
-import { useTangoContext } from '../contexts/TangoContext';
+import { useAuthContext } from '../contexts/AuthContext';
 
 interface UserInfo {
   __v: number,
@@ -38,15 +38,13 @@ interface UserInfo {
 }
 
 export function DrawerContent(props: any) {
-  const { logout } = useTangoContext();
+  const { currentUser, logout } = useAuthContext();
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
   
   const [userProfileInfo, setUserProfileInfo] = useState<UserInfo[]>();
 
-  const auth = getAuth();
-
   useEffect(() => {
-    const uid = auth.currentUser?.uid;
+    const uid = currentUser;
     axios
       .get(`https://tangoatsumare-api.herokuapp.com/api/usersuid/${uid}`)
       .then((response: any) => {

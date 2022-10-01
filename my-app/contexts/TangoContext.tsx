@@ -1,13 +1,5 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import { HTTPRequest } from '../utils/httpRequest';
-// import { auth } from 'firebase/auth';
-import { 
-    getAuth,
-    createUserWithEmailAndPassword, 
-    onAuthStateChanged, 
-    signInWithEmailAndPassword, 
-    signOut,
-} from 'firebase/auth';
 import {
     preprocessFlashcards,
     getTagsToFlashcardsIdObject
@@ -16,6 +8,8 @@ import {
     SRSTangoFlashcard,
     getReviewableSRSFlashcards
  } from "../utils/supermemo";
+import { useAuthContext } from './AuthContext';
+import { ActivityIndicator } from 'react-native-paper';
 
 const TangoContext = React.createContext();
 
@@ -24,26 +18,21 @@ export function useTangoContext() {
 }
 
 export function TangoProvider({ children }) {
+    const { currentUser } = useAuthContext();
     const [loading, setLoading] = useState(true);
     const [flashcards, setFlashcards] = useState([]);
     const [users, setUsers] = useState([]);
     const [tags, setTags] = useState([]);
-    const [currentUser, setCurrentUser] = useState();
-    
     const [flashcardsMaster, setFlashcardsMaster] = useState<object[]>([]);
     const [flashcardsCurated, setFlashcardsCurated] = useState<object[]>([]);
     const [flashcardsCollection, setFlashcardsCollection] = useState<object[]>([]);
     const [flashcardsFeed, setFlashcardsFeed] = useState<object[]>([]);
     const [tagsToFlashcards, setTagsToFlashcards] = useState<object>({});
 
-    
     // to implement the checking of user is authenticated
     // then set the states of current user's set of flashcards
-    const auth = getAuth();
     const [flashcardsOfCurrentUser, setFlashcardsOfCurrentUser] = useState([]);
     const [SRSFlashcardsOfCurrentUser, setSRSFlashcardsOfCurrentUser] = useState<SRSTangoFlashcard[]>([]);
-
-    ///
     const [ flashcardsReviewable, setFlashcardsReviewable ] = useState([]);
     const [ metrics, setMetrics ] = useState({
         new: 0,
@@ -76,12 +65,14 @@ export function TangoProvider({ children }) {
             setFlashcards(result);
             setUsers(usersAll);
             setTags(tagsData);
-            setFlashcardsOfCurrentUser(result.filter(flashcard => flashcard["created_by"] === currentUser.uid));
+
+            const currentUserFlashcards = result.filter(flashcard => flashcard["created_by"] === currentUser.uid);
+            setFlashcardsOfCurrentUser(currentUserFlashcards);
             
             setTagsToFlashcards(getTagsToFlashcardsIdObject(tagsData));
             setFlashcardsMaster(result);
             setFlashcardsFeed(result);
-            setFlashcardsCollection(result.filter(flashcard => flashcard["created_by"] === currentUser.uid));
+            setFlashcardsCollection(currentUserFlashcards);
 
             const SRSFlashcards = await HTTPRequest.getSRSFlashcardsByUser(currentUser.uid);
             setSRSFlashcardsOfCurrentUser(SRSFlashcards);
@@ -100,34 +91,13 @@ export function TangoProvider({ children }) {
         }
     }
 
-    function signup(email, password) {
-        return createUserWithEmailAndPassword(auth, email, password);
-    }
-
-    function login(email, password) {
-        return signInWithEmailAndPassword(auth, email, password);
-    }
-
-    function logout() {
-        return signOut(auth);
-    }
-
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, user => {
-            setCurrentUser(user);
-            console.log("changing auth state");
-            // setAuthLoading(false);
-        });
-
-        return unsubscribe;
-    }, []);
-
     useEffect(() => {
         (async () => {
             console.log("running");
             if (currentUser) {
                 // data to fetch as global context
                 await updateAppStates();
+                setLoading(false);
             }
         })();
     }, [currentUser]);
@@ -144,19 +114,6 @@ export function TangoProvider({ children }) {
 
         }
     }, [flashcardsReviewable]);
-
-
-    useEffect(() => {
-        if (
-            // currentUser || 
-            flashcards && users && tags
-             && SRSFlashcardsOfCurrentUser && flashcardsOfCurrentUser
-             && flashcardsCollection && flashcardsFeed && flashcardsCurated
-             && tagsToFlashcards && flashcardsMaster
-             ) {
-            setLoading(false);
-        }
-    }, [flashcards, users, tags]);
 
     const value = {
         flashcards,
@@ -182,15 +139,16 @@ export function TangoProvider({ children }) {
         tagsToFlashcards,
         setTagsToFlashcards,
         loading,
-        updateAppStates,
-        currentUser,
-        login,
-        signup,
-        logout,
+        updateAppStates
     };
 
     return (
         <TangoContext.Provider value={value}>
+            {loading && 
+                <ActivityIndicator
+                    style={{flex:1, justifyContent: 'center', alignItems: 'center'}}
+                />
+            }
             {!loading && children}
         </TangoContext.Provider>
     );

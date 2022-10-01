@@ -13,6 +13,7 @@ import { LogBox } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 
 import { TangoProvider } from './contexts/TangoContext';
+import { AuthProvider } from './contexts/AuthContext';
 
 LogBox.ignoreAllLogs();
 
@@ -61,11 +62,13 @@ export default function App() {
   return (
     <SafeAreaProvider onLayout={onLayoutRootView}>
       <PaperProvider theme={theme}>
-        <TangoProvider>
-          <NavigationContainer independent={true}>
-            <StackNav />
-          </NavigationContainer>
-        </TangoProvider>
+        <AuthProvider>
+          <TangoProvider>
+            <NavigationContainer independent={true}>
+              <StackNav />
+            </NavigationContainer>
+          </TangoProvider>
+        </AuthProvider>
       </PaperProvider>
     </SafeAreaProvider>
   );

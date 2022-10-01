@@ -19,24 +19,15 @@ const {width, height} = Dimensions.get('screen');
 export const Review = ({route}) => {
   // NEW - using Tango Context
   const {
-    // flashcards,
-    // setFlashcards,
-    // flashcardsOfCurrentUser,
-    // SRSFlashcardsOfCurrentUser,
     updateSRSFlashcards,
-    // currentUser,
   } = useTangoContext();
 
-
     const theme = useTheme();
-    const auth = getAuth();
-    const userId = auth.currentUser?.uid;
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
     
     let { flashcardsAll } = route.params;
     const [flashcards, setFlashcards] = useState(flashcardsAll);
     const [flashcard, setFlashcard] = useState({});
-    // const [engDef, setEngDef] = useState<string>('');
 
     const [ sideOfFlashcard, setSideOfFlashcard ] = useState<string>("Front"); // Front and Back
     const [ index, setIndex ] = useState<number>(0);

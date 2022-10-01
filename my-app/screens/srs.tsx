@@ -19,17 +19,16 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { TouchableOpacity } from "react-native-gesture-handler";
 
 import { useTangoContext } from "../contexts/TangoContext";
+import { useAuthContext } from "../contexts/AuthContext";
 
 const { width, height } = Dimensions.get('screen');
 
 export const SRS = ({route}) => {
-  // NEW - using Tango Context
+  const { currentUser } = useAuthContext();
   const {
     flashcards,
     setFlashcards,
-    // flashcardsOfCurrentUser,
     SRSFlashcardsOfCurrentUser,
-    currentUser,
     metrics,
     flashcardsReviewable,
     setFlashcardsReviewable
