@@ -25,6 +25,8 @@ import { initializeSRSFlashcard, TangoFlashcard } from '../utils/supermemo';
 import Icon from 'react-native-vector-icons/Octicons';
 import {useTheme} from 'react-native-paper';
 
+import { useTangoContext } from "../contexts/TangoContext";
+
 interface OCRProps {
     route: any;
     navigation: any;
@@ -37,6 +39,7 @@ interface Tag {
 const {width, height} = Dimensions.get('screen');
 
 export const OCR = ({ route, navigation }: OCRProps) => {
+    const { updateAppStates } = useTangoContext();
     const theme = useTheme();
     const auth = getAuth();
     const userId = auth.currentUser?.uid;
@@ -74,6 +77,12 @@ export const OCR = ({ route, navigation }: OCRProps) => {
         })();
     }, []);
     
+    useEffect(() => {
+        if (cardIsSubmitted) {
+            updateAppStates();
+        }
+    }, [cardIsSubmitted]);
+
     async function uploadImageAsync(uri: string): Promise<string> {
         // Why are we using XMLHttpRequest? See:
         // https://github.com/expo/expo/issues/2402#issuecomment-443726662

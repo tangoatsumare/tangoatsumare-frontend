@@ -17,6 +17,8 @@ import { ParamListBase } from "@react-navigation/native";
 import { getAuth } from 'firebase/auth';
 import axios from 'axios';
 
+import { useTangoContext } from '../contexts/TangoContext';
+
 interface UserInfo {
   __v: number,
   _id: string
@@ -36,6 +38,7 @@ interface UserInfo {
 }
 
 export function DrawerContent(props: any) {
+  const { logout } = useTangoContext();
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
   
   const [userProfileInfo, setUserProfileInfo] = useState<UserInfo[]>();
@@ -53,8 +56,8 @@ export function DrawerContent(props: any) {
 
   }, []);
 
-  const logout = () => {
-    auth.signOut()
+  const executeLogout = () => {
+    logout()
     .then(() => navigation.navigate("Login"))
     .catch(error => console.log(error));
   }
@@ -112,7 +115,7 @@ export function DrawerContent(props: any) {
               />
             )}
             label="Sign Out"
-            onPress={() => logout()}
+            onPress={() => executeLogout()}
           />
         </Drawer.Section>
       </View>

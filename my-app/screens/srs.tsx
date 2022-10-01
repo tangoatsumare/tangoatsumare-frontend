@@ -30,6 +30,9 @@ export const SRS = ({route}) => {
     // flashcardsOfCurrentUser,
     SRSFlashcardsOfCurrentUser,
     currentUser,
+    metrics,
+    flashcardsReviewable,
+    setFlashcardsReviewable
   } = useTangoContext();
 
     // const auth = getAuth();
@@ -39,11 +42,6 @@ export const SRS = ({route}) => {
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
     
     const [ flashcardsAll, setFlashcardsAll ] = useState<SRSTangoFlashcard[]>([]);
-    const [ flashcardsReviewable, setFlashcardsReviewable ] = useState<SRSTangoFlashcard[]>([]);
-    const [ metrics, setMetrics ] = useState({
-        new: 0,
-        due: 0
-    });
     const [ modalContent, setModalContent ] = useState('');
     const [ modalVisible, setModalVisible ] = useState(false);
     const [ modalSegmentButtonValue, setModalSegmentButtonValue ] = useState('all'); // all & due
@@ -72,33 +70,6 @@ export const SRS = ({route}) => {
             }
         })
     });
-
-    useEffect(() => {
-        (async () => {
-            if (isFocused && currentUser) {
-                // let flashcards: SRSTangoFlashcard[] = await HTTPRequest.getSRSFlashcardsByUser(userId);
-                console.log("hihi");
-                setFlashcardsAll(SRSFlashcardsOfCurrentUser);
-
-                // Updated to accomolate for deletion
-                // flashcards = flashcards.filter(card => !card.Flashcard[0].created_by?.includes("delete"));
-                setFlashcardsReviewable(getReviewableSRSFlashcards(SRSFlashcardsOfCurrentUser));
-            } 
-        })();
-    },[isFocused]);
-    
-    useEffect(() => {
-        if (flashcardsReviewable) {
-            const newCards = flashcardsReviewable.filter(card => card.counter === 0).length;
-            const dueCards = flashcardsReviewable.filter(card => card.counter !== 0).length;
-            
-            setMetrics({
-                new: newCards,
-                due: dueCards
-            });
-
-        }
-    }, [flashcardsReviewable]);
 
     // DO NOT REMOVE
     // Options for SRS properties. hide it from the user
@@ -208,7 +179,7 @@ export const SRS = ({route}) => {
                 />
                 <FlatList
                     data={modalSegmentButtonValue === 'all' ? 
-                            flashcardsAll :
+                            SRSFlashcardsOfCurrentUser :
                         modalSegmentButtonValue === 'due' ? 
                             flashcardsReviewable : null}
                     keyExtractor={(item) => item._id}

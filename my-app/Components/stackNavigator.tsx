@@ -32,48 +32,10 @@ const Tab = createBottomTabNavigator();
 export const TabHome = () => {
   // NEW - using Tango Context
   const {
-    flashcards,
-    setFlashcards,
-    // flashcardsOfCurrentUser,
     SRSFlashcardsOfCurrentUser,
     currentUser,
+    metrics
   } = useTangoContext();
-
-    // const auth = getAuth();
-    // const userId: UserId = auth.currentUser?.uid;
-    const isFocused = useIsFocused();
-    const [flashcardsAll, setFlashcardsAll] = useState<SRSTangoFlashcard[]>([]);
-    const [ flashcardsReviewable, setFlashcardsReviewable ] = useState<SRSTangoFlashcard[]>([]);
-    const [ metrics, setMetrics ] = useState({
-        new: 0,
-        due: 0
-    });
-
-    useEffect(() => {
-        (async () => {
-            if (isFocused && currentUser.uid) {
-                // let flashcards: SRSTangoFlashcard[] = await HTTPRequest.getSRSFlashcardsByUser(userId);
-                setFlashcardsAll(SRSFlashcardsOfCurrentUser);
-
-                // Updated to accomolate for deletion
-                // flashcards = flashcards.filter(card => !card.Flashcard[0].created_by?.includes("delete"));
-                setFlashcardsReviewable(getReviewableSRSFlashcards(SRSFlashcardsOfCurrentUser));
-            } 
-        })();
-    },[isFocused]);
-
-    useEffect(() => {
-        if (flashcardsReviewable) {
-            const newCards = flashcardsReviewable.filter(card => card.counter === 0).length;
-            const dueCards = flashcardsReviewable.filter(card => card.counter !== 0).length;
-            
-            setMetrics({
-                new: newCards,
-                due: dueCards
-            });
-
-        }
-    }, [flashcardsReviewable]);
 
     return (
         <Tab.Navigator

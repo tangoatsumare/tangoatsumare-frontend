@@ -13,7 +13,7 @@ import { useTangoContext } from "../contexts/TangoContext";
 
 
 export const Login = () => {
-  const { flashcards, login } = useTangoContext();
+  const { flashcards, login, currentUser, flashcardsOfCurrentUser } = useTangoContext();
 
   useEffect(() => {
     console.log(flashcards);
@@ -21,9 +21,6 @@ export const Login = () => {
   },[]);
 
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
-
-  const auth = getAuth();
-
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [validationMessage, setValidationMessage] = useState<string>('');
@@ -39,15 +36,23 @@ export const Login = () => {
       // await signInWithEmailAndPassword(auth, email, password);
       await login(email, password); // NEW
       await setRenderingIndicator(true);
-      await setTimeout(() => {
-        setRenderingIndicator(false);
-        navigation.navigate('TabHome');
-      }, 1000);
+      // await setTimeout(() => {
+      //   setRenderingIndicator(false);
+      //   navigation.navigate('TabHome');
+      // }, 1000);
 
     } catch(error: any) {
       setValidationMessage(error.message);
     }
   }
+
+  // TESTING
+  useEffect(() => {
+    if (currentUser && flashcardsOfCurrentUser) {
+      setRenderingIndicator(false);
+      navigation.navigate('TabHome');
+    }
+  }, [currentUser, flashcardsOfCurrentUser]);
 
   return (
     <View style={styles.container}>

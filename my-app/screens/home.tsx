@@ -42,7 +42,6 @@ const data = Object.keys(views).map((i) => ({
 }));
 
 export const Home = () => {
-  // NEW - using Tango Context
   const {
     flashcards,
     setFlashcards,
@@ -52,11 +51,18 @@ export const Home = () => {
     setTags,
     flashcardsOfCurrentUser,
     currentUser,
+    flashcardsMaster,
+    setFlashcardsMaster,
+    flashcardsCurated,
+    setFlashcardsCurated,
+    flashcardsCollection,
+    setFlashcardsCollection,
+    flashcardsFeed,
+    setFlashcardsFeed,
+    tagsToFlashcards,
+    setTagsToFlashcards,
+    loading
   } = useTangoContext();
-
-  // useEffect(() => {
-  //   console.log(flashcardsOfCurrentUser)
-  // }, []);
 
   // for animated indicator
   let scrollX = useRef(new Animated.Value(0)).current;
@@ -74,23 +80,23 @@ export const Home = () => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
   const [text, setText] = useState<string>('');
   const [textInputOnFocus, setTextInputOnFocus] = useState<boolean>(false);
-  const [flashcardsMaster, setFlashcardsMaster] = useState<object[]>([]);
-  const [flashcardsCurated, setFlashcardsCurated] = useState<object[]>([]);
-  const [flashcardsCollection, setFlashcardsCollection] = useState<object[]>([]);
-  const [flashcardsFeed, setFlashcardsFeed] = useState<object[]>([]);
+  // const [flashcardsMaster, setFlashcardsMaster] = useState<object[]>([]);
+  // const [flashcardsCurated, setFlashcardsCurated] = useState<object[]>([]);
+  // const [flashcardsCollection, setFlashcardsCollection] = useState<object[]>([]);
+  // const [flashcardsFeed, setFlashcardsFeed] = useState<object[]>([]);
   const [resetIsClick, setResetIsClick] = useState<boolean>(false);
   const [submitIsClick, setSubmitIsClick] = useState<boolean>(false);
 
   // const [tags, setTags] = useState<Tag[]>([]);
-  const [tagsToFlashcards, setTagsToFlashcards] = useState<object>({});
+  // const [tagsToFlashcards, setTagsToFlashcards] = useState<object>({});
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [hashTagSearchMode, setHashTagSearchMode] = useState<boolean>(false);
 
   const isFocused = useIsFocused();
-  const auth = getAuth();
-  const userId = auth.currentUser?.uid;
+  // const auth = getAuth();
+  // const userId = auth.currentUser?.uid;
 
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
 
   const [navigateTo, setNavigateTo] = useState({item: null}); 
   // from search view: navigate to feed card, reset navigateTo state
@@ -161,55 +167,69 @@ export const Home = () => {
     }
   }, [textInputOnFocus]);
 
-  useEffect(() => {
-      (async () => {
-        if (isFocused) {
-          try {
-              console.log("it is focused now. HTTP request will be sent to backend");
-
-              // let flashcardsAll = await HTTPRequest.getFlashcards();
-              // const usersAll = await HTTPRequest.getUsers();
-              // const tagsData = await HTTPRequest.getTags(); // fetching hashtag data
-
-              // remove the deleted cards from the flashcards
-              // cards with delete keyword in its created_by field are cards that deleted by their owners
-              //remove flagged cards
-              // flashcardsAll = flashcardsAll.filter((card: any) => (!card.flagged_inappropriate));
-  
-              // flashcardsAll = filterOutDeletedFlashcardsFromFlashcards(flashcardsAll);
-          
-              // // TODO: filter by flags
-
-              // const formattedFlashcards = formatFlashcardRelatedUserDetails(flashcardsAll, usersAll);
-              // const result: any[] = formattedFlashcards.reverse();
-
-              // setting states
-              setTags(tags);
-              setTagsToFlashcards(getTagsToFlashcardsIdObject(tags));
-              setFlashcardsMaster(flashcards);
-              setFlashcardsFeed(flashcards);
-              setFlashcardsCollection(flashcardsOfCurrentUser);
-              // setLoading(false);
-              // setNavigateTo({item: null}); // reset navigateTo
-          } catch (err) {
-              console.log(err);
-          }
-        }
-      })();
-  }, [isFocused]);
+  const [tangoDataLoaded, setTangoDataLoaded] = useState(false);
 
   useEffect(() => {
-    if (tags && tagsToFlashcards && flashcardsMaster && flashcardsFeed && flashcardsCollection) {
-      setLoading(false);
+    if (tags && flashcards
+      // .length > 0 && flashcardsOfCurrentUser.length > 0
+      ) { // TO REVIEW
+      setTangoDataLoaded(true);
     }
-  }, [tags, tagsToFlashcards, flashcardsMaster, flashcardsFeed, flashcardsCollection]);
+  }, [tags, flashcards, flashcardsOfCurrentUser]);
+
+  // useEffect(() => {
+  //     (async () => {
+  //       if (tangoDataLoaded) {
+  //         try {
+  //             console.log("it is focused now.");
+
+  //             // setting states
+  //             // setTags(tags);
+  //             // console.log(flashcards);
+  //             // console.log(flashcardsOfCurrentUser);
+  //             // setTagsToFlashcards(getTagsToFlashcardsIdObject(tags));
+  //             // setFlashcardsMaster(() => [...flashcards]);
+  //             // setFlashcardsFeed(() => [...flashcards]);
+  //             // setFlashcardsCollection(() => [...flashcardsOfCurrentUser]);
+  //             // setLoading(false);
+  //             // setNavigateTo({item: null}); // reset navigateTo
+  //         } catch (err) {
+  //             console.log(err);
+  //         }
+  //       }
+  //     })();
+  // }, [
+  //   tangoDataLoaded
+  // ]);
+
+  // useEffect(() => {
+  //   if (
+  //     // tangoDataLoaded && 
+  //     flashcards.length === 0) {
+  //     console.log("heeeei");
+  //     setLoading(false);
+  //   }
+  //   else if (
+  //     // tangoDataLoaded &&
+  //     // tags && tagsToFlashcards && 
+  //     flashcardsMaster.length > 0 && 
+  //     flashcardsFeed.length > 0 
+  //     && flashcardsCollection.length > 0) {
+  //     // flashcards.length > 0 && flashcardsOfCurrentUser) {
+  //     // console.log(flashcardsCollection)
+  //     // console.log(flashcardsFeed);
+  //     setLoading(false);
+  //   }
+  // }, [
+  //   // tangoDataLoaded
+  //   , tags, tagsToFlashcards, flashcardsMaster, flashcardsFeed, flashcardsCollection, flashcards, flashcardsOfCurrentUser]);
 
   // update the home collection/feed states when the search is submitted
   useEffect(() => {
     if (flashcardsCurated && !textInputOnFocus) {
       // update the states for flashcardsFeed and flashcardsCollection
       setFlashcardsFeed(flashcardsCurated);
-      setFlashcardsCollection(flashcardsCurated.filter(flashcard => flashcard.created_by === userId));
+      setFlashcardsCollection(flashcardsCurated.filter(flashcard => flashcard.created_by === currentUser.uid));
     }
   },[ flashcardsCurated, textInputOnFocus ]);
 
@@ -224,7 +244,7 @@ export const Home = () => {
     setResetIsClick(true);
     setSubmitIsClick(false);
     setFlashcardsFeed(flashcardsMaster);
-    setFlashcardsCollection(flashcardsMaster.filter(flashcard => flashcard["created_by"] === userId));
+    setFlashcardsCollection(flashcardsMaster.filter(flashcard => flashcard["created_by"] === currentUser.uid));
   };
 
   // reshape the object so it is easier to work with
@@ -450,21 +470,94 @@ export const Home = () => {
     if (scrollContentChanged) setScrollContentChanged(false);
   }, [scrollContentChanged]);
 
+  const Tags = () => {
+    return (
+      selectedTags.length !== 0 ? 
+        <View style={styles.tagsContainer}>
+          {selectedTags.map(item => {
+            return (
+              <Chip key={item} style={{...styles.tag, backgroundColor: theme.colors.primary}}>
+                <Text style={{fontSize: 10, color: 'white'}}>{item}</Text>
+              </Chip>
+            );
+          })}
+        </View>         
+      :null
+    );
+  }
+
+  // const FeedList = () => {
+  //   return (
+  //     tangoDataLoaded && flashcardsFeed.length > 0 ?
+  //       <FlatList style={styles.container}
+  //         data={flashcardsFeed}
+  //         numColumns={2}
+  //         key={'_'}
+  //         keyExtractor={(item) => "_" + item._id}
+  //         renderItem={({item}) => (       
+  //             <Feed item={item} />
+  //           )
+  //         }
+  //         contentContainerStyle={{paddingBottom: 50}}
+  //         showsVerticalScrollIndicator={false}
+  //       />
+  //       : 
+  //         <View style={{
+  //               width: width,
+  //               height: "100%",
+  //               flex: 1,
+  //               alignItems: 'center',
+  //               justifyContent: 'center'
+  //         }}>
+  //           {submitIsClick ? 
+  //             loading ? 
+  //               <ActivityIndicator /> : 
+  //               <NoSearchResultFound />
+  //               : 
+  //             loading ? 
+  //               <ActivityIndicator /> : 
+  //               <CreateYourFirstCard />
+  //           }
+  //         </View>
+      
+  //   );
+  // }
+
+
+  // const CollectionList = () => {
+  //   return (
+  //     tangoDataLoaded && flashcardsCollection.length > 0 ? 
+  //       <FlatList style={styles.container}
+  //           data={flashcardsCollection}
+  //           keyExtractor={(item) => item._id}
+  //           renderItem={({item}) => (
+  //               <Collection item={item} />
+  //             )
+  //           }
+  //           // workaround for the last item of flatlist not showing properly
+  //           // https://thewebdev.info/2022/02/19/how-to-fix-the-react-native-flatlist-last-item-not-visible-issue/
+  //           contentContainerStyle={{paddingBottom: 50}}
+  //           showsVerticalScrollIndicator={false}
+  //         />
+  //     : 
+  //       submitIsClick ? 
+  //         <NoSearchResultFound />
+  //          :  
+  //          <CreateYourFirstCard />
+  //   );
+  // }
+
   return (
+    // <Text>{flashcardsFeed.length}</Text>
+    // <Text>{flashcards.length}</Text>
+
     <View style={styles.master}>
-      { !textInputOnFocus && flashcardsFeed && flashcardsCollection ? 
+      { !textInputOnFocus 
+      // && tangoDataLoaded 
+      && flashcardsFeed && flashcardsCollection ? 
         <View> 
-            {selectedTags.length !== 0 ? 
-              <View style={styles.tagsContainer}>
-                {selectedTags.map(item => {
-                  return (
-                    <Chip key={item} style={{...styles.tag, backgroundColor: theme.colors.primary}}>
-                      <Text style={{fontSize: 10, color: 'white'}}>{item}</Text>
-                    </Chip>
-                  );
-                })}
-              </View>         
-            :null}
+            <Tags />
+            {/* <Text>{flashcardsFeed.length}</Text> */}
           <Animated.ScrollView 
               contentContainerStyle={{ marginTop: selectedTags.length !== 0 ? 30 : 60 }}
               ref={scrollRef}
@@ -489,58 +582,63 @@ export const Home = () => {
               decelerationRate="fast" 
               showsHorizontalScrollIndicator={false}              
           >
-          {flashcardsFeed.length > 0 ?
-            <FlatList style={styles.container}
-              data={flashcardsFeed}
-              numColumns={2}
-              key={'_'}
-              keyExtractor={(item) => "_" + item._id}
-              renderItem={({item}) => (       
-                  <Feed item={item} />
-                )
-              }
-              contentContainerStyle={{paddingBottom: 50}}
-              showsVerticalScrollIndicator={false}
-            />
-            : 
-              <View style={{
-                    width: width,
-                    height: "100%",
-                    flex: 1,
-                    alignItems: 'center',
-                    justifyContent: 'center'
-              }}>
-                {submitIsClick ? 
-                  loading ? 
-                    <ActivityIndicator /> : 
-                    <NoSearchResultFound />
-                    : 
-                  loading ? 
-                    <ActivityIndicator /> : 
-                    <CreateYourFirstCard />
-                }
-              </View>
+            {/* <FeedList /> */}
+           { 
+          //  tangoDataLoaded && 
+           flashcardsFeed.length > 0 ?
+        <FlatList style={styles.container}
+          data={flashcardsFeed}
+          numColumns={2}
+          key={'_'}
+          keyExtractor={(item) => "_" + item._id}
+          renderItem={({item}) => (       
+              <Feed item={item} />
+            )
           }
-            {flashcardsCollection.length > 0 ? 
-              <FlatList style={styles.container}
-                  data={flashcardsCollection}
-                  keyExtractor={(item) => item._id}
-                  renderItem={({item}) => (
-                      <Collection item={item} />
-                    )
-                  }
-                  // workaround for the last item of flatlist not showing properly
-                  // https://thewebdev.info/2022/02/19/how-to-fix-the-react-native-flatlist-last-item-not-visible-issue/
-                  contentContainerStyle={{paddingBottom: 50}}
-                  showsVerticalScrollIndicator={false}
-                />
-            : 
-              submitIsClick ? 
+          contentContainerStyle={{paddingBottom: 50}}
+          showsVerticalScrollIndicator={false}
+        />
+        : 
+          <View style={{
+                width: width,
+                height: "100%",
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center'
+          }}>
+            {submitIsClick ? 
+              loading ? 
+                <ActivityIndicator /> : 
                 <NoSearchResultFound />
-                 :  
-                 <CreateYourFirstCard />
-                                 
-          }
+                : 
+              loading ? 
+                <ActivityIndicator /> : 
+                <CreateYourFirstCard />
+            }
+          </View>
+      }
+            {/* <CollectionList /> */}
+            {
+                    // tangoDataLoaded && 
+                    flashcardsCollection.length > 0 ? 
+                    <FlatList style={styles.container}
+                        data={flashcardsCollection}
+                        keyExtractor={(item) => item._id}
+                        renderItem={({item}) => (
+                            <Collection item={item} />
+                          )
+                        }
+                        // workaround for the last item of flatlist not showing properly
+                        // https://thewebdev.info/2022/02/19/how-to-fix-the-react-native-flatlist-last-item-not-visible-issue/
+                        contentContainerStyle={{paddingBottom: 50}}
+                        showsVerticalScrollIndicator={false}
+                      />
+                  : 
+                    submitIsClick ? 
+                      <NoSearchResultFound />
+                       :  
+                       <CreateYourFirstCard />
+            }
         </Animated.ScrollView>
         <Tabs scrollX={scrollX} data={data} onItemPress={onItemPress}/>
     </View>
