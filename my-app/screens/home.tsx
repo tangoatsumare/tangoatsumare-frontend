@@ -1,7 +1,6 @@
 import { useNavigation } from "@react-navigation/core";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
-import { useIsFocused } from "@react-navigation/native";
 import React, { useEffect, useLayoutEffect, useState, useRef, createRef, forwardRef, useCallback } from "react";
 import { Keyboard, Dimensions, Animated, findNodeHandle, Image } from 'react-native';
 import { View, StyleSheet, FlatList, TouchableOpacity, ScrollView } from 'react-native'
@@ -9,13 +8,14 @@ import {
   ActivityIndicator, Text, Button, Card, Paragraph, Title, Avatar, Divider, Chip, Searchbar 
 } from "react-native-paper";
 import { useTheme } from 'react-native-paper';
-import { HTTPRequest } from "../utils/httpRequest";
 import { SearchBar, SearchBody } from '../screens/Search';
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { getAuth } from 'firebase/auth';
 import { Collection } from "../Components/collection";
 import { Feed } from "../Components/feed";
+
+import { useTangoContext } from "../contexts/TangoContext";
+import { useAuthContext } from "../contexts/AuthContext";
 
 const { width, height } = Dimensions.get('screen');
 
@@ -40,6 +40,21 @@ const data = Object.keys(views).map((i) => ({
 }));
 
 export const Home = () => {
+  const { currentUser } = useAuthContext();
+  const {
+    tags,
+    setTags,
+    flashcardsMaster,
+    flashcardsCurated,
+    setFlashcardsCurated,
+    flashcardsCollection,
+    setFlashcardsCollection,
+    flashcardsFeed,
+    setFlashcardsFeed,
+    tagsToFlashcards,
+    loading
+  } = useTangoContext();
+
   // for animated indicator
   let scrollX = useRef(new Animated.Value(0)).current;
   const scrollRef = useRef();
@@ -56,24 +71,11 @@ export const Home = () => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
   const [text, setText] = useState<string>('');
   const [textInputOnFocus, setTextInputOnFocus] = useState<boolean>(false);
-  const [flashcardsMaster, setFlashcardsMaster] = useState<object[]>([]);
-  const [flashcardsCurated, setFlashcardsCurated] = useState<object[]>([]);
-  const [flashcardsCollection, setFlashcardsCollection] = useState<object[]>([]);
-  const [flashcardsFeed, setFlashcardsFeed] = useState<object[]>([]);
   const [resetIsClick, setResetIsClick] = useState<boolean>(false);
   const [submitIsClick, setSubmitIsClick] = useState<boolean>(false);
-
-  const [tags, setTags] = useState<Tag[]>([]);
-  const [tagsToFlashcards, setTagsToFlashcards] = useState<object>({});
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [hashTagSearchMode, setHashTagSearchMode] = useState<boolean>(false);
-
-  const isFocused = useIsFocused();
-  const auth = getAuth();
-  const userId = auth.currentUser?.uid;
-
-  const [loading, setLoading] = useState(true);
-
+  const [currentView, setCurrentView] = useState("feed");
   const [navigateTo, setNavigateTo] = useState({item: null}); 
   // from search view: navigate to feed card, reset navigateTo state
   useEffect(() => {
@@ -143,49 +145,12 @@ export const Home = () => {
     }
   }, [textInputOnFocus]);
 
-  useEffect(() => {
-      (async () => {
-        if (isFocused) {
-          try {
-              console.log("it is focused now. HTTP request will be sent to backend");
-
-              let flashcardsAll = await HTTPRequest.getFlashcards();
-              const usersAll = await HTTPRequest.getUsers();
-              const tagsData = await HTTPRequest.getTags(); // fetching hashtag data
-
-              // remove the deleted cards from the flashcards
-              // cards with delete keyword in its created_by field are cards that deleted by their owners
-              //remove flagged cards
-              flashcardsAll = flashcardsAll.filter((card: any) => (!card.flagged_inappropriate));
-  
-              flashcardsAll = filterOutDeletedFlashcardsFromFlashcards(flashcardsAll);
-          
-              // TODO: filter by flags
-
-              const formattedFlashcards = formatFlashcardRelatedUserDetails(flashcardsAll, usersAll);
-              const result: any[] = formattedFlashcards.reverse();
-
-              // setting states
-              setTags(tagsData);
-              setTagsToFlashcards(getTagsToFlashcardsIdObject(tagsData));
-              setFlashcardsMaster(result);
-              setFlashcardsFeed(result);
-              setFlashcardsCollection(result.filter(flashcard => flashcard["created_by"] === userId));
-              setLoading(false);
-              // setNavigateTo({item: null}); // reset navigateTo
-          } catch (err) {
-              console.log(err);
-          }
-        }
-      })();
-  }, [isFocused]);
-
   // update the home collection/feed states when the search is submitted
   useEffect(() => {
     if (flashcardsCurated && !textInputOnFocus) {
       // update the states for flashcardsFeed and flashcardsCollection
       setFlashcardsFeed(flashcardsCurated);
-      setFlashcardsCollection(flashcardsCurated.filter(flashcard => flashcard.created_by === userId));
+      setFlashcardsCollection(flashcardsCurated.filter(flashcard => flashcard.created_by === currentUser.uid));
     }
   },[ flashcardsCurated, textInputOnFocus ]);
 
@@ -200,39 +165,8 @@ export const Home = () => {
     setResetIsClick(true);
     setSubmitIsClick(false);
     setFlashcardsFeed(flashcardsMaster);
-    setFlashcardsCollection(flashcardsMaster.filter(flashcard => flashcard["created_by"] === userId));
+    setFlashcardsCollection(flashcardsMaster.filter(flashcard => flashcard["created_by"] === currentUser.uid));
   };
-
-  // reshape the object so it is easier to work with
-  const getTagsToFlashcardsIdObject = (tags: Tag[]): object => {
-    const tagsToFlashcardsId = {};
-    for (const tag of tags) {
-      // https://stackoverflow.com/questions/11508463/javascript-set-object-key-by-variable
-        tagsToFlashcardsId[tag.tag] = tag.flashcards;
-
-    }
-    return tagsToFlashcardsId;
-  }
-
-  const formatFlashcardRelatedUserDetails = (cards: any[], users: any[]): any[] => {
-    const formattedCards = [...cards];
-    for (const card of cards) {
-      const result = users.find((user: any) => user.uuid === card.created_by);
-      if (result) {
-          card.created_by_username = result.user_name; // replace uid with username
-          card.avatar_url = result.avatar_url; // add field
-      }
-      // card.created_timestamp = dayjs(card.created_timestamp)
-        // .fromNow(); 
-      // https://day.js.org/docs/en/plugin/relative-time
-    }
-    return formattedCards;
-  };
-
-  const filterOutDeletedFlashcardsFromFlashcards = (cards: any[]): any[] => {
-    // cards with delete keyword in its created_by field are cards that deleted by their owners
-    return cards.filter((card: any) => !card.created_by.includes("delete"));
-  }
 
   const handleEditSubmit = () => {
     if (text || selectedTags.length !== 0) {
@@ -346,7 +280,6 @@ export const Home = () => {
     );
   };
 
-  const [currentView, setCurrentView] = useState("feed");
   const handleScroll = (event) => {
     if (event.nativeEvent.contentOffset.x === width) {
       setCurrentView("collection") 
@@ -426,21 +359,26 @@ export const Home = () => {
     if (scrollContentChanged) setScrollContentChanged(false);
   }, [scrollContentChanged]);
 
+  const Tags = () => {
+    return (
+      selectedTags.length !== 0 ? 
+        <View style={styles.tagsContainer}>
+          {selectedTags.map(item => {
+            return (
+              <Chip key={item} style={{...styles.tag, backgroundColor: theme.colors.primary}}>
+                <Text style={{fontSize: 10, color: 'white'}}>{item}</Text>
+              </Chip>
+            );
+          })}
+        </View>         
+      :null
+    );
+  }
   return (
     <View style={styles.master}>
       { !textInputOnFocus && flashcardsFeed && flashcardsCollection ? 
         <View> 
-            {selectedTags.length !== 0 ? 
-              <View style={styles.tagsContainer}>
-                {selectedTags.map(item => {
-                  return (
-                    <Chip key={item} style={{...styles.tag, backgroundColor: theme.colors.primary}}>
-                      <Text style={{fontSize: 10, color: 'white'}}>{item}</Text>
-                    </Chip>
-                  );
-                })}
-              </View>         
-            :null}
+            <Tags />
           <Animated.ScrollView 
               contentContainerStyle={{ marginTop: selectedTags.length !== 0 ? 30 : 60 }}
               ref={scrollRef}
@@ -465,58 +403,57 @@ export const Home = () => {
               decelerationRate="fast" 
               showsHorizontalScrollIndicator={false}              
           >
-          {flashcardsFeed.length > 0 ?
-            <FlatList style={styles.container}
-              data={flashcardsFeed}
-              numColumns={2}
-              key={'_'}
-              keyExtractor={(item) => "_" + item._id}
-              renderItem={({item}) => (       
-                  <Feed item={item} />
-                )
-              }
-              contentContainerStyle={{paddingBottom: 50}}
-              showsVerticalScrollIndicator={false}
-            />
-            : 
-              <View style={{
-                    width: width,
-                    height: "100%",
-                    flex: 1,
-                    alignItems: 'center',
-                    justifyContent: 'center'
-              }}>
-                {submitIsClick ? 
-                  loading ? 
-                    <ActivityIndicator /> : 
-                    <NoSearchResultFound />
-                    : 
-                  loading ? 
-                    <ActivityIndicator /> : 
-                    <CreateYourFirstCard />
-                }
-              </View>
+           { flashcardsFeed.length > 0 ?
+        <FlatList style={styles.container}
+          data={flashcardsFeed}
+          numColumns={2}
+          key={'_'}
+          keyExtractor={(item) => "_" + item._id}
+          renderItem={({item}) => (       
+              <Feed item={item} />
+            )
           }
-            {flashcardsCollection.length > 0 ? 
-              <FlatList style={styles.container}
-                  data={flashcardsCollection}
-                  keyExtractor={(item) => item._id}
-                  renderItem={({item}) => (
-                      <Collection item={item} />
-                    )
-                  }
-                  // workaround for the last item of flatlist not showing properly
-                  // https://thewebdev.info/2022/02/19/how-to-fix-the-react-native-flatlist-last-item-not-visible-issue/
-                  contentContainerStyle={{paddingBottom: 50}}
-                  showsVerticalScrollIndicator={false}
-                />
-            : 
-              submitIsClick ? 
+          contentContainerStyle={{paddingBottom: 50}}
+          showsVerticalScrollIndicator={false}
+        />
+        : 
+          <View style={{
+                width: width,
+                height: "100%",
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center'
+          }}>
+            {submitIsClick ? 
+              loading ? 
+                <ActivityIndicator /> : 
                 <NoSearchResultFound />
-                 :  
-                 <CreateYourFirstCard />
-                                 
-          }
+                : 
+              loading ? 
+                <ActivityIndicator /> : 
+                <CreateYourFirstCard />
+            }
+          </View>
+      }
+            { flashcardsCollection.length > 0 ? 
+                    <FlatList style={styles.container}
+                        data={flashcardsCollection}
+                        keyExtractor={(item) => item._id}
+                        renderItem={({item}) => (
+                            <Collection item={item} />
+                          )
+                        }
+                        // workaround for the last item of flatlist not showing properly
+                        // https://thewebdev.info/2022/02/19/how-to-fix-the-react-native-flatlist-last-item-not-visible-issue/
+                        contentContainerStyle={{paddingBottom: 50}}
+                        showsVerticalScrollIndicator={false}
+                      />
+                  : 
+                    submitIsClick ? 
+                      <NoSearchResultFound />
+                       :  
+                       <CreateYourFirstCard />
+            }
         </Animated.ScrollView>
         <Tabs scrollX={scrollX} data={data} onItemPress={onItemPress}/>
     </View>

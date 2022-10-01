@@ -17,6 +17,8 @@ import { ParamListBase } from "@react-navigation/native";
 import { getAuth } from 'firebase/auth';
 import axios from 'axios';
 
+import { useAuthContext } from '../contexts/AuthContext';
+
 interface UserInfo {
   __v: number,
   _id: string
@@ -36,14 +38,13 @@ interface UserInfo {
 }
 
 export function DrawerContent(props: any) {
+  const { currentUser, logout } = useAuthContext();
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
   
   const [userProfileInfo, setUserProfileInfo] = useState<UserInfo[]>();
 
-  const auth = getAuth();
-
   useEffect(() => {
-    const uid = auth.currentUser?.uid;
+    const uid = currentUser;
     axios
       .get(`https://tangoatsumare-api.herokuapp.com/api/usersuid/${uid}`)
       .then((response: any) => {
@@ -53,8 +54,8 @@ export function DrawerContent(props: any) {
 
   }, []);
 
-  const logout = () => {
-    auth.signOut()
+  const executeLogout = () => {
+    logout()
     .then(() => navigation.navigate("Login"))
     .catch(error => console.log(error));
   }
@@ -112,7 +113,7 @@ export function DrawerContent(props: any) {
               />
             )}
             label="Sign Out"
-            onPress={() => logout()}
+            onPress={() => executeLogout()}
           />
         </Drawer.Section>
       </View>

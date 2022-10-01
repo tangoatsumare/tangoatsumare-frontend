@@ -4,16 +4,19 @@ import { ParamListBase } from '@react-navigation/native'
 //import { getFirebaseAuth } from '../firebase';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity,  } from 'react-native'
 import { Button } from "react-native-paper";
 import {ActivityIndicator} from 'react-native-paper';
 
+// import { useTangoContext } from "../contexts/TangoContext";
+import { useAuthContext } from "../contexts/AuthContext";
+
+
 export const Login = () => {
+  const { login, currentUser } = useAuthContext();
+
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
-
-  const auth = getAuth();
-
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [validationMessage, setValidationMessage] = useState<string>('');
@@ -26,17 +29,26 @@ export const Login = () => {
     }
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      // await signInWithEmailAndPassword(auth, email, password);
+      await login(email, password); // NEW
       await setRenderingIndicator(true);
-      await setTimeout(() => {
-        setRenderingIndicator(false);
-        navigation.navigate('TabHome');
-      }, 1000);
+      // await setTimeout(() => {
+      //   setRenderingIndicator(false);
+      //   navigation.navigate('TabHome');
+      // }, 1000);
 
     } catch(error: any) {
       setValidationMessage(error.message);
     }
   }
+
+  // TESTING
+  useEffect(() => {
+    if (currentUser) {
+      setRenderingIndicator(false);
+      navigation.navigate('TabHome');
+    }
+  }, [currentUser]);
 
   return (
     <View style={styles.container}>

@@ -18,21 +18,29 @@ import { HTTPRequest, UserId } from "../utils/httpRequest";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { TouchableOpacity } from "react-native-gesture-handler";
 
+import { useTangoContext } from "../contexts/TangoContext";
+import { useAuthContext } from "../contexts/AuthContext";
+
 const { width, height } = Dimensions.get('screen');
 
 export const SRS = ({route}) => {
-    const auth = getAuth();
-    const userId: UserId = auth.currentUser?.uid;
+  const { currentUser } = useAuthContext();
+  const {
+    flashcards,
+    setFlashcards,
+    SRSFlashcardsOfCurrentUser,
+    metrics,
+    flashcardsReviewable,
+    setFlashcardsReviewable
+  } = useTangoContext();
+
+    // const auth = getAuth();
+    // const userId: UserId = auth.currentUser?.uid;
     const theme = useTheme();
     const isFocused = useIsFocused();
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
     
     const [ flashcardsAll, setFlashcardsAll ] = useState<SRSTangoFlashcard[]>([]);
-    const [ flashcardsReviewable, setFlashcardsReviewable ] = useState<SRSTangoFlashcard[]>([]);
-    const [ metrics, setMetrics ] = useState({
-        new: 0,
-        due: 0
-    });
     const [ modalContent, setModalContent ] = useState('');
     const [ modalVisible, setModalVisible ] = useState(false);
     const [ modalSegmentButtonValue, setModalSegmentButtonValue ] = useState('all'); // all & due
@@ -61,32 +69,6 @@ export const SRS = ({route}) => {
             }
         })
     });
-
-    useEffect(() => {
-        (async () => {
-            if (isFocused && userId) {
-                let flashcards: SRSTangoFlashcard[] = await HTTPRequest.getSRSFlashcardsByUser(userId);
-                setFlashcardsAll(flashcards);
-
-                // Updated to accomolate for deletion
-                flashcards = flashcards.filter(card => !card.Flashcard[0].created_by?.includes("delete"));
-                setFlashcardsReviewable(getReviewableSRSFlashcards(flashcards));
-            } 
-        })();
-    },[isFocused]);
-    
-    useEffect(() => {
-        if (flashcardsReviewable) {
-            const newCards = flashcardsReviewable.filter(card => card.counter === 0).length;
-            const dueCards = flashcardsReviewable.filter(card => card.counter !== 0).length;
-            
-            setMetrics({
-                new: newCards,
-                due: dueCards
-            });
-
-        }
-    }, [flashcardsReviewable]);
 
     // DO NOT REMOVE
     // Options for SRS properties. hide it from the user
@@ -196,7 +178,7 @@ export const SRS = ({route}) => {
                 />
                 <FlatList
                     data={modalSegmentButtonValue === 'all' ? 
-                            flashcardsAll :
+                            SRSFlashcardsOfCurrentUser :
                         modalSegmentButtonValue === 'due' ? 
                             flashcardsReviewable : null}
                     keyExtractor={(item) => item._id}

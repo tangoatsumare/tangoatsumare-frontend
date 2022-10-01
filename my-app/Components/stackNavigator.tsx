@@ -11,58 +11,15 @@ import { Review } from "../screens/review";
 import { ProfileSetup } from "../screens/profileSetup";
 import React, {useEffect, useState} from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Collection } from "./collection";
 import { SingleCard } from "./card";
-import { Front } from "../screens/front";
-import { Back } from "../screens/back";
 import { FeedCard } from "../screens/feedCard";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { HTTPRequest, UserId } from "../utils/httpRequest";
-import { getAuth } from "firebase/auth";
-import { useIsFocused } from "@react-navigation/native";
-import { 
-    SRSTangoFlashcard,
-    getReviewableSRSFlashcards
- } from "../utils/supermemo";
+import { useTangoContext } from "../contexts/TangoContext";
 
 const Tab = createBottomTabNavigator();
 
 export const TabHome = () => {
-    const auth = getAuth();
-    const userId: UserId = auth.currentUser?.uid;
-    const isFocused = useIsFocused();
-    const [flashcardsAll, setFlashcardsAll] = useState<SRSTangoFlashcard[]>([]);
-    const [ flashcardsReviewable, setFlashcardsReviewable ] = useState<SRSTangoFlashcard[]>([]);
-    const [ metrics, setMetrics ] = useState({
-        new: 0,
-        due: 0
-    });
-
-    useEffect(() => {
-        (async () => {
-            if (isFocused && userId) {
-                let flashcards: SRSTangoFlashcard[] = await HTTPRequest.getSRSFlashcardsByUser(userId);
-                setFlashcardsAll(flashcards);
-
-                // Updated to accomolate for deletion
-                flashcards = flashcards.filter(card => !card.Flashcard[0].created_by?.includes("delete"));
-                setFlashcardsReviewable(getReviewableSRSFlashcards(flashcards));
-            } 
-        })();
-    },[isFocused]);
-
-    useEffect(() => {
-        if (flashcardsReviewable) {
-            const newCards = flashcardsReviewable.filter(card => card.counter === 0).length;
-            const dueCards = flashcardsReviewable.filter(card => card.counter !== 0).length;
-            
-            setMetrics({
-                new: newCards,
-                due: dueCards
-            });
-
-        }
-    }, [flashcardsReviewable]);
+  const { metrics } = useTangoContext();
 
     return (
         <Tab.Navigator
@@ -120,7 +77,6 @@ export const TabHome = () => {
     );
 };
 
-
 const RootStack = createNativeStackNavigator();
 
 export const StackNav = () => {
@@ -171,7 +127,6 @@ export const StackNav = () => {
                     headerStyle: {},
                 }}
             />
-            {/* <RootStack.Screen name="Collection" component={Collection}/> */}
             <RootStack.Screen 
                 name="Card" 
                 component={SingleCard} 
@@ -192,8 +147,6 @@ export const StackNav = () => {
                     headerStyle: {},
                 }}
             />
-            {/* <RootStack.Screen name="Front" component={Front}/>
-            <RootStack.Screen name="Back" component={Back}/> */}
             <RootStack.Screen 
                 name="Review" 
                 component={Review}
