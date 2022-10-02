@@ -38,7 +38,8 @@ export const Feed = ({item}) => {
       }
     }, [item]);
   
-    const [loading, setLoading] = useState(true);
+    // const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
 
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
 
@@ -71,7 +72,7 @@ export const Feed = ({item}) => {
                             paddingVertical: 0,
                           }}
                     >
-                        <Card.Cover 
+                        {/* <Card.Cover 
                             source={item.picture_url && {uri: item.picture_url}} 
                             onLoadEnd={() => {
                               setLoading(false)
@@ -81,7 +82,7 @@ export const Feed = ({item}) => {
                                 backgroundColor: 'transparent'
                               }}
                             resizeMode="cover"
-                        />
+                        /> */}
                     {fontsLoaded && <Title style={styles.textVocab}>{item.target_word}</Title>}
                     </Card.Content>
                 </Card>

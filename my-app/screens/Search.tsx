@@ -52,6 +52,7 @@ interface SearchBodyProps {
 const { width } = Dimensions.get('window');
 
 export const SearchBar = (props: SearchBarProps) => {
+    const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
     const theme = useTheme();
     const inputRef = useRef();
     const { 
@@ -59,27 +60,31 @@ export const SearchBar = (props: SearchBarProps) => {
         setText, 
         textInputOnFocus, 
         setTextInputOnFocus, 
-        flashcardsCurated, 
+        flashcardsCurated,
         setFlashcardsCurated,
         flashcardsFeed,
-        submitIsClick,
-        setSubmitIsClick,
         resetIsClick,
         flashcardsMaster,
-        hashTagSearchMode,
-        setHashTagSearchMode,
         handleEditSubmit,
         selectedTags,
         setSelectedTags,
         tagsToFlashcards,
-        tags,
-        setTags,
+        tags
     } = props;
 
     const [pressed, setPressed] = useState(false);
 
     const resetFlashcardsCurated = () => {
         setFlashcardsCurated(flashcardsMaster);
+    };
+
+    const navigateToSearchScreen = () => {
+        // TODO
+        console.log('hi');
+        navigation.navigate("Search", {
+            flashcards: flashcardsCurated,
+            tags: tags
+        });
     };
 
     useEffect(() => {
@@ -182,17 +187,21 @@ export const SearchBar = (props: SearchBarProps) => {
     };
 
     return (
-        <View style={{
-            flexDirection: 'row',
-            justifyContent: "space-evenly",
-            alignItems: 'center',
-            backgroundColor: textInputOnFocus ? theme.colors.tertiary: 'rgba(0,0,0,0.1)',
-            borderColor: textInputOnFocus ? theme.colors.primary: 'rgba(0,0,0,0.1)',
-            borderWidth: textInputOnFocus ? 0.5: 0,
-            borderRadius: 30,
-            width: width / 1.5, // ratio that the search bar takes up the page
-            height: 30
-        }}>
+        <TouchableOpacity 
+            style={{
+                flexDirection: 'row',
+                justifyContent: "space-evenly",
+                alignItems: 'center',
+                backgroundColor: textInputOnFocus ? theme.colors.tertiary: 'rgba(0,0,0,0.1)',
+                borderColor: textInputOnFocus ? theme.colors.primary: 'rgba(0,0,0,0.1)',
+                borderWidth: textInputOnFocus ? 0.5: 0,
+                borderRadius: 30,
+                width: width / 1.5, // ratio that the search bar takes up the page
+                height: 30
+            }}
+            onPress={navigateToSearchScreen}
+            activeOpacity={1}
+        >
             <PaperTextInput.Icon 
                 icon="magnify" 
                 // disabled={true}
@@ -201,7 +210,7 @@ export const SearchBar = (props: SearchBarProps) => {
                     marginLeft: 20 // hard coded
                 }}
                 />
-            <TextInput 
+            {/* <TextInput 
                 ref={inputRef}
                 style={{
                     flex: 1, 
@@ -230,7 +239,18 @@ export const SearchBar = (props: SearchBarProps) => {
                 onSubmitEditing={handleEditSubmit}
                 onFocus={() => setTextInputOnFocus(true)}
                 onBlur={() => setPressed(false)} // trigger during blur event
-            />
+            /> */}
+            <Text
+                style={{
+                    flex: 1, 
+                    marginLeft: 40,
+                    marginRight: 40,
+                    alignSelf: 'center',
+                    width: "auto",
+                    fontSize:  15
+                }}
+                
+            >Search Tango</Text>
             {textInputOnFocus ? 
                 <PaperTextInput.Icon
                     style={{
@@ -248,7 +268,7 @@ export const SearchBar = (props: SearchBarProps) => {
                     }}
                 />
             : null}
-        </View>
+        </TouchableOpacity>
     );
 };
 
@@ -274,8 +294,6 @@ export const SearchBody = (props: SearchBodyProps) => {
         selectedTags,
         setSelectedTags,
         tags,
-        setTags,
-        navigateTo,
         setNavigateTo
     } = props;
     const [tagsModified, setTagsModified ] = useState<modifiedTag[]>([]);

@@ -14,7 +14,8 @@ export const Collection = ({item}) => {
 
   const [imgHeight, setImgHeight] = useState<number>();
 
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
 
@@ -59,7 +60,7 @@ export const Collection = ({item}) => {
             }}
             // https://stackoverflow.com/questions/61511559/how-can-i-resize-an-image-in-a-react-paper-card-cover-to-fit-the-height
           >
-            <Card.Cover 
+            {/* <Card.Cover 
               source={{
                 uri: item.picture_url ? 
                       item.picture_url : 
@@ -73,7 +74,7 @@ export const Collection = ({item}) => {
               }}
               resizeMode="cover"
               // resizeMode="contain"
-            />
+            /> */}
             <Title style={styles.textVocab}>{item.target_word}</Title>
           </Card.Content>
         </Card>

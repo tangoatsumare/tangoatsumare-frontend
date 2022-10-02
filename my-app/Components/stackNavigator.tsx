@@ -15,6 +15,7 @@ import { SingleCard } from "./card";
 import { FeedCard } from "../screens/feedCard";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useTangoContext } from "../contexts/TangoContext";
+import {SearchScreen} from "../screens/SearchScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -89,6 +90,13 @@ export const StackNav = () => {
                     headerTitle:"Back"
                 }} 
                 component={TabHome} 
+            />
+            <RootStack.Screen name="Search" 
+                options={{
+                    headerShown: false, 
+                    // headerTitle:"Back"
+                }} 
+                component={SearchScreen} 
             />
             <RootStack.Screen name="Settings" component={Settings}/>
             <RootStack.Screen name="Profile" component={Profile} options={{headerShadowVisible: false,
