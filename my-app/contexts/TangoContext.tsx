@@ -10,6 +10,7 @@ import {
  } from "../utils/supermemo";
 import { useAuthContext } from './AuthContext';
 import { ActivityIndicator } from 'react-native-paper';
+import { WithSplashScreen, Splash } from '../Components/WithSplashScreen';
 
 const TangoContext = React.createContext();
 
@@ -20,6 +21,7 @@ export function useTangoContext() {
 export function TangoProvider({ children }) {
     const { currentUser } = useAuthContext();
     const [loading, setLoading] = useState(true);
+    const [isAppReady, setIsAppReady] = useState(false);
     const [flashcards, setFlashcards] = useState([]);
     const [users, setUsers] = useState([]);
     const [tags, setTags] = useState([]);
@@ -97,7 +99,12 @@ export function TangoProvider({ children }) {
             if (currentUser) {
                 // data to fetch as global context
                 await updateAppStates();
-                setLoading(false);
+                setLoading(false); // redundant? check
+                setIsAppReady(true);
+                console.log('hi');
+            } else {
+                setIsAppReady(true);
+                setLoading(false); // redundant? check
             }
         })();
     }, [currentUser]);
@@ -139,17 +146,26 @@ export function TangoProvider({ children }) {
         tagsToFlashcards,
         setTagsToFlashcards,
         loading,
+        isAppReady,
+        setIsAppReady,
         updateAppStates
     };
 
     return (
-        <TangoContext.Provider value={value}>
-            {loading && 
-                <ActivityIndicator
-                    style={{flex:1, justifyContent: 'center', alignItems: 'center'}}
-                />
-            }
-            {!loading && children}
-        </TangoContext.Provider>
+        <WithSplashScreen isAppReady={isAppReady}>
+            <TangoContext.Provider value={value}>
+                {/* {loading && 
+                    <ActivityIndicator
+                        style={{flex:1, justifyContent: 'center', alignItems: 'center'}}
+                    />
+                } */}
+
+                {isAppReady && children}
+
+                <Splash isAppReady={isAppReady} />
+
+                {/* {!loading && children} */}
+            </TangoContext.Provider>
+        </WithSplashScreen>
     );
 }

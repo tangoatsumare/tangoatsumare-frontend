@@ -14,37 +14,36 @@ import * as SplashScreen from 'expo-splash-screen';
 
 import { TangoProvider } from './contexts/TangoContext';
 import { AuthProvider } from './contexts/AuthContext';
-
+import { WithSplashScreen } from "./Components/WithSplashScreen";
 LogBox.ignoreAllLogs();
 
-SplashScreen.preventAutoHideAsync();
+// SplashScreen.preventAutoHideAsync();
 
 export default function App() {
 
-  const [appIsReady, setAppIsReady] = useState(false);
+  // const [isAppReady, setIsAppReady] = useState(false);
+  // useEffect(() => {
+  //   async function prepare() {
+  //     try {
+  //       await new Promise(resolve => setTimeout(resolve, 1000));
+  //     } catch (e) {
+  //       console.warn(e);
+  //     } finally {
+  //       setIsAppReady(true);
+  //     }
+  //   }
+  //   prepare();
+  // }, []);
 
-  useEffect(() => {
-    async function prepare() {
-      try {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      } catch (e) {
-        console.warn(e);
-      } finally {
-        setAppIsReady(true);
-      }
-    }
-    prepare();
-  }, []);
+  // const onLayoutRootView = useCallback(async () => {
+  //   if (isAppReady) {
+  //     await SplashScreen.hideAsync();
+  //   }
+  // }, [isAppReady]);
 
-  const onLayoutRootView = useCallback(async () => {
-    if (appIsReady) {
-      await SplashScreen.hideAsync();
-    }
-  }, [appIsReady]);
-
-  if (!appIsReady) {
-    return null;
-  }
+  // if (!isAppReady) {
+  //   return null;
+  // }
 
   const theme = {
     ...DefaultTheme,
@@ -60,17 +59,21 @@ export default function App() {
   };
 
   return (
-    <SafeAreaProvider onLayout={onLayoutRootView}>
-      <PaperProvider theme={theme}>
-        <AuthProvider>
-          <TangoProvider>
-            <NavigationContainer independent={true}>
-              <StackNav />
-            </NavigationContainer>
-          </TangoProvider>
-        </AuthProvider>
-      </PaperProvider>
-    </SafeAreaProvider>
+    <AuthProvider>
+        <TangoProvider>
+        {/* <WithSplashScreen> */}
+          <SafeAreaProvider 
+          // onLayout={onLayoutRootView}
+          >
+            <PaperProvider theme={theme}>
+              <NavigationContainer independent={true}>
+                <StackNav />
+              </NavigationContainer>
+            </PaperProvider>
+          </SafeAreaProvider>
+    {/* </WithSplashScreen> */}
+        </TangoProvider>
+      </AuthProvider>
   );
 }
 
