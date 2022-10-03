@@ -8,7 +8,7 @@ import {
   ActivityIndicator, Text, Button, Card, Paragraph, Title, Avatar, Divider, Chip, Searchbar 
 } from "react-native-paper";
 import { useTheme } from 'react-native-paper';
-import { SearchBar, SearchBody } from '../screens/Search';
+import { SearchBar } from '../screens/SearchBar';
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { Collection } from "../Components/collection";
@@ -39,20 +39,18 @@ const data = Object.keys(views).map((i) => ({
   ref: createRef()
 }));
 
-export const Home = () => {
+export const Home = ({route}) => {
   const { currentUser } = useAuthContext();
   const {
-    tags,
-    setTags,
-    flashcardsMaster,
+    selectedTags,
     flashcardsCurated,
-    setFlashcardsCurated,
     flashcardsCollection,
     setFlashcardsCollection,
     flashcardsFeed,
     setFlashcardsFeed,
-    tagsToFlashcards,
-    loading
+    loading,
+    text,
+    searchMode
   } = useTangoContext();
 
   // for animated indicator
@@ -66,24 +64,30 @@ export const Home = () => {
     }
   });
 
+  const [ scrollContentChanged, setScrollContentChanged ] = useState(false);
+
+  useEffect(() => {
+    if (scrollContentChanged && currentView === 'collection') {
+      scrollRef.current.scrollToEnd();
+    }
+  }, [scrollContentChanged, currentView]);
+  
+  useEffect(() => {
+    if (scrollContentChanged) setScrollContentChanged(false);
+  }, [scrollContentChanged]);
+
   const theme = useTheme();
   dayjs.extend(relativeTime);
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
-  const [text, setText] = useState<string>('');
-  const [textInputOnFocus, setTextInputOnFocus] = useState<boolean>(false);
-  const [resetIsClick, setResetIsClick] = useState<boolean>(false);
-  const [submitIsClick, setSubmitIsClick] = useState<boolean>(false);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [hashTagSearchMode, setHashTagSearchMode] = useState<boolean>(false);
   const [currentView, setCurrentView] = useState("feed");
   const [navigateTo, setNavigateTo] = useState({item: null}); 
   // from search view: navigate to feed card, reset navigateTo state
-  useEffect(() => {
-      if (selectedTags.length === 0 && text == '' && !textInputOnFocus && navigateTo.item !== null) {
-          navigation.navigate("FeedCard", navigateTo);
-          setNavigateTo({item: null});
-      }
-  }, [selectedTags, text, textInputOnFocus, navigateTo]);
+  // useEffect(() => {
+  //     if (selectedTags.length === 0 && text == '' && navigateTo.item !== null) {
+  //         navigation.navigate("FeedCard", navigateTo);
+  //         setNavigateTo({item: null});
+  //     }
+  // }, [selectedTags, text, navigateTo]);
 
   // setting the header section
   useLayoutEffect(() => {
@@ -93,94 +97,19 @@ export const Home = () => {
       },
       headerShadowVisible: false,
       headerTitle: () => (
-        <SearchBar 
-          text={text} 
-          setText={setText} 
-          textInputOnFocus={textInputOnFocus}
-          setTextInputOnFocus={setTextInputOnFocus}
-          flashcardsCurated={flashcardsCurated}
-          setFlashcardsCurated={setFlashcardsCurated}
-          flashcardsFeed={flashcardsFeed}
-          submitIsClick={submitIsClick}
-          setSubmitIsClick={setSubmitIsClick}
-          resetIsClick={resetIsClick}
-          flashcardsMaster={flashcardsMaster}
-          hashTagSearchMode={hashTagSearchMode}
-          setHashTagSearchMode={setHashTagSearchMode}
-          handleEditSubmit={handleEditSubmit}
-          selectedTags={selectedTags}
-          setSelectedTags={setSelectedTags}
-          tagsToFlashcards={tagsToFlashcards}
-          tags={tags}
-          setTags={setTags}
-          scrollRef={scrollRef}
-        />
+        <SearchBar />
       ),
-      headerRight: () => {
-        if (!textInputOnFocus && submitIsClick) {
-          return (
-            <TouchableOpacity 
-                mode="text" 
-                onPress={resetHomeScreen}
-                style={{marginRight: 15}} // Hard coded
-            >
-              <Text variant="labelLarge" style={{color: 'black'}}>reset</Text>
-              </TouchableOpacity>
-          );
-        }
-      }
     })
   });
 
-  useEffect(() => {
-    if (resetIsClick) {
-      setResetIsClick(false); // reset it
-    }
-  }, [resetIsClick]);
-
-  // clear previously saved text & selected tags whenever the search bar is focused
-  useEffect(() => {
-    if (textInputOnFocus) {
-      setSelectedTags([]);
-    }
-  }, [textInputOnFocus]);
-
   // update the home collection/feed states when the search is submitted
   useEffect(() => {
-    if (flashcardsCurated && !textInputOnFocus) {
+    if (flashcardsCurated) {
       // update the states for flashcardsFeed and flashcardsCollection
       setFlashcardsFeed(flashcardsCurated);
       setFlashcardsCollection(flashcardsCurated.filter(flashcard => flashcard.created_by === currentUser.uid));
     }
-  },[ flashcardsCurated, textInputOnFocus ]);
-
-  const clearKeyboard = () => {
-    Keyboard.dismiss();
-    setTextInputOnFocus(false);
-  };
-  
-  const resetHomeScreen = () => {
-    setText('');
-    setSelectedTags([]);
-    setResetIsClick(true);
-    setSubmitIsClick(false);
-    setFlashcardsFeed(flashcardsMaster);
-    setFlashcardsCollection(flashcardsMaster.filter(flashcard => flashcard["created_by"] === currentUser.uid));
-  };
-
-  const handleEditSubmit = () => {
-    if (text || selectedTags.length !== 0) {
-        const searchParams = {
-          text,
-          selectedTags
-        };
-        console.log(searchParams);
-        setSubmitIsClick(true);
-        clearKeyboard(); // change the screen back to the feed/collection  
-    } else {
-        console.log('search not executed due to empty string');
-    }
-};
+  },[ flashcardsCurated]);
 
   const Tab = forwardRef(({item, onItemPress}, ref) => {
     return (
@@ -347,18 +276,6 @@ export const Home = () => {
     );
   }
 
-  const [ scrollContentChanged, setScrollContentChanged ] = useState(false);
-  useEffect(() => {
-    if (scrollContentChanged && currentView === 'collection') {
-      console.log('hi');
-      scrollRef.current.scrollToEnd();
-    }
-  }, [scrollContentChanged, currentView]);
-  
-  useEffect(() => {
-    if (scrollContentChanged) setScrollContentChanged(false);
-  }, [scrollContentChanged]);
-
   const Tags = () => {
     return (
       selectedTags.length !== 0 ? 
@@ -376,7 +293,7 @@ export const Home = () => {
   }
   return (
     <View style={styles.master}>
-      { !textInputOnFocus && flashcardsFeed && flashcardsCollection ? 
+      { flashcardsFeed && flashcardsCollection && 
         <View> 
             <Tags />
           <Animated.ScrollView 
@@ -424,7 +341,7 @@ export const Home = () => {
                 alignItems: 'center',
                 justifyContent: 'center'
           }}>
-            {submitIsClick ? 
+            {searchMode ? 
               loading ? 
                 <ActivityIndicator /> : 
                 <NoSearchResultFound />
@@ -449,7 +366,7 @@ export const Home = () => {
                         showsVerticalScrollIndicator={false}
                       />
                   : 
-                    submitIsClick ? 
+                    searchMode ? 
                       <NoSearchResultFound />
                        :  
                        <CreateYourFirstCard />
@@ -457,24 +374,7 @@ export const Home = () => {
         </Animated.ScrollView>
         <Tabs scrollX={scrollX} data={data} onItemPress={onItemPress}/>
     </View>
-        :
-        <SearchBody 
-          text={text} 
-          setText={setText} 
-          textInputOnFocus={textInputOnFocus}
-          setTextInputOnFocus={setTextInputOnFocus}
-          flashcardsCurated={flashcardsCurated}
-          hashTagSearchMode={hashTagSearchMode}
-          setHashTagSearchMode={setHashTagSearchMode}
-          handleEditSubmit={handleEditSubmit}
-          selectedTags={selectedTags}
-          setSelectedTags={setSelectedTags}
-          tags={tags}
-          setTags={setTags}
-          navigateTo={navigateTo}
-          setNavigateTo={setNavigateTo}
-        /> 
-      }
+    }
   </View>
   );
 };

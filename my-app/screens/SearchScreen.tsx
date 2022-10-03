@@ -3,9 +3,11 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 import React, { useState, useEffect, useRef } from "react";
 import { Card, Text, Avatar, Chip, useTheme, TextInput as PaperTextInput } from 'react-native-paper';
-import { TextInput, View, StyleSheet, ScrollView, FlatList, TouchableOpacity, Animated, Dimensions } from 'react-native'
+import { TextInput, View, StyleSheet, ScrollView, FlatList, TouchableOpacity, Animated, Dimensions, Keyboard } from 'react-native'
 import { Tag } from "./home";
-
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useTangoContext } from "../contexts/TangoContext";
+import {getFlashcardsHashTagsKeywordIntersection} from '../utils/helper';
 const {width, height} = Dimensions.get('screen');
 
 interface modifiedTag extends Tag {
@@ -15,28 +17,91 @@ interface modifiedTag extends Tag {
     isClicked: boolean // additional property
 }
 
-export const SearchScreen = ({route}) => {
+export const SearchScreen = () => {
+    const {
+        tags,
+        selectedTags,
+        setSelectedTags,
+        flashcardsMaster,
+        flashcardsCurated,
+        setFlashcardsCurated,
+        tagsToFlashcards, 
+        hashTagSearchMode,
+        setHashTagSearchMode,
+        searchMode,
+        setSearchMode,
+        text,
+        setText
+    } = useTangoContext();
+    
     const theme = useTheme();
     const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
-    const { flashcards, tags } = route.params;
     
     const [tagsModified, setTagsModified ] = useState<modifiedTag[]>([]);
-    const [selectedTags, setSelectedTags] = useState([]);
 
-    const [text, setText] = useState('');
+    useEffect(() => {
+        if (selectedTags.length > 0) {
+            // turn on hashtag search mode if there exists isClicked
+            setHashTagSearchMode(true);
+        } else {
+            setHashTagSearchMode(false);
+        }
+    }, [selectedTags]);
+
+    useEffect(() => {
+        if (text) console.log(text);
+    }, [text]);
 
     useEffect(() => {
         (async () => {
             if (tags) {
                 let result = tags;
-                for (let i = 0; i < result.length; i++) {
-                    result[i].isClicked = false;
+                if (selectedTags.length !== 0) {
+                    for (let i = 0; i < result.length; i++) {
+                        if (selectedTags.find(tag => tag === result[i].tag)) {
+                            result[i].isClicked = true;
+                        } else result[i].isClicked = false;
+                    }
                 }
-                // if (tags.length === 0) 
+                else {
+                    for (let i = 0; i < result.length; i++) {
+                        result[i].isClicked = false;
+                    }
+                }
                 setTagsModified(result);
             }
         })();
     }, [tags]);
+
+    useEffect(() => {
+        if (text || selectedTags.length !== 0) {
+            setSearchMode(true);
+            setFlashcardsCurated(getFlashcardsHashTagsKeywordIntersection(flashcardsMaster, selectedTags, tagsToFlashcards, text));
+        } else if (text === "" || selectedTags.length === 0) { // TO VERIFY
+            resetFlashcardsCurated();
+        } else if (text === "" && selectedTags.length === 0) {
+            setSearchMode(false);
+        }
+    }, [text, selectedTags]);
+
+    const resetFlashcardsCurated = () => {
+        setFlashcardsCurated(flashcardsMaster);
+    };
+
+    const handleEditSubmit = () => {
+        if (text || selectedTags.length !== 0) {
+            // setSubmitIsClick(true);
+            clearKeyboard(); // change the screen back to the feed/collection  
+            navigation.goBack();
+        } else {
+            console.log('search not executed due to empty string');
+        }
+    };
+
+    const clearKeyboard = () => {
+        Keyboard.dismiss();
+        // setTextInputOnFocus(false);
+      };
 
     const handleTagClick = (tag: modifiedTag) => {
         if (tagsModified) {           
@@ -65,53 +130,112 @@ export const SearchScreen = ({route}) => {
         }
     };
 
-    return (
-        <View style={styles.container}>
+    const handleShowFlashcard = (item: any) => {
+        navigation.navigate("FeedCard", {item: item})
+    };
+    
+    const SearchResultCard = ({item}) => {
+        // const [loading, setLoading] = useState(true);
+        const [loading, setLoading] = useState(false);
+        const fadeAnim = useRef(new Animated.Value(0)).current;
+    
+        useEffect(() => {
+          if (!loading) {
+            Animated.timing(fadeAnim, {
+              toValue: 1,
+              duration: 300,
+              useNativeDriver: true
+            }).start();
+          }
+        }, [loading]);
+    
+        return (
             <TouchableOpacity 
-            style={{
-                flexDirection: 'row',
-                justifyContent: "space-evenly",
-                alignItems: 'center',
-                backgroundColor: theme.colors.tertiary,
-                borderColor: theme.colors.primary,
-                borderWidth: 0.5,
-                borderRadius: 30,
-                width: width / 1.5, // ratio that the search bar takes up the page
-                height: 30
-            }}
+            style={{marginBottom: 5}} key={item._id}
+            onPress={() => handleShowFlashcard(item)}
             activeOpacity={1}
             >
-                <PaperTextInput.Icon 
-                    icon="magnify" 
-                    iconColor={theme.colors.primary}
+                <Animated.View
+                    style={{opacity: fadeAnim}}
+                >
+                    <Card
+                        mode="contained"
+                        style={{backgroundColor: "transparent"}}
+                    >
+                        <Card.Title 
+                            title={item.target_word} 
+                            titleVariant="headlineSmall"
+                            subtitle={item.example_sentence}
+                            // left={(props) => (
+                            //     <Avatar.Image {...props} 
+                            //         source={{uri:item.picture_url}} 
+                            //         onLoadEnd={() => setLoading(false)}
+                            //         style={{backgroundColor: 'transparent'}}
+                            //     />
+                            // )}
+                        />
+                        <Card.Content>
+                        </Card.Content>
+                    </Card>
+                </Animated.View>
+            </TouchableOpacity>
+        );
+    };
+
+    return (
+        <View style={styles.container}>
+            <View 
+                style={{
+                    marginTop: 10,
+                    marginBottom: 10,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: theme.colors.tertiary,
+                    borderColor: theme.colors.primary,
+                    borderWidth: 0.5,
+                    borderRadius: 30,
+                    width: width / 1.5, // ratio that the search bar takes up the page
+                    height: 30,
+                }}
+            >
+                <Icon 
+                    name="magnify" 
+                    size={20} 
+                    color={theme.colors.primary}     
                     style={{
-                        marginLeft: 20 // hard coded
-                    }}
-                    />
+                        marginLeft: 10 // hard coded
+                    }}   
+                />
                 <TextInput 
-                    // ref={inputRef}
                     style={{
-                        flex: 1, 
-                        marginLeft: 40,
-                        marginRight: 40,
-                        alignSelf: 'center',
-                        width: "auto",
+                        marginLeft: 10,
+                        width: width / 2 ,
                         fontSize:  15
                     }}
                     placeholder="Search Tango"
                     value={text}
                     onChangeText={(text) => setText(text)}
+                    autoFocus={true}
                 />
-                <PaperTextInput.Icon
-                    style={{
-                        marginLeft: width + 80,  // Hard coded
-                    }}
-                    size={20}
-                    iconColor="rgba(0,0,0,0.5)"
-                    icon="close" 
-                    onPress={() => navigation.goBack()}
-                />
-            </TouchableOpacity>
+                <TouchableOpacity
+                onPress={() => {
+                    resetFlashcardsCurated();
+                    setSelectedTags([]);
+                    setText('');
+                    navigation.goBack();
+                }}
+                style={{
+                    marginRight: 100 // hard coded
+                }}   
+                >
+                    <Icon 
+                        name="close" 
+                        size={20} 
+                        color={theme.colors.primary}        
+                    />
+                </TouchableOpacity>
+               
+            </View>
             <View style={styles.tagsContainer}>
                 {tagsModified.length > 0 ?
                 tagsModified.map(item => {
@@ -143,72 +267,49 @@ export const SearchScreen = ({route}) => {
                 })
                 : null}
             </View>
-            <FlatList 
-                data={flashcards}
-                keyExtractor={(item) => item._id}
-                renderItem={({item}) => (
-                    <SearchResultCard item={item} />
-                )
+            <View style={{
+                padding: 20,
+                width: width,
+                flex: 1,
+            }}>
+                {flashcardsCurated && flashcardsCurated.length > 0 ?
+                    <FlatList 
+                        data={flashcardsCurated}
+                        keyExtractor={(item) => item._id}
+                        renderItem={({item}) => (
+                            <SearchResultCard item={item} />
+                        )
+                        }
+                    />
+                :
+                    <View style={{flex: 1}}></View> // empty placeholder to fill the div when flatlist is empty
                 }
-            />
+                {text !== '' || hashTagSearchMode ? 
+                        <View style={styles.searchButtonContainer}>
+                            <TouchableOpacity 
+                                style={styles.searchButton}
+                                onPress={handleEditSubmit}
+                            >
+                                <Icon 
+                                    name="magnify" 
+                                    size={35} 
+                                    color="white"
+                                />
+                            </TouchableOpacity>
+                        </View>
+                : null}
+            </View>
         </View>
     )
 }
 
-const SearchResultCard = ({item}) => {
-    // const [loading, setLoading] = useState(true);
-    const [loading, setLoading] = useState(false);
-    const fadeAnim = useRef(new Animated.Value(0)).current;
-
-    useEffect(() => {
-      if (!loading) {
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true
-        }).start();
-      }
-    }, [loading]);
-
-    return (
-        <TouchableOpacity 
-        style={{marginBottom: 5}} key={item._id}
-        // onPress={() => handleShowFlashcard(item)}
-        activeOpacity={1}
-        >
-            <Animated.View
-                style={{opacity: fadeAnim}}
-            >
-                <Card
-                    mode="contained"
-                    style={{backgroundColor: "transparent"}}
-                >
-                    <Card.Title 
-                        title={item.target_word} 
-                        titleVariant="headlineSmall"
-                        subtitle={item.example_sentence}
-                        // left={(props) => (
-                        //     <Avatar.Image {...props} 
-                        //         source={{uri:item.picture_url}} 
-                        //         onLoadEnd={() => setLoading(false)}
-                        //         style={{backgroundColor: 'transparent'}}
-                        //     />
-                        // )}
-                    />
-                    <Card.Content>
-                    </Card.Content>
-                </Card>
-            </Animated.View>
-        </TouchableOpacity>
-    );
-};
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // alignItems: 'center',
+    alignItems: 'center',
     paddingTop: 40,
-    backgroundColor: 'white'
+    backgroundColor: 'white',
+    width: width,
   },
   tagsContainer: {
     flexDirection: 'row',
@@ -222,5 +323,25 @@ const styles = StyleSheet.create({
         margin: 5,
         borderRadius: 30,
     },
+    searchButtonContainer: {
+        position: 'absolute',
+        bottom: 30,
+        right: 30,
+        justifyContent: 'center',
+        // alignSelf: 'flex-end',
+        width: 70,
+        height: 70,
+        borderRadius: 100,
+        shadowColor: 'rgba(0,0,0,0.1)',
+        shadowOffset: { width: 3, height: 20 },
+        shadowOpacity: 0.8,
+        shadowRadius: 15,
+        backgroundColor: "rgba(0,0,0,0.7)"
+    },
+    searchButton: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'black',
+    }
 }
 );

@@ -25,11 +25,15 @@ export function TangoProvider({ children }) {
     const [flashcards, setFlashcards] = useState([]);
     const [users, setUsers] = useState([]);
     const [tags, setTags] = useState([]);
+    const [selectedTags, setSelectedTags] = useState([]);
     const [flashcardsMaster, setFlashcardsMaster] = useState<object[]>([]);
     const [flashcardsCurated, setFlashcardsCurated] = useState<object[]>([]);
     const [flashcardsCollection, setFlashcardsCollection] = useState<object[]>([]);
     const [flashcardsFeed, setFlashcardsFeed] = useState<object[]>([]);
     const [tagsToFlashcards, setTagsToFlashcards] = useState<object>({});
+    const [searchMode, setSearchMode] = useState(false);
+    const [hashTagSearchMode, setHashTagSearchMode] = useState<boolean>(false);
+    const [text, setText] = useState("");
 
     // to implement the checking of user is authenticated
     // then set the states of current user's set of flashcards
@@ -73,6 +77,7 @@ export function TangoProvider({ children }) {
             
             setTagsToFlashcards(getTagsToFlashcardsIdObject(tagsData));
             setFlashcardsMaster(result);
+            setFlashcardsCurated(result);
             setFlashcardsFeed(result);
             setFlashcardsCollection(currentUserFlashcards);
 
@@ -129,6 +134,8 @@ export function TangoProvider({ children }) {
         setUsers,
         tags,
         setTags,
+        selectedTags,
+        setSelectedTags,
         flashcardsOfCurrentUser,
         SRSFlashcardsOfCurrentUser,
         metrics,
@@ -145,6 +152,12 @@ export function TangoProvider({ children }) {
         setFlashcardsFeed,
         tagsToFlashcards,
         setTagsToFlashcards,
+        hashTagSearchMode,
+        setHashTagSearchMode,
+        searchMode,
+        setSearchMode,
+        text,
+        setText,
         loading,
         isAppReady,
         setIsAppReady,

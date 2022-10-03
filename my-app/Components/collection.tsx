@@ -56,7 +56,7 @@ export const Collection = ({item}) => {
             style={{
               paddingHorizontal: 0,
               paddingVertical: 0,
-              height: imgHeight
+              // height: imgHeight
             }}
             // https://stackoverflow.com/questions/61511559/how-can-i-resize-an-image-in-a-react-paper-card-cover-to-fit-the-height
           >
