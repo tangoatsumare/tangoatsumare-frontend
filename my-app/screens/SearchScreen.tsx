@@ -2,8 +2,8 @@ import { useNavigation } from "@react-navigation/core";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 import React, { useState, useEffect, useRef } from "react";
-import { Card, Text, Avatar, Chip, useTheme } from 'react-native-paper';
-import { View, StyleSheet, ScrollView, FlatList, TouchableOpacity, Animated, Dimensions } from 'react-native'
+import { Card, Text, Avatar, Chip, useTheme, TextInput as PaperTextInput } from 'react-native-paper';
+import { TextInput, View, StyleSheet, ScrollView, FlatList, TouchableOpacity, Animated, Dimensions } from 'react-native'
 import { Tag } from "./home";
 
 const {width, height} = Dimensions.get('screen');
@@ -23,6 +23,8 @@ export const SearchScreen = ({route}) => {
     const [tagsModified, setTagsModified ] = useState<modifiedTag[]>([]);
     const [selectedTags, setSelectedTags] = useState([]);
 
+    const [text, setText] = useState('');
+
     useEffect(() => {
         (async () => {
             if (tags) {
@@ -36,12 +38,8 @@ export const SearchScreen = ({route}) => {
         })();
     }, [tags]);
 
-
     const handleTagClick = (tag: modifiedTag) => {
         if (tagsModified) {           
-            // set to text
-            // setText(`#${tag.tag}`);
-
             // update the currentSelected tags
             setSelectedTags((prev) => {
                 // if it is in a clicked state before, remove it from selectedTags
@@ -69,50 +67,90 @@ export const SearchScreen = ({route}) => {
 
     return (
         <View style={styles.container}>
-            <TouchableOpacity
-                onPress={() => navigation.goBack()}
+            <TouchableOpacity 
+            style={{
+                flexDirection: 'row',
+                justifyContent: "space-evenly",
+                alignItems: 'center',
+                backgroundColor: theme.colors.tertiary,
+                borderColor: theme.colors.primary,
+                borderWidth: 0.5,
+                borderRadius: 30,
+                width: width / 1.5, // ratio that the search bar takes up the page
+                height: 30
+            }}
+            activeOpacity={1}
             >
-                <Text>Go back</Text>
-            </TouchableOpacity>
-                <View style={styles.tagsContainer}>
-                    {tagsModified.length > 0 ?
-                    tagsModified.map(item => {
-                        return (
-                            <Chip
-                                key={item._id} 
-                                style={item.isClicked? 
-                                    {...styles.tagButton, backgroundColor:theme.colors.secondary}
-                                    : {...styles.tagButton, backgroundColor: theme.colors.primary }
-                                }
-                                mode="flat"
-                                selected={item.isClicked}
-                                onPress={() => handleTagClick(item)}
-                                selectedColor={theme.colors.tertiary}
-                            >
-                                <Text 
-                                    variant='bodyMedium'
-                                    style={
-                                        // item.isClicked? 
-                                        {color: theme.colors.tertiary}
-                                        // : 
-                                        // {color: theme.colors.secondary}
-                                    }
-                                >
-                                    {item.tag}
-                                </Text>
-                            </Chip>
-                        );
-                    })
-                    : null}
-                </View>
-            <FlatList 
-                        data={flashcards}
-                        keyExtractor={(item) => item._id}
-                        renderItem={({item}) => (
-                            <SearchResultCard item={item} />
-                        )
-                        }
+                <PaperTextInput.Icon 
+                    icon="magnify" 
+                    iconColor={theme.colors.primary}
+                    style={{
+                        marginLeft: 20 // hard coded
+                    }}
                     />
+                <TextInput 
+                    // ref={inputRef}
+                    style={{
+                        flex: 1, 
+                        marginLeft: 40,
+                        marginRight: 40,
+                        alignSelf: 'center',
+                        width: "auto",
+                        fontSize:  15
+                    }}
+                    placeholder="Search Tango"
+                    value={text}
+                    onChangeText={(text) => setText(text)}
+                />
+                <PaperTextInput.Icon
+                    style={{
+                        marginLeft: width + 80,  // Hard coded
+                    }}
+                    size={20}
+                    iconColor="rgba(0,0,0,0.5)"
+                    icon="close" 
+                    onPress={() => navigation.goBack()}
+                />
+            </TouchableOpacity>
+            <View style={styles.tagsContainer}>
+                {tagsModified.length > 0 ?
+                tagsModified.map(item => {
+                    return (
+                        <Chip
+                            key={item._id} 
+                            style={item.isClicked? 
+                                {...styles.tagButton, backgroundColor:theme.colors.secondary}
+                                : {...styles.tagButton, backgroundColor: theme.colors.primary }
+                            }
+                            mode="flat"
+                            selected={item.isClicked}
+                            onPress={() => handleTagClick(item)}
+                            selectedColor={theme.colors.tertiary}
+                        >
+                            <Text 
+                                variant='bodyMedium'
+                                style={
+                                    // item.isClicked? 
+                                    {color: theme.colors.tertiary}
+                                    // : 
+                                    // {color: theme.colors.secondary}
+                                }
+                            >
+                                {item.tag}
+                            </Text>
+                        </Chip>
+                    );
+                })
+                : null}
+            </View>
+            <FlatList 
+                data={flashcards}
+                keyExtractor={(item) => item._id}
+                renderItem={({item}) => (
+                    <SearchResultCard item={item} />
+                )
+                }
+            />
         </View>
     )
 }
