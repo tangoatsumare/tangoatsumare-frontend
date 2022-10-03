@@ -147,43 +147,6 @@ export const SearchBar = (props: SearchBarProps) => {
         // if no selectedTags, return the flashcards that are filtered by the text
         // else, return the result with both text and hashtag(s) filtering
         setFlashcardsCurated(selectedTags.length > 0 ? flashcards.filter(item => matchingFlashcardIds.includes(item._id)): flashcards);
-
-        // https://stackoverflow.com/questions/1885557/simplest-code-for-array-intersection-in-javascript
-        // reference code example
-        // const object = {
-        //     food: [1,2,3],
-        //     fashion: [3,4,5]
-        // };
-        // const tags = ["food","fashion"];
-        // const arr1 = [];
-        // for (let i = 0; i < tags.length; i++) {
-        //     const result = object[tags[i]];
-        //     arr1.push(result);
-        // }
-        // // arr1 is [[1,2,3],[3,4,5]]
-        // const reduce = arr1.reduce((prev, curr) => curr.filter(value => prev.includes(value)))
-        // // reduce is [3]
-
-
-        // reference code example 
-        // const tags = ["food", "lifestyle", "fashion"];
-        // const flashcard = {
-        //     tags: ["Apple", "food", "Banana"]
-        // };
-        // flashcard.tags.some(item => tags.includes(item));  ===> returns true
-
-
-        // each card's tag array would need to include the tags within the selectedTags
-        // && card.tags.some(item => selectedTag.includes(item));
-
-
-        // TODO: curate the flashcardsCurated by hashtags
-        // console.log(selectedTags);
-        // console.log(flashcards);
-
-        // get the tags array in the flashcard
-        // const flashcardsTag = flashcards.map(card => card.tags);
-        // console.log("tags in the matching flashcards:", flashcardsTag);
     };
 
     return (
