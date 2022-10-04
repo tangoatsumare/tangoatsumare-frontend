@@ -375,7 +375,9 @@ export const Home = ({route}) => {
 const styles = StyleSheet.create({
   master: {
     flex: 1,
-    backgroundColor: 'white'
+    backgroundColor: 'white',
+    // alignItems: 'center',
+    // justifyContent: 'center'
   },
   tagsContainer: {
     marginTop: 60,

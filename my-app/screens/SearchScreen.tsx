@@ -4,6 +4,7 @@ import { ParamListBase } from '@react-navigation/native'
 import React, { useState, useEffect, useRef } from "react";
 import { Card, Text, Avatar, Chip, useTheme, TextInput as PaperTextInput } from 'react-native-paper';
 import { TextInput, View, StyleSheet, ScrollView, FlatList, TouchableOpacity, Animated, Dimensions, Keyboard } from 'react-native'
+import { Image } from 'react-native-expo-image-cache';
 import { Tag } from "./home";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useTangoContext } from "../contexts/TangoContext";
@@ -150,28 +151,31 @@ export const SearchScreen = () => {
             activeOpacity={1}
             >
                 <Animated.View
-                    style={{opacity: fadeAnim}}
+                    // style={{opacity: fadeAnim}}
                 >
-                    <Card
-                        mode="contained"
-                        style={{backgroundColor: "transparent"}}
+                    <View
+                        style={{
+                            backgroundColor: "transparent",
+                            flexDirection: 'row',
+                            marginBottom: 20
+                        }}
                     >
-                        <Card.Title 
-                            title={item.target_word} 
-                            titleVariant="headlineSmall"
-                            subtitle={item.example_sentence}
-                            left={(props) => (
-                                <Avatar.Image {...props} 
-                                    source={require('../assets/splash.png')}
-                                    // source={item.picture_url && {uri:item.picture_url}} 
-                                    onLoadEnd={() => setLoading(false)}
-                                    style={{backgroundColor: 'transparent'}}
-                                />
-                            )}
+                        <Image 
+                            preview={item.picture_url}
+                            uri={item.picture_url}
+                            style={{
+                                height: 50,
+                                width: 50,
+                                borderRadius: 25
+                            }}
                         />
-                        <Card.Content>
-                        </Card.Content>
-                    </Card>
+                        <View style={{
+                            marginLeft: 20
+                        }}>
+                            <Text variant="bodyLarge" style={{fontWeight: 'bold'}}>{item.target_word}</Text>
+                            <Text variant="bodySmall">{item.example_sentence}</Text>
+                        </View>
+                    </View>
                 </Animated.View>
             </TouchableOpacity>
         );

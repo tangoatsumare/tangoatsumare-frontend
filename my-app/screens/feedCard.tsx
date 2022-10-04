@@ -2,11 +2,8 @@ import { useNavigation } from "@react-navigation/core";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { ParamListBase, RouteProp } from "@react-navigation/native";
 import {
-  Avatar,
   Button,
   Card,
-  Paragraph,
-  Title,
   Text,
   Chip,
   useTheme,
@@ -17,32 +14,24 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
-  Image,
-  ViewPagerAndroidComponent,
-  Animated
+  Animated,
+  Dimensions
 } from "react-native";
-import axios from "axios";
-import { useRoute } from "@react-navigation/core";
-import { ScreenRouteProp, StackParamsList } from "../library/routeProp";
-import { Item } from "react-native-paper/lib/typescript/components/List/List";
+import { Image } from 'react-native-expo-image-cache';
 import {
-  initializeSRSFlashcard,
   SRSTangoFlashcard,
-  TangoFlashcard,
 } from "../utils/supermemo";
 import { getAuth } from "@firebase/auth";
-import { HTTPRequest, UserId } from "../utils/httpRequest";
-import { useIsFocused } from "@react-navigation/native";
-import { report } from "process";
+import { HTTPRequest } from "../utils/httpRequest";
 import dayjs from "dayjs";
-import { mdiCardsPlayingSpadeMultiple } from "@mdi/js";
+import { useTangoContext } from "../contexts/TangoContext";
+
+const {width, height} = Dimensions.get('screen');
 
 export const FeedCard = ({route}) => {
+  const { tags } = useTangoContext();
   const theme = useTheme();
-  const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
-  const [flashcard, setFlashcard] = useState({});
-  const [imageUrl, setImageUrl] = useState("");
-  const [engDef, setEngDef] = useState("");
+  // const [engDef, setEngDef] = useState("");
   const [hasSRSCard, setHasSRSCard] = useState(false);
 //make a variable and just check once on load
   const [flaggingUsers, setFlaggingUsers] = useState<any[]>([]);
@@ -52,27 +41,19 @@ export const FeedCard = ({route}) => {
   const [liked, setLiked] = useState(false);
   const [userAvatar, setUserAvatar] = useState("");
   const [userName, setUserName] = useState("");
-  const [flashcardId, setFlashcardId] = useState("");
+  // const [item._id, setFlashcardId] = useState("");
   const [reported, setReported] = useState(false);
-  const [date, setDate] = useState("");
-  const [tags, setTags] = useState<string[]>([]);
+  const [matchingTags, setMatchingTags] = useState<string[]>([]);
 
   const {item} = route?.params;
   const auth = getAuth();
   const userId = auth.currentUser?.uid;
   let currentUserId;
-  const isFocused = useIsFocused();
 
   useEffect(() => {
     if (item) {
       (async () => {
           try {
-            setFlashcard(item);
-            setEngDef(item.Eng_meaning[0]);
-            setFlashcardId(item._id);
-            const newDate = dayjs(item.created_timestamp).fromNow();
-            // .format('DD/MM/YYYY');
-            setDate(newDate)
             const flaggersArray = item.flagging_users
             checkIfReported(flaggersArray);
             const likersArray = item.likers
@@ -91,13 +72,13 @@ export const FeedCard = ({route}) => {
             const avatar = user.avatar_url;
             setUser(userName, avatar);
 
-            const tagsData = await HTTPRequest.getTags(); // fetching hashtag data
+            // const tagsData = await HTTPRequest.getTags(); // fetching hashtag data
             const tagsOfCard: string[] = [];
             for (const tag of item.tags) {
-              const result = tagsData.find(data => data._id === tag).tag;
+              const result = tags.find(data => data._id === tag).tag;
               if (result) tagsOfCard.push(result);
             }
-            setTags(tagsOfCard);
+            setMatchingTags(tagsOfCard);
 
           } catch (err) {
               console.log(err);
@@ -129,7 +110,7 @@ export const FeedCard = ({route}) => {
     //user users_to_cards_ joined with flashcards, loop through each entry checking the flashcard_id, if exists set state to true;
       for (let card of arrayOfSRSCards) {
         if (card.flashcard_id === id) {
-          // console.log(flashcardId)
+          // console.log(item._id)
           setHasSRSCard(true);
         }
     }
@@ -149,7 +130,7 @@ function checkIfReported (array: any) {
   const like = async () => {
     const likersArray = likers;
     likersArray.push(userId);
-    await HTTPRequest.updateFlashcardProperties(flashcardId, { likers: likersArray })
+    await HTTPRequest.updateFlashcardProperties(item._id, { likers: likersArray })
         .then(res => {
           console.log('liked');
           setLiked(true);
@@ -162,7 +143,7 @@ function checkIfReported (array: any) {
    //a function to add the card to the users SRS deck if the user has not already added it
    const addCardToDeck = async () => {
     await HTTPRequest.addSRSCard({
-      flashcard_id: flashcardId,
+      flashcard_id: item._id,
       uid: userId,
       counter: 0,
       interval: 0,
@@ -184,7 +165,7 @@ function checkIfReported (array: any) {
     const reporters = flaggingUsers;
     reporters.push(userId);
     if (reporters.length >= 3){
-      await HTTPRequest.updateFlashcardProperties(flashcardId, { 
+      await HTTPRequest.updateFlashcardProperties(item._id, { 
         flagging_users: reporters,
         flagged_inappropriate: true
       })
@@ -194,7 +175,7 @@ function checkIfReported (array: any) {
       })
       .catch(err => console.log(err));
     } else {
-      await HTTPRequest.updateFlashcardProperties(flashcardId, { 
+      await HTTPRequest.updateFlashcardProperties(item._id, { 
         flagging_users: reporters
       })
       .then(res => {
@@ -273,10 +254,13 @@ function checkIfReported (array: any) {
     }, [loadingCardImg, loadingProfileImg]);
 
     return (
-        <Animated.View
+        <Animated.ScrollView
+          contentContainerStyle={{
+            // justifyContent: 'center',
+            alignItems: 'center',
+          }}
           style={{
-            // flex: 1,
-            opacity: fadeAnim,
+            // opacity: fadeAnim,
             backgroundColor: "white",
             paddingLeft: 30,
             paddingRight: 30
@@ -284,7 +268,7 @@ function checkIfReported (array: any) {
         >
           <View style={styles.header}>
             <View style={styles.user}>
-              <Avatar.Image
+              {/* <Avatar.Image
                 size={35}
                 onLoadEnd={() => {
                   setLoadingProfileImg(false)
@@ -293,15 +277,25 @@ function checkIfReported (array: any) {
                   uri: userAvatar? userAvatar: 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png' 
               }}               
               style={styles.userLeft}
-              />
+              /> */}
+                <Image 
+                    preview={userAvatar}
+                    uri={userAvatar}
+                    style={styles.userLeft}
+                  />
               <View style={styles.userRight}>
                 <Text variant="bodyLarge">{userName}</Text>
-                <Text variant="bodySmall">{date}</Text>
+                <Text variant="bodySmall">{dayjs(item.created_timestamp).fromNow()}</Text>
               </View>
             </View>
             <Card style={styles.card} mode="contained">
               <Card.Content>
-                <Card.Cover
+                <Image 
+                  preview={item.picture_uri}
+                  uri={item.picture_url}
+                  style={styles.image}
+                />
+                {/* <Card.Cover
                   onLoadEnd={() => setLoadingCardImg(false)}
                   source={{
                     uri: flashcard.picture_url
@@ -310,15 +304,15 @@ function checkIfReported (array: any) {
                   }}
                   style={styles.image}
                   resizeMode="contain"
-                />
+                /> */}
                 <ButtonGroup />
                 <View style={{paddingTop: 50}}>
-                  <Text style={styles.textVocab} variant="displayLarge">{flashcard.target_word}</Text>
-                  <Text style={styles.text} variant="displayMedium">{flashcard.Eng_meaning}</Text>
-                  <Text style={styles.text} variant="headlineMedium">{flashcard.example_sentence}</Text>
+                  <Text style={styles.textVocab} variant="displayLarge">{item.target_word}</Text>
+                  <Text style={styles.text} variant="displayMedium">{item.Eng_meaning}</Text>
+                  <Text style={styles.text} variant="headlineMedium">{item.example_sentence}</Text>
                 </View>
                 <View style={{flexDirection: 'row', paddingTop: 20}}>
-                  {tags.length > 0 ? tags.map(tag => {
+                  {matchingTags.length > 0 ? matchingTags.map(tag => {
                     return (
                       <Chip 
                         key={tag} 
@@ -338,14 +332,14 @@ function checkIfReported (array: any) {
               </Card.Content>
             </Card>
           </View>
-        </Animated.View>
+        </Animated.ScrollView>
     );
   };
 
   return (
     <View style={styles.container}>
-      {flashcard && userAvatar && userName && date && tags ?
-        <DisplayCard flashcard={flashcard}/>
+      {userAvatar && userName && matchingTags ?
+        <DisplayCard flashcard={item}/>
         :
         <ActivityIndicator />
       }
@@ -363,7 +357,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   userLeft: {
+    borderRadius: 25,
     marginRight: 10,
+    height: 50,
+    width: 50,
   },
   userRight: {
     alignItems: "flex-start",
@@ -398,6 +395,8 @@ const styles = StyleSheet.create({
   },
   image: {
     // height: '60%',
+    height: width - 100,
+    width: width - 100,
     backgroundColor: "transparent",
     borderRadius: 20,
   },

@@ -11,7 +11,7 @@ import {
 import { UsersToCardsSRSProps, HTTPRequest } from "../utils/httpRequest";
 import { getAuth } from 'firebase/auth';
 import { useTheme } from "react-native-paper";
-
+import { Image } from 'react-native-expo-image-cache';
 import { useTangoContext } from "../contexts/TangoContext";
 
 const {width, height} = Dimensions.get('screen');
@@ -140,7 +140,7 @@ export const Review = ({route}) => {
                 style={{
                     flex: 1, 
                     alignItems: 'center',
-                    opacity: fadeAnim
+                    // opacity: fadeAnim
                 }}
             >
                 <Card 
@@ -149,11 +149,16 @@ export const Review = ({route}) => {
                     mode="contained"
                 >
                     <Card.Content>
-                        <Card.Cover  
+                        <Image 
+                            preview={flashcard.picture_url}
+                            uri={flashcard.picture_url}
+                            style={styles.photo} 
+                        />
+                        {/* <Card.Cover  
                             source={flashcard.picture_url && {uri: flashcard.picture_url}}
                             style={styles.photo} 
                             onLoadEnd={() => setLoading(false)}
-                        />
+                        /> */}
                         <View style={{paddingTop: 50}}>
                             <Text style={styles.textVocab} variant="displayLarge">{flashcard.target_word}</Text>
                             {sideOfFlashcard === 'Back' && <Text style={styles.text} variant="displayMedium">{flashcard.Eng_meaning[0]}</Text>}
@@ -282,21 +287,14 @@ const styles = StyleSheet.create({
         backgroundColor: 'white'
     },
     card: {
-        // minWidth: '90%',
-        // borderRadius: 10,
-        // margin: 10,
-        // marginTop: 2, 
-        // flex: 1,
-        // height: '60%',
+        justifyContent: 'center',
+        alignItems: 'center',
         width: width - 50, // hard coded
         backgroundColor: "transparent",
     },
     photo: {
-        // minWidth: '80%',
-        // minHeight: '50%',
-        // maxHeight: '95%',
-        // maxWidth: '95%',
-        height: height / 3,
+        height: width - 50,
+        width: width - 50,
         backgroundColor: "transparent",
         borderRadius: 20,
     },
