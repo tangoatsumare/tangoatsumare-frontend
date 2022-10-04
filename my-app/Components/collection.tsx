@@ -15,7 +15,7 @@ export const Collection = ({item}) => {
   const [imgHeight, setImgHeight] = useState<number>();
 
   // const [loading, setLoading] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
 
@@ -30,13 +30,13 @@ export const Collection = ({item}) => {
     }
   }, [loading]);
 
-  useEffect(() => {
-    if (item.picture_url) {
-      Image.getSize(item.picture_url, (width, height) => {
-        setImgHeight(height);
-      });
-    }
-  }, [item]);
+  // useEffect(() => {
+  //   if (item.picture_url) {
+  //     Image.getSize(item.picture_url, (width, height) => {
+  //       setImgHeight(height);
+  //     });
+  //   }
+  // }, [item]);
 
   return (
     <TouchableOpacity 
@@ -45,7 +45,7 @@ export const Collection = ({item}) => {
       activeOpacity={1}
     >
       <Animated.View
-        style={{opacity: fadeAnim}}
+        // style={{opacity: fadeAnim}}
       >
         <Card 
           key={item.target_word} 
@@ -60,21 +60,19 @@ export const Collection = ({item}) => {
             }}
             // https://stackoverflow.com/questions/61511559/how-can-i-resize-an-image-in-a-react-paper-card-cover-to-fit-the-height
           >
-            {/* <Card.Cover 
-              source={{
-                uri: item.picture_url ? 
-                      item.picture_url : 
-                      'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'
-              }}
+            <Card.Cover
+              defaultSource={require('../assets/splash.png')} 
+              source={item.picture_url && {uri: item.picture_url}}
               onLoadEnd={() => setLoading(false)}
               style={{
-                height: imgHeight,
+                // height: imgHeight,
+                height: 300,
                 backgroundColor: "transparent",
                 borderRadius: 20
               }}
               resizeMode="cover"
               // resizeMode="contain"
-            /> */}
+            />
             <Title style={styles.textVocab}>{item.target_word}</Title>
           </Card.Content>
         </Card>

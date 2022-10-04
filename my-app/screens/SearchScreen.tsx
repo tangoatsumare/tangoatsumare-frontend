@@ -49,10 +49,6 @@ export const SearchScreen = () => {
     }, [selectedTags]);
 
     useEffect(() => {
-        if (text) console.log(text);
-    }, [text]);
-
-    useEffect(() => {
         (async () => {
             if (tags) {
                 let result = tags;
@@ -90,7 +86,6 @@ export const SearchScreen = () => {
 
     const handleEditSubmit = () => {
         if (text || selectedTags.length !== 0) {
-            // setSubmitIsClick(true);
             clearKeyboard(); // change the screen back to the feed/collection  
             navigation.goBack();
         } else {
@@ -100,7 +95,6 @@ export const SearchScreen = () => {
 
     const clearKeyboard = () => {
         Keyboard.dismiss();
-        // setTextInputOnFocus(false);
       };
 
     const handleTagClick = (tag: modifiedTag) => {
@@ -166,13 +160,14 @@ export const SearchScreen = () => {
                             title={item.target_word} 
                             titleVariant="headlineSmall"
                             subtitle={item.example_sentence}
-                            // left={(props) => (
-                            //     <Avatar.Image {...props} 
-                            //         source={{uri:item.picture_url}} 
-                            //         onLoadEnd={() => setLoading(false)}
-                            //         style={{backgroundColor: 'transparent'}}
-                            //     />
-                            // )}
+                            left={(props) => (
+                                <Avatar.Image {...props} 
+                                    source={require('../assets/splash.png')}
+                                    // source={item.picture_url && {uri:item.picture_url}} 
+                                    onLoadEnd={() => setLoading(false)}
+                                    style={{backgroundColor: 'transparent'}}
+                                />
+                            )}
                         />
                         <Card.Content>
                         </Card.Content>
@@ -253,12 +248,10 @@ export const SearchScreen = () => {
                         >
                             <Text 
                                 variant='bodyMedium'
-                                style={
-                                    // item.isClicked? 
-                                    {color: theme.colors.tertiary}
-                                    // : 
-                                    // {color: theme.colors.secondary}
-                                }
+                                style={{
+                                    color: theme.colors.tertiary,
+                                    textAlign: 'center'
+                                }}
                             >
                                 {item.tag}
                             </Text>
@@ -304,31 +297,28 @@ export const SearchScreen = () => {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    paddingTop: 40,
-    backgroundColor: 'white',
-    width: width,
-  },
-  tagsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    width: width,
-    marginHorizontal: 'auto'
+    container: {
+        flex: 1,
+        alignItems: 'center',
+        paddingTop: 40,
+        backgroundColor: 'white',
+        width: width,
+    },
+    tagsContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
     },
     tagButton: {
-        minWidth: 125,
-        maxWidth: 200,
-        margin: 5,
+        width: 100,
+        margin: 2,
         borderRadius: 30,
+        flexDirection: 'row',
     },
     searchButtonContainer: {
         position: 'absolute',
         bottom: 30,
         right: 30,
         justifyContent: 'center',
-        // alignSelf: 'flex-end',
         width: 70,
         height: 70,
         borderRadius: 100,

@@ -38,8 +38,8 @@ export const Feed = ({item}) => {
       }
     }, [item]);
   
-    // const [loading, setLoading] = useState(true);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    // const [loading, setLoading] = useState(false);
 
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
 
@@ -62,7 +62,7 @@ export const Feed = ({item}) => {
             <Animated.View 
               style={{
                 ...styles.header, 
-                opacity: fadeAnim
+                // opacity: fadeAnim
               }}
             >
                 <Card style={styles.card} mode="contained">
@@ -72,18 +72,32 @@ export const Feed = ({item}) => {
                             paddingVertical: 0,
                           }}
                     >
-                        {/* <Card.Cover 
+                      {/* {!loading &&  */}
+                        <Card.Cover 
                             source={item.picture_url && {uri: item.picture_url}} 
                             onLoadEnd={() => {
                               setLoading(false)
                             }}
+                            defaultSource={require('../assets/splash.png')}
                             style={{
                                 borderRadius: 20,
                                 backgroundColor: 'transparent'
                               }}
                             resizeMode="cover"
-                        /> */}
+                        />
+                      {/* } */}
+                      {/* {loading && 
+                        <Card.Cover 
+                          source={require('../assets/wakeupcat.jpeg')} 
+                          style={{
+                              borderRadius: 20,
+                              backgroundColor: 'transparent'
+                            }}
+                          resizeMode="cover"
+                        />
+                      } */}
                     {fontsLoaded && <Title style={styles.textVocab}>{item.target_word}</Title>}
+
                     </Card.Content>
                 </Card>
             </Animated.View>

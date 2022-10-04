@@ -20,7 +20,6 @@ export function useTangoContext() {
 
 export function TangoProvider({ children }) {
     const { currentUser } = useAuthContext();
-    const [loading, setLoading] = useState(true);
     const [isAppReady, setIsAppReady] = useState(false);
     const [flashcards, setFlashcards] = useState([]);
     const [users, setUsers] = useState([]);
@@ -104,12 +103,9 @@ export function TangoProvider({ children }) {
             if (currentUser) {
                 // data to fetch as global context
                 await updateAppStates();
-                setLoading(false); // redundant? check
                 setIsAppReady(true);
-                console.log('hi');
             } else {
                 setIsAppReady(true);
-                setLoading(false); // redundant? check
             }
         })();
     }, [currentUser]);
@@ -158,7 +154,6 @@ export function TangoProvider({ children }) {
         setSearchMode,
         text,
         setText,
-        loading,
         isAppReady,
         setIsAppReady,
         updateAppStates

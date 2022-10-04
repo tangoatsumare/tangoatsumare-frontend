@@ -48,7 +48,7 @@ export const Home = ({route}) => {
     setFlashcardsCollection,
     flashcardsFeed,
     setFlashcardsFeed,
-    loading,
+    isAppReady,
     text,
     searchMode
   } = useTangoContext();
@@ -81,13 +81,6 @@ export const Home = ({route}) => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
   const [currentView, setCurrentView] = useState("feed");
   const [navigateTo, setNavigateTo] = useState({item: null}); 
-  // from search view: navigate to feed card, reset navigateTo state
-  // useEffect(() => {
-  //     if (selectedTags.length === 0 && text == '' && navigateTo.item !== null) {
-  //         navigation.navigate("FeedCard", navigateTo);
-  //         setNavigateTo({item: null});
-  //     }
-  // }, [selectedTags, text, navigateTo]);
 
   // setting the header section
   useLayoutEffect(() => {
@@ -342,11 +335,11 @@ export const Home = ({route}) => {
                 justifyContent: 'center'
           }}>
             {searchMode ? 
-              loading ? 
+              !isAppReady ? 
                 <ActivityIndicator /> : 
                 <NoSearchResultFound />
                 : 
-              loading ? 
+              !isAppReady ? 
                 <ActivityIndicator /> : 
                 <CreateYourFirstCard />
             }

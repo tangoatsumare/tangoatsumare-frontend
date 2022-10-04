@@ -49,8 +49,6 @@ for (const tag of tags) {
 }
 
 const getFlashcardsHashTagsKeywordIntersection = (flashcards: object[], selectedTags, tagsToFlashcardsArr, keyword) => {        
-    console.log({keyword});
-    
     // curate the flashcardsCurated by the search text
     flashcards = flashcards.filter(card => card.target_word.includes(keyword));
 
