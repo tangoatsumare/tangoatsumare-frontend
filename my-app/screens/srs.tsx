@@ -4,6 +4,7 @@ import { ParamListBase } from '@react-navigation/native'
 import React, { useEffect, useState, useLayoutEffect } from "react";
 import {ScrollView, View, StyleSheet, FlatList, Dimensions} from 'react-native'
 import {TextInput, Text, Button, Modal, Portal, Card, Title, Paragraph, SegmentedButtons} from "react-native-paper";
+import { Image } from 'react-native-expo-image-cache';
 import { useIsFocused } from "@react-navigation/native";
 import { useTheme } from 'react-native-paper';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
@@ -194,10 +195,15 @@ export const SRS = ({route}) => {
                                     >
                                     {!item.Flashcard[0].created_by?.includes("delete") ? // check whether this card has been deleted
                                     <>
-                                        <Card.Cover 
+                                        {/* <Card.Cover 
                                             source={{uri: item.Flashcard[0].picture_url ? item.Flashcard[0].picture_url : 'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'}} 
                                             style={styles.cardCover}
                                             resizeMode="contain"
+                                        /> */}
+                                        <Image 
+                                            preview={item.Flashcard[0].picture_url}
+                                            uri={item.Flashcard[0].picture_url}
+                                            style={styles.cardCover}
                                         />
                                         <View style={styles.cardMain}>
                                             <Title style={styles.textVocab}>{item.Flashcard[0].target_word}</Title>
@@ -299,6 +305,7 @@ const styles = StyleSheet.create({
         cardCover: {
             flex: 1,
             height: 100,
+            width: 100,
             backgroundColor: 'transparent'
         },
         cardMain: {

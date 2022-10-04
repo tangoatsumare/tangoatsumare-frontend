@@ -3,13 +3,14 @@ import { StackNavigationProp} from '@react-navigation/stack';
 import { ParamListBase, RouteProp } from '@react-navigation/native'
 import {Card, Paragraph, Title, Text, ActivityIndicator, MD2Colors } from "react-native-paper";
 import React, { useEffect, useState, useRef } from 'react'
-import { StyleSheet, TouchableOpacity, View, Image, ScrollView, Animated, Dimensions } from 'react-native'
+import { StyleSheet, TouchableOpacity, View, ScrollView, Animated, Dimensions } from 'react-native'
 import axios from 'axios'
 import { useRoute } from '@react-navigation/core'
 import { useTheme } from "react-native-paper";
 import { ScreenRouteProp, StackParamsList } from "../library/routeProp";
 import { Item } from "react-native-paper/lib/typescript/components/List/List";
 import Icon from 'react-native-vector-icons/Ionicons';
+import { Image } from 'react-native-expo-image-cache';
 
 const {width, height} = Dimensions.get('screen');
 
@@ -53,7 +54,7 @@ export const SingleCard = () => {
         {/* https://callstack.github.io/react-native-paper/activity-indicator.html */}
         {/* {loading && <ActivityIndicator animating={true} color="rgba(0,0,0,1)"/>} */}
         <Animated.ScrollView 
-        style={{opacity: fadeAnim}}
+        // style={{opacity: fadeAnim}}
         contentContainerStyle={{
           flex: 1,
           justifyContent: 'center',
@@ -65,7 +66,12 @@ export const SingleCard = () => {
           mode="contained"
         >
           <Card.Content>
-          <Card.Cover 
+          <Image 
+                preview={flashcard.picture_url}
+                uri={flashcard.picture_url}
+                style={styles.photo}
+              />
+          {/* <Card.Cover 
             onLoadStart={() => console.log('hi')}
             onLoadEnd={() => {
               // setTimeout(() => 
@@ -75,7 +81,7 @@ export const SingleCard = () => {
             source={flashcard.picture_url && {uri: flashcard.picture_url}}
             style={loading ? {...styles.photo, opacity: 0.5} : styles.photo}
             resizeMode="cover"
-          />
+          /> */}
           <View style={{paddingTop: 50}}>
             {/* <Paragraph style={styles.text}>{flashcard.reading}</Paragraph> */}
             <Text style={styles.textVocab} variant="displayLarge">{flashcard.target_word}</Text>
@@ -119,7 +125,8 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
   photo: {
-    height: '60%',
+    height: width - 100,
+    width: width - 100,
     backgroundColor: "transparent",
     borderRadius: 20,
   }

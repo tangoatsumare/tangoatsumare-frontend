@@ -4,7 +4,7 @@ import { DrawerContent } from './drawerContents';
 import {Home} from "../screens/home";
 import {SRS} from "../screens/srs";
 import {Camera} from "../screens/camera";
-import { Search } from '../screens/Search';
+// import { SearchBar } from '../screens/SearchBar';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useTheme } from 'react-native-paper';
 import { TouchableOpacity } from 'react-native-gesture-handler';

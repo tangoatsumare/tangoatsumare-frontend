@@ -48,7 +48,44 @@ for (const tag of tags) {
     return tagsToFlashcardsId;
 }
 
+const getFlashcardsHashTagsKeywordIntersection = (flashcards: object[], selectedTags, tagsToFlashcardsArr, keyword) => {        
+    // curate the flashcardsCurated by the search text
+    flashcards = flashcards.filter(card => card.target_word.includes(keyword));
+
+    // formatting an array of all selected tags' sub-array
+    const filterArr = [];
+    for (let i = 0; i < selectedTags.length; i++) {
+        filterArr.push(tagsToFlashcardsArr[selectedTags[i]]); 
+    }
+
+    // using reduce to get the intersection of multiple arrays
+    const flashcardIntersectionArrFromSelectedTags = filterArr.length !== 0 ?
+        filterArr.reduce((prev, curr) => {
+            return curr.filter(value => prev.includes(value));
+        })
+    : filterArr; // if filterArr is empty, that means no intersection. So simply assign filterArr here
+
+    // grab all ids from the function incoming parameter
+    const flashcardIdsFromUI: string[] = [];
+    for (const item of flashcards) {
+        flashcardIdsFromUI.push(item._id);
+    }
+
+    // grab the intersected match between the flashcardIds and the flashcardIntersectionArrFromSelectedTags
+    const matchingFlashcardIds = flashcardIntersectionArrFromSelectedTags.filter(item => {
+        return flashcardIdsFromUI.includes(item);
+    });
+    // console.log("the intersected cards:", matchingFlashcardIds);
+
+    // set flashcardsCurated with the search text and/or the search hashtags
+    // if no selectedTags, return the flashcards that are filtered by the text
+    // else, return the result with both text and hashtag(s) filtering
+
+    return selectedTags.length > 0 ? flashcards.filter(item => matchingFlashcardIds.includes(item._id)): flashcards;
+};
+
 export {
     preprocessFlashcards,
-    getTagsToFlashcardsIdObject
+    getTagsToFlashcardsIdObject,
+    getFlashcardsHashTagsKeywordIntersection
 }

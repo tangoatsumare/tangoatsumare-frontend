@@ -3,9 +3,10 @@ import { StackNavigationProp} from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 import React, {useState, useEffect} from "react";
 import {Text, Button, Card, Paragraph, Title, Avatar} from "react-native-paper";
-import {Image, View, StyleSheet, FlatList, TouchableOpacity, 
+import { View, StyleSheet, FlatList, TouchableOpacity, 
   Animated, Dimensions
 } from 'react-native';
+import { Image } from 'react-native-expo-image-cache';
 // TESTING FONTS
 import {useFonts} from 'expo-font';
 // TESTING FONTS
@@ -28,17 +29,18 @@ export const Feed = ({item}) => {
         console.log(item._id);
     };
 
-    const [imgHeight, setImgHeight] = useState<number>();
+    // const [imgHeight, setImgHeight] = useState<number>();
 
-    useEffect(() => {
-      if (item.picture_url) {
-        Image.getSize(item.picture_url, (width, height) => {
-          setImgHeight(height);
-        });
-      }
-    }, [item]);
+    // useEffect(() => {
+    //   if (item.picture_url) {
+    //     Image.getSize(item.picture_url, (width, height) => {
+    //       setImgHeight(height);
+    //     });
+    //   }
+    // }, [item]);
   
     const [loading, setLoading] = useState(true);
+    // const [loading, setLoading] = useState(false);
 
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
 
@@ -61,7 +63,7 @@ export const Feed = ({item}) => {
             <Animated.View 
               style={{
                 ...styles.header, 
-                opacity: fadeAnim
+                // opacity: fadeAnim
               }}
             >
                 <Card style={styles.card} mode="contained">
@@ -71,18 +73,42 @@ export const Feed = ({item}) => {
                             paddingVertical: 0,
                           }}
                     >
-                        <Card.Cover 
+                        <Image 
+                          preview={item.picture_uri}
+                          uri={item.picture_url}
+                          style={{
+                            height: (width - 20) / 2,
+                            width: (width - 20) / 2,
+                            borderRadius: 20,
+                            backgroundColor: 'transparent'
+                          }}
+                        />
+                      
+                        {/* <Card.Cover
                             source={item.picture_url && {uri: item.picture_url}} 
                             onLoadEnd={() => {
                               setLoading(false)
                             }}
+                            defaultSource={require('../assets/splash.png')}
                             style={{
                                 borderRadius: 20,
                                 backgroundColor: 'transparent'
                               }}
                             resizeMode="cover"
+                        /> */}
+                      {/* } */}
+                      {/* {loading && 
+                        <Card.Cover 
+                          source={require('../assets/wakeupcat.jpeg')} 
+                          style={{
+                              borderRadius: 20,
+                              backgroundColor: 'transparent'
+                            }}
+                          resizeMode="cover"
                         />
+                      } */}
                     {fontsLoaded && <Title style={styles.textVocab}>{item.target_word}</Title>}
+
                     </Card.Content>
                 </Card>
             </Animated.View>
@@ -110,6 +136,8 @@ const styles = StyleSheet.create({
         marginLeft: 15,
         marginRight: 15,
         backgroundColor: "transparent",
+        justifyContent: 'center',
+        alignItems: 'center'
     },
     image: {
         backgroundColor: 'transparent'

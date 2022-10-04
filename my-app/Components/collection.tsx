@@ -3,7 +3,10 @@ import { StackNavigationProp} from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 import {Button, Text, Card, Paragraph, Title} from "react-native-paper";
 import React, { useEffect, useState } from "react";
-import {View, StyleSheet, FlatList, TouchableOpacity, Image, Animated} from 'react-native'
+import {View, StyleSheet, FlatList, TouchableOpacity, Animated, Dimensions} from 'react-native';
+import { Image } from 'react-native-expo-image-cache';
+
+const {width, height} = Dimensions.get('screen');
 
 export const Collection = ({item}) => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
@@ -14,6 +17,7 @@ export const Collection = ({item}) => {
 
   const [imgHeight, setImgHeight] = useState<number>();
 
+  // const [loading, setLoading] = useState(true);
   const [loading, setLoading] = useState(true);
 
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
@@ -29,13 +33,13 @@ export const Collection = ({item}) => {
     }
   }, [loading]);
 
-  useEffect(() => {
-    if (item.picture_url) {
-      Image.getSize(item.picture_url, (width, height) => {
-        setImgHeight(height);
-      });
-    }
-  }, [item]);
+  // useEffect(() => {
+  //   if (item.picture_url) {
+  //     Image.getSize(item.picture_url, (width, height) => {
+  //       setImgHeight(height);
+  //     });
+  //   }
+  // }, [item]);
 
   return (
     <TouchableOpacity 
@@ -44,7 +48,7 @@ export const Collection = ({item}) => {
       activeOpacity={1}
     >
       <Animated.View
-        style={{opacity: fadeAnim}}
+        // style={{opacity: fadeAnim}}
       >
         <Card 
           key={item.target_word} 
@@ -55,25 +59,34 @@ export const Collection = ({item}) => {
             style={{
               paddingHorizontal: 0,
               paddingVertical: 0,
-              height: imgHeight
+              justifyContent: 'center',
+              alignItems: 'center'
             }}
             // https://stackoverflow.com/questions/61511559/how-can-i-resize-an-image-in-a-react-paper-card-cover-to-fit-the-height
           >
-            <Card.Cover 
-              source={{
-                uri: item.picture_url ? 
-                      item.picture_url : 
-                      'https://www.escj.org/sites/default/files/default_images/noImageUploaded.png'
+            <Image 
+              preview={item.picture_uri}
+              uri={item.picture_url}
+              style={{
+                height: width - 50,
+                width: width - 50,
+                borderRadius: 20,
+                backgroundColor: 'transparent',
               }}
+            />
+            {/* <Card.Cover
+              defaultSource={require('../assets/splash.png')} 
+              source={item.picture_url && {uri: item.picture_url}}
               onLoadEnd={() => setLoading(false)}
               style={{
-                height: imgHeight,
+                // height: imgHeight,
+                height: 300,
                 backgroundColor: "transparent",
                 borderRadius: 20
               }}
               resizeMode="cover"
               // resizeMode="contain"
-            />
+            /> */}
             <Title style={styles.textVocab}>{item.target_word}</Title>
           </Card.Content>
         </Card>
@@ -88,16 +101,18 @@ const styles = StyleSheet.create({
     margin: 10,
     marginLeft: 20,
     marginRight: 20,
+
   },
   text: {},
   textVocab: {
-    fontSize: 15,
+    fontSize: 20,
     fontWeight: "bold",
-    marginLeft: 10,
+    // marginLeft: 10,
+    alignSelf: 'flex-start'
   },
   card: {
     borderRadius: 10,
     backgroundColor: "transparent",
-    marginBottom: 20
+    marginBottom: 20,
   },
 });
