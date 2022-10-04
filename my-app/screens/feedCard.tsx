@@ -25,10 +25,12 @@ import { getAuth } from "@firebase/auth";
 import { HTTPRequest } from "../utils/httpRequest";
 import dayjs from "dayjs";
 import { useTangoContext } from "../contexts/TangoContext";
+import { useAuthContext } from "../contexts/AuthContext";
 
 const {width, height} = Dimensions.get('screen');
 
 export const FeedCard = ({route}) => {
+  const { currentUser } = useAuthContext();
   const { tags } = useTangoContext();
   const theme = useTheme();
   // const [engDef, setEngDef] = useState("");
@@ -46,8 +48,8 @@ export const FeedCard = ({route}) => {
   const [matchingTags, setMatchingTags] = useState<string[]>([]);
 
   const {item} = route?.params;
-  const auth = getAuth();
-  const userId = auth.currentUser?.uid;
+  // const auth = getAuth();
+  const userId = currentUser.uid;
   let currentUserId;
 
   useEffect(() => {
@@ -56,8 +58,9 @@ export const FeedCard = ({route}) => {
           try {
             const flaggersArray = item.flagging_users
             checkIfReported(flaggersArray);
-            const likersArray = item.likers
+            const likersArray = item.likers;
             checkIfLiked(likersArray);
+            setLikers(item.likers);
             currentUserId = item.created_by;
   
             //fetch all of the users SRS To Cards data, to see if the card already exists in the users deck
@@ -96,8 +99,6 @@ export const FeedCard = ({route}) => {
 //run on load, check to see if this user has already liked the card
   function checkIfLiked (array: any) {
     for (let user of array) {
-        console.log("user:", user)
-        console.log("userID:", userId)
       if (user === userId) {
         setLiked(true);
       }
