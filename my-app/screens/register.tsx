@@ -2,21 +2,32 @@ import { useNavigation } from "@react-navigation/core";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TextInput, ViewComponent } from 'react-native'
 import { Button } from "react-native-paper";
 
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { useAuthContext } from '../contexts/AuthContext';
 
 export const Register = () => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
-
+  const { 
+    registrationMode,
+    setRegistrationMode, 
+    registrationIsReady,
+    setRegistrationIsReady 
+  } = useAuthContext();
   const auth = getAuth();
 
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [validationMessage, setValidationMessage] = useState<string>('');
+
+  useEffect(() => {
+    setRegistrationMode(true);
+    setRegistrationIsReady(false);
+  }, []);
 
   const checkPassword = (firstPassword: string, secoundPassword: string) => {
     if (firstPassword !== secoundPassword) {
@@ -31,7 +42,12 @@ export const Register = () => {
       return;
     }
     try {
-      await createUserWithEmailAndPassword(auth, email, password)
+      // store the username and password into states
+      // let the user upload the profile pciture & type his user profile
+      // when submit button is clicked
+      // call createUserWithEmailAndPassword
+
+      await createUserWithEmailAndPassword(auth, email, password) // to fix 
         .then(result => {
           console.log(result);
           // navigation.navigate('Home');

@@ -14,13 +14,17 @@ import { useAuthContext } from "../contexts/AuthContext";
 
 
 export const Login = () => {
-  const { login, currentUser } = useAuthContext();
+  const { login, currentUser, registrationMode, setRegistrationMode } = useAuthContext();
 
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [validationMessage, setValidationMessage] = useState<string>('');
   const [renderingIndicator, setRenderingIndicator] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (registrationMode) setRegistrationMode(false);
+  }, [registrationMode]);
 
   const handleLogin = async () => {
     if (email === "" || password === "") {

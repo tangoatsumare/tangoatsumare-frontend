@@ -19,7 +19,7 @@ export function useTangoContext() {
 }
 
 export function TangoProvider({ children }) {
-    const { currentUser } = useAuthContext();
+    const { currentUser, registrationIsReady, registrationMode } = useAuthContext();
     const [isAppReady, setIsAppReady] = useState(false);
     const [flashcards, setFlashcards] = useState([]);
     const [users, setUsers] = useState([]);
@@ -101,14 +101,16 @@ export function TangoProvider({ children }) {
         (async () => {
             console.log("running");
             if (currentUser) {
-                // data to fetch as global context
-                await updateAppStates();
-                setIsAppReady(true);
+                if (registrationMode && registrationIsReady || !registrationMode) {
+                    // data to fetch as global context
+                    await updateAppStates();
+                    setIsAppReady(true);
+                } 
             } else {
                 setIsAppReady(true);
             }
         })();
-    }, [currentUser]);
+    }, [currentUser, registrationMode, registrationIsReady]);
 
     useEffect(() => {
         if (flashcardsReviewable) {

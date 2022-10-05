@@ -17,6 +17,8 @@ export function AuthProvider({ children }) {
     const auth = getAuth();
     const [loading, setLoading] = useState(true);
     const [currentUser, setCurrentUser] = useState();
+    const [registrationMode, setRegistrationMode] = useState(false);
+    const [registrationIsReady, setRegistrationIsReady] = useState(false);
     
     function signup(email, password) {
         return createUserWithEmailAndPassword(auth, email, password);
@@ -44,6 +46,10 @@ export function AuthProvider({ children }) {
         login,
         signup,
         logout,
+        registrationMode,
+        setRegistrationMode,
+        registrationIsReady,
+        setRegistrationIsReady,
     };
 
     return (

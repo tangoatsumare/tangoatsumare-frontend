@@ -21,6 +21,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { ScrollView, TouchableWithoutFeedback } from "react-native-gesture-handler";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
+import { useAuthContext } from "../contexts/AuthContext";
+
 //test
 import { getProfileInfoById } from "../utils/profileInfo";
 import axios from 'axios';
@@ -43,6 +45,7 @@ interface UserInfo {
 }
 
 export const ProfileSetup = () => {
+  const { setRegistrationMode, setRegistrationIsReady } = useAuthContext();
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
   const auth = getAuth();
@@ -186,6 +189,8 @@ export const ProfileSetup = () => {
             body: JSON.stringify(userinfo)
           });
           console.log("Userinfo POSTed to heroku backend");
+          setRegistrationIsReady(true);
+          navigation.navigate("TabHome");
         } catch (err) {
           console.log(err);
         }
@@ -246,7 +251,7 @@ export const ProfileSetup = () => {
     // post user information to heroku db VV
 
     // post user information to heroku db ^^
-    navigation.navigate("TabHome");
+    // navigation.navigate("TabHome");
   }
 
   // need to get profilepic info from firebase and put into avatar_url... i think?
