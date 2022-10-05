@@ -2,7 +2,7 @@ import { useNavigation} from "@react-navigation/core";
 import { StackNavigationProp} from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native'
 import React, { useEffect, useState, useRef, useLayoutEffect } from "react";
-import { View, StyleSheet, Dimensions, Animated, TouchableOpacity } from 'react-native'
+import { View, StyleSheet, Dimensions, Animated, TouchableOpacity, ScrollView } from 'react-native'
 import { ActivityIndicator, Button, Card, Text, Title } from "react-native-paper";
 import { 
     setFlashcardAsGood,
@@ -171,12 +171,21 @@ export const Review = ({route}) => {
         };
 
     return (
-        <View 
+        <ScrollView 
             style={styles.container}
+            contentContainerStyle={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+            }}
         >
             {!isEndOfReview && !SRSFlashcardsUpdated ? 
                     flashcard && 
-                    <View style={{flex: 1}}>
+                    <View style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}>
                         <DisplayCard flashcard={flashcard} />
                         <View style={styles.buttonGroup}>
                                 {sideOfFlashcard === 'Front' ?
@@ -274,16 +283,12 @@ export const Review = ({route}) => {
                     </TouchableOpacity>
                 </View> 
             }
-        </View>
+        </ScrollView>
     )
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        // padding: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
         backgroundColor: 'white'
     },
     card: {
@@ -345,6 +350,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold"
     },
     endOfReview: {
+        flex: 1,
         justifyContent: 'center',
         alignItems: 'center'
     }

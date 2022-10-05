@@ -31,7 +31,7 @@ const {width, height} = Dimensions.get('screen');
 
 export const FeedCard = ({route}) => {
   const { currentUser } = useAuthContext();
-  const { tags } = useTangoContext();
+  const { tags, updateAppStates } = useTangoContext();
   const theme = useTheme();
   // const [engDef, setEngDef] = useState("");
   const [hasSRSCard, setHasSRSCard] = useState(false);
@@ -131,32 +131,42 @@ function checkIfReported (array: any) {
   const like = async () => {
     const likersArray = likers;
     likersArray.push(userId);
-    await HTTPRequest.updateFlashcardProperties(item._id, { likers: likersArray })
-        .then(res => {
-          console.log('liked');
-          setLiked(true);
-          })
-        .catch(err => console.log(err));
+    try {
+      await HTTPRequest.updateFlashcardProperties(item._id, { likers: likersArray });
+      console.log('liked');
+      setLiked(true);
+            // TODO: update the states for the flashcards
+            // get the latest info for this card from the endpoint
+            // update the state for flashcards: 
+              // metrics
+              // SRSFlashcardsOfCurrentUser
+              // flashcardsReviewable            
+      await updateAppStates();
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   //Adding to users SRS DECK
 
    //a function to add the card to the users SRS deck if the user has not already added it
    const addCardToDeck = async () => {
-    await HTTPRequest.addSRSCard({
-      flashcard_id: item._id,
-      uid: userId,
-      counter: 0,
-      interval: 0,
-      repetition: 0,
-      efactor: 2.5,
-      due_date: dayjs(Date.now()).toISOString(),
-    }).then(res => {
+     try {
+       await HTTPRequest.addSRSCard({
+         flashcard_id: item._id,
+         uid: userId,
+         counter: 0,
+         interval: 0,
+         repetition: 0,
+         efactor: 2.5,
+         due_date: dayjs(Date.now()).toISOString(),
+       });
       console.log("added to deck");
-      setHasSRSCard(true)
-    }).catch(err => {
-      console.log(err);
-    })
+      setHasSRSCard(true);
+      await updateAppStates();
+     } catch(err) {
+       console.log(err);
+     }
   };
 
 //Reporting inappropriate cards
@@ -165,25 +175,25 @@ function checkIfReported (array: any) {
  const report = async () => {
     const reporters = flaggingUsers;
     reporters.push(userId);
-    if (reporters.length >= 3){
-      await HTTPRequest.updateFlashcardProperties(item._id, { 
-        flagging_users: reporters,
-        flagged_inappropriate: true
-      })
-      .then(res => {
-      console.log("reported");
-        setReported(true);
-      })
-      .catch(err => console.log(err));
-    } else {
-      await HTTPRequest.updateFlashcardProperties(item._id, { 
-        flagging_users: reporters
-      })
-      .then(res => {
+    try {
+      if (reporters.length >= 3){
+        await HTTPRequest.updateFlashcardProperties(item._id, { 
+          flagging_users: reporters,
+          flagged_inappropriate: true
+        });
         console.log("reported");
         setReported(true);
-      })
-      .catch(err => console.log(err));
+        await updateAppStates();
+      } else {
+        await HTTPRequest.updateFlashcardProperties(item._id, { 
+          flagging_users: reporters
+        });
+        console.log("reported");
+        setReported(true);
+        await updateAppStates();
+      }
+    } catch(err) {
+      console.log(err);
     }
   };
  
